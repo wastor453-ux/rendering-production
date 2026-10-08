@@ -8,9 +8,14 @@ on:
         required: true
         default: 'P3Rehearsal'
       frames:
-        description: 'Number of frames for benchmark (e.g. 600 = 20s)'
+        description: 'Number of frames for benchmark (e.g. 300 = 10s)'
         required: false
-        default: '600'
+        default: '300'
+
+# Measures Remotion per-worker concurrency on a single GitHub runner (4 vCPUs).
+# This is DISTINCT from distributed chunk parallelism (multiple runners),
+# which is exercised by render-production.yml.
+# Only concurrency 1/2/4 are meaningful on a 4-vCPU runner.
 
 jobs:
   benchmark:
@@ -18,41 +23,70 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        parallel: [1, 2, 4, 8, 16, 20]
+        concurrency: [1, 2, 4]
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
 
       - uses: actions/setup-node@v4
         with:
           node-version: '24.20.0'
-          # cache disabled for stability
 
-      - run: |
+      - name: Install system deps
+        run: |
+          set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg libnss3 libatk1.0-0 libatk-bridge2.0-0 \
             libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
-            libxrandr2 libgbm1 libasound2t64
+            libxrandr2 libgbm1 libasound2t64 bc
 
-      - working-directory: .
-        run: npm ci --no-audit --no-fund
-
-      - working-directory: .
-        run: npx remotion browser ensure
-
-      - name: Benchmark parallel=${{ matrix.parallel }}
-        working-directory: .
+      - name: Install npm deps
         run: |
-          START=$(date +%s)
-          # Split frames across parallel jobs via max-parallel simulation:
-          # each matrix job renders the full range with concurrency=2,
-          # wall-clock comparison shows scaling efficiency.
-          npx remotion render ${{ inputs.composition }} /tmp/bench.mp4 \
-            --frames=0-$(( ${{ inputs.frames }} - 1 )) \
-            --concurrency=2 --overwrite 2>&1 | tail -20
-          END=$(date +%s)
-          ELAPSED=$((END - START))
-          FPS=$(echo "scale=2; ${{ inputs.frames }} / $ELAPSED" | bc)
-          echo "parallel=${{ matrix.parallel }} elapsed=${ELAPSED}s fps=$FPS"
-          echo "RESULT parallel=${{ matrix.parallel }} elapsed=${ELAPSED}s fps=${FPS}" >> $GITHUB_STEP_SUMMARY
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+
+      - name: Ensure Chromium
+        run: |
+          set -euo pipefail
+          npx remotion browser ensure
+
+      - name: Benchmark concurrency=${{ matrix.concurrency }}
+        run: |
+          set -euo pipefail
+          FRAMES=${{ inputs.frames }}
+          LAST=$(( FRAMES - 1 ))
+
+          # --- Render phase (timed separately) ---
+          RENDER_START=$(date +%s)
+          if ! npx remotion render ${{ inputs.composition }} /tmp/bench.mp4 \
+            --frames=0-$LAST \
+            --concurrency=${{ matrix.concurrency }} --overwrite > /tmp/bench_render.log 2>&1; then
+            echo "RENDER FAILED (concurrency=${{ matrix.concurrency }})"
+            echo "=== render log (tail 50) ==="
+            tail -50 /tmp/bench_render.log
+            exit 1
+          fi
+          RENDER_END=$(date +%s)
+          RENDER_ELAPSED=$((RENDER_END - RENDER_START))
+
+          # --- Verify output exists and is valid ---
+          [ -f /tmp/bench.mp4 ] || { echo "output missing: /tmp/bench.mp4"; exit 1; }
+          [ -s /tmp/bench.mp4 ] || { echo "output empty: /tmp/bench.mp4"; exit 1; }
+
+          OUT_FRAMES=$(ffprobe -v error -select_streams v:0 -show_entries stream=nb_frames -of default=noprint_wrappers=1:nokey=1 /tmp/bench.mp4)
+          OUT_W=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1 /tmp/bench.mp4)
+          OUT_H=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 /tmp/bench.mp4)
+          OUT_DUR=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 /tmp/bench.mp4)
+
+          echo "output: ${OUT_FRAMES} frames, ${OUT_W}x${OUT_H}, ${OUT_DUR}s"
+
+          [ "$OUT_FRAMES" = "$FRAMES" ] || { echo "frame count FAIL: expected $FRAMES got $OUT_FRAMES"; exit 1; }
+          [ "$OUT_W" = "1920" ] && [ "$OUT_H" = "1080" ] || { echo "resolution FAIL: ${OUT_W}x${OUT_H}"; exit 1; }
+
+          # Full decode check
+          ffmpeg -v error -i /tmp/bench.mp4 -f null - || { echo "decode FAIL"; exit 1; }
+
+          # --- Calculate FPS from successful render only ---
+          FPS=$(echo "scale=2; $FRAMES / $RENDER_ELAPSED" | bc)
+
+          echo "concurrency=${{ matrix.concurrency }} render=${RENDER_ELAPSED}s fps=$FPS"
+          echo "RESULT concurrency=${{ matrix.concurrency }} render=${RENDER_ELAPSED}s fps=${FPS} frames=${OUT_FRAMES} res=${OUT_W}x${OUT_H}" >> $GITHUB_STEP_SUMMARY

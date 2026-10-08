@@ -29,6 +29,18 @@ on:
         description: 'H.264 CRF (quality)'
         required: false
         default: '18'
+      with_audio:
+        description: 'Mux canonical VO+music mix (true/false)'
+        required: false
+        default: 'true'
+      vo_file:
+        description: 'VO source (relative to repo root)'
+        required: false
+        default: 'public/audio/vo_p3.wav'
+      bed_file:
+        description: 'Music bed source (relative to repo root)'
+        required: false
+        default: 'public/audio/bed.mp3'
 
 env:
   NODE_VERSION: '24.20.0'
@@ -100,10 +112,12 @@ jobs:
       - name: Render chunk ${{ matrix.chunk.chunk_id }}
         working-directory: .
         run: |
+          set -euo pipefail
           npx remotion render ${{ inputs.composition }} \
             /tmp/chunk_${{ matrix.chunk.chunk_id }}.mp4 \
             --frames=${{ matrix.chunk.start }}-${{ matrix.chunk.end }} \
             --concurrency=2 --codec=h264 --crf=${{ inputs.crf }} --overwrite
+          [ -f /tmp/chunk_${{ matrix.chunk.chunk_id }}.mp4 ] || { echo "chunk output missing"; exit 1; }
           sha256sum /tmp/chunk_${{ matrix.chunk.chunk_id }}.mp4 | cut -d' ' -f1 > /tmp/chunk_${{ matrix.chunk.chunk_id }}.sha256
           echo "chunk_id=${{ matrix.chunk.chunk_id }}" > /tmp/chunk_${{ matrix.chunk.chunk_id }}.meta
           echo "start=${{ matrix.chunk.start }}" >> /tmp/chunk_${{ matrix.chunk.chunk_id }}.meta
@@ -138,8 +152,9 @@ jobs:
           path: /tmp/chunks
           merge-multiple: true
 
-      - name: Verify chunk checksums + assemble
+      - name: Verify chunk checksums + assemble video
         run: |
+          set -euo pipefail
           cd /tmp/chunks
           # verify each chunk
           for meta in *.meta; do
@@ -151,15 +166,81 @@ jobs:
           echo "all chunk checksums OK"
           # assemble in order (no re-encode)
           ls chunk_*.mp4 | sort -V | sed "s/^/file '/;s/$/'/" > concat.txt
-          ffmpeg -y -f concat -safe 0 -i concat.txt -c copy /tmp/master.mp4
+          ffmpeg -y -f concat -safe 0 -i concat.txt -c copy /tmp/master_video.mp4
+          echo "video assembled: /tmp/master_video.mp4"
 
-      - name: Verify master
+      - name: Mux canonical audio (VO + music bed)
+        if: inputs.with_audio == 'true'
         run: |
-          W=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1 /tmp/master.mp4)
-          H=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 /tmp/master.mp4)
+          set -euo pipefail
+          # Canonical P3 mix: VO dominant + bed at -18dB (from mix_audio.sh)
+          # Audio segment matches the rendered frame range
+          FPS=30
+          START_S=$(echo "scale=3; ${{ inputs.start_frame }} / $FPS" | bc)
+          DUR_S=$(echo "scale=3; (${{ inputs.end_frame }} - ${{ inputs.start_frame }} + 1) / $FPS" | bc)
+          echo "audio segment: start=${START_S}s duration=${DUR_S}s"
+
+          [ -f "${{ inputs.vo_file }}" ] || { echo "VO missing: ${{ inputs.vo_file }}"; exit 1; }
+          [ -f "${{ inputs.bed_file }}" ] || { echo "bed missing: ${{ inputs.bed_file }}"; exit 1; }
+
+          ffmpeg -y \
+            -i /tmp/master_video.mp4 \
+            -ss $START_S -t $DUR_S -i "${{ inputs.vo_file }}" \
+            -ss $START_S -t $DUR_S -i "${{ inputs.bed_file }}" \
+            -filter_complex "[1:a]volume=1.0[vo];[2:a]atrim=0:${DUR_S},volume=-18dB[bed];[vo][bed]amix=inputs=2:duration=shortest[aout]" \
+            -map 0:v -map "[aout]" \
+            -c:v copy -c:a aac -b:a 192k \
+            -shortest \
+            /tmp/master.mp4
+          echo "audio muxed: /tmp/master.mp4"
+
+      - name: Verify master (video + audio + pipeline)
+        run: |
+          set -euo pipefail
+          MASTER=/tmp/master.mp4
+          if [ "${{ inputs.with_audio }}" != "true" ]; then
+            MASTER=/tmp/master_video.mp4
+            cp $MASTER /tmp/master.mp4
+          fi
+
+          echo "=== VIDEO ==="
+          W=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1 $MASTER)
+          H=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 $MASTER)
+          FPS_R=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 $MASTER)
+          FRAMES=$(ffprobe -v error -select_streams v:0 -show_entries stream=nb_frames -of default=noprint_wrappers=1:nokey=1 $MASTER)
+          V_DUR=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $MASTER)
+          echo "video: ${W}x${H} @ ${FPS_R}fps, ${FRAMES} frames, ${V_DUR}s"
+
           [ "$W" = "1920" ] && [ "$H" = "1080" ] || { echo "resolution FAIL: ${W}x${H}"; exit 1; }
-          ffmpeg -v error -i /tmp/master.mp4 -f null - || { echo "decode FAIL"; exit 1; }
-          echo "master verified: ${W}x${H}"
+          [ "$FPS_R" = "30/1" ] || { echo "fps FAIL: $FPS_R"; exit 1; }
+          EXPECTED_FRAMES=$(( ${{ inputs.end_frame }} - ${{ inputs.start_frame }} + 1 ))
+          [ "$FRAMES" = "$EXPECTED_FRAMES" ] || { echo "frame count FAIL: expected $EXPECTED_FRAMES got $FRAMES"; exit 1; }
+
+          ffmpeg -v error -i $MASTER -f null - || { echo "decode FAIL"; exit 1; }
+          echo "video OK"
+
+          echo "=== AUDIO ==="
+          if [ "${{ inputs.with_audio }}" = "true" ]; then
+            A_STREAMS=$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 $MASTER | wc -l)
+            [ "$A_STREAMS" -ge 1 ] || { echo "audio stream MISSING"; exit 1; }
+            A_DUR=$(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 $MASTER)
+            echo "audio: ${A_STREAMS} stream(s), ${A_DUR}s (video ${V_DUR}s)"
+            # audio duration must match video within 0.5s
+            DIFF=$(echo "$V_DUR - $A_DUR" | bc | tr -d -)
+            echo "a/v duration diff: ${DIFF}s"
+            python3 -c "import sys; sys.exit(0 if abs(float('$DIFF')) < 0.5 else 1)" || { echo "a/v sync FAIL: diff ${DIFF}s"; exit 1; }
+            echo "audio OK"
+          else
+            echo "audio skipped (with_audio=false)"
+          fi
+
+          echo "=== PIPELINE ==="
+          # verify composition inputs exist
+          [ -f "src/compiled_p3/beat_timeline.json" ] || { echo "beats missing"; exit 1; }
+          [ -f "src/compiled_p3/events.json" ] || { echo "events missing"; exit 1; }
+          echo "pipeline inputs OK"
+
+          echo "MASTER VERIFIED: ${W}x${H}, ${FRAMES}f, audio=${{ inputs.with_audio }}"
 
       - name: Upload master
         uses: actions/upload-artifact@v4
