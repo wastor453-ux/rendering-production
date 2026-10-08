@@ -35,14 +35,14 @@ jobs:
             libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
             libxrandr2 libgbm1 libasound2t64
 
-      - working-directory: demo-video
+      - working-directory: .
         run: npm ci --no-audit --no-fund
 
-      - working-directory: demo-video
+      - working-directory: .
         run: npx remotion browser ensure
 
       - name: Benchmark parallel=${{ matrix.parallel }}
-        working-directory: demo-video
+        working-directory: .
         run: |
           START=$(date +%s)
           # Split frames across parallel jobs via max-parallel simulation:
