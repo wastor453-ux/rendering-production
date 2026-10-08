@@ -1,0 +1,99 @@
+{
+ "version": "stress-v3",
+ "video": "StressTest",
+ "fps": 30,
+ "duration_sec": 5.0,
+ "pools": {
+  "pluck": [
+   "pluck",
+   "pluck_alt"
+  ],
+  "bell": [
+   "bell",
+   "bell_alt"
+  ],
+  "drop": [
+   "drop"
+  ],
+  "snap": [
+   "snap",
+   "snap_alt"
+  ],
+  "wheel": [
+   "wheel"
+  ],
+  "subhit": [
+   "subhit"
+  ]
+ },
+ "scene_cuts_sec": [],
+ "vo_segments": [
+  [
+   1.5,
+   5.0
+  ]
+ ],
+ "ducking": {
+  "depth_db": -4,
+  "ramp_frames": 12,
+  "ramp_sec": 0.4
+ },
+ "stems": {
+  "amb": "public/audio/sfx/pro/shaped/amb_stress.wav"
+ },
+ "laws": {
+  "grid_8px": true,
+  "no_ticking": true,
+  "overshoot_alignment": true,
+  "vo_band_exclusion": true
+ },
+ "layout": {
+  "cards": [
+   {
+    "h": 480,
+    "pad": 48,
+    "w": 856,
+    "x": 80,
+    "y": 296
+   },
+   {
+    "h": 480,
+    "pad": 48,
+    "w": 856,
+    "x": 984,
+    "y": 296
+   }
+  ],
+  "grid": 8,
+  "margins": 80
+ },
+ "events": [
+  {
+   "t": 0.8667,
+   "pool": "snap",
+   "asset": "snap",
+   "seed": 0,
+   "anchor": {
+    "spring_start_frame": 15,
+    "type": "spring-overshoot"
+   },
+   "why": "Card 1 (Alex) spring MAX OVERSHOOT: pop starts frame 15, spring-local frame 11 -> global frame 26 -> t=0.8667s. Single isolated snap, pool draw #1."
+  },
+  {
+   "t": 1.2,
+   "pool": "snap",
+   "asset": "snap_alt",
+   "seed": 1,
+   "anchor": {
+    "spring_start_frame": 25,
+    "type": "spring-overshoot"
+   },
+   "why": "Card 2 (Ben) spring MAX OVERSHOOT: pop starts frame 25, spring-local frame 11 -> global frame 36 -> t=1.2s. Single isolated snap, pool draw #2 -> must yield snap_alt or the gate fails."
+  }
+ ],
+ "master": {
+  "file": "public/audio/stress-master.mp3",
+  "duration_sec": 5.0,
+  "true_peak_dbfs": -2.1
+ }
+}

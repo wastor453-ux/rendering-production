@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>HYSA Stress Test 02 — Layout &amp; Audio Preview</title>
+<style>
+  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:#FAFAF8;color:#1A1B25;margin:0;padding:24px}
+  h1{font-size:20px;margin:0 0 4px} .sub{color:#8A8AA3;font-size:13px;margin-bottom:20px}
+  .hairline{height:10px;border-radius:6px;background:linear-gradient(90deg,#4F46E5,#8B5CF6,#4F46E5);margin-bottom:20px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:1100px}
+  .card{background:#fff;border:1px solid #ECECF3;border-radius:28px;padding:16px}
+  .card h3{margin:0 0 8px;font-size:14px} .card .meta{font-size:12px;color:#8A8AA3;margin-top:8px}
+  svg{width:100%;height:auto;border-radius:14px;background:#FAFAF8}
+  .box{fill:#fff;stroke:#4F46E5;stroke-width:2}
+  .box.dim{stroke:#8B5CF6;stroke-dasharray:6 4}
+  .lbl{font-size:22px;font-weight:700;fill:#1A1B25}
+  .sub2{font-size:14px;fill:#8A8AA3}
+  .safe{fill:none;stroke:#E0E0EE;stroke-width:1;stroke-dasharray:4 4}
+  .curve{fill:none;stroke:#E5484D;stroke-width:4}
+  .dot{fill:#E5484D}
+  table{border-collapse:collapse;font-size:13px;margin-top:8px}
+  td,th{border:1px solid #ECECF3;padding:6px 10px;text-align:left}
+  th{background:#EEEDFE}
+  .pass{color:#16a34a;font-weight:700}
+  audio{width:100%;margin-top:6px}
+</style></head><body>
+<div class="hairline"></div>
+<h1>HYSA Explainer Matrix — Stress Test 02</h1>
+<div class="sub">10s · 300 frames @ 30fps · Style A tokens · gate exit 0 · 29/29 checks PASS</div>
+<div class="grid" id="frames"></div>
+
+<div class="card" style="max-width:1068px;margin-top:20px">
+  <h3>Audio events (listen below)</h3>
+  <table>
+    <tr><th>Time</th><th>Event</th><th>Asset</th><th>Routing</th></tr>
+    <tr><td>t=1.37s (f41)</td><td>Card 1 overshoot</td><td>hysa-snap-yield.wav</td><td>[ENVIRONMENTAL] sterile click</td></tr>
+    <tr><td>t=1.87s (f56)</td><td>Card 2 overshoot</td><td>hysa-thud-inflation.wav</td><td>[DEFICIT] low thud</td></tr>
+    <tr><td>t=3.0–9.0s (f90–270)</td><td>Chart draw</td><td>hysa-swell-loss.wav</td><td>[DEFICIT] velocity swell, 6.000s exact</td></tr>
+  </table>
+  <div class="meta">Gate report: <span class="pass">PASS · exit 0</span> — 5× MONOTONICITY_DECAY · 12× safe-margin · 12× AABB pairs</div>
+</div>
+
+<script>
+const FRAMES=[
+ {f:40,els:[["card-hysa",80,325,936,725,"HYSA Yield: +4%","mid pop-in"],["card-inflation",1155.2,440,1668.8,680,"Inflation Rate: -5%","pre-entry"],["card-chart",80,768,1840,1000,"-1% real trend","static"]]},
+ {f:75,els:[["card-hysa",80.11,320.05,935.89,719.95,"HYSA Yield: +4%","settling"],["card-inflation",984,320,1840,720,"Inflation Rate: -5%","settled"],["card-chart",80,768,1840,1000,"-1% real trend","static"]]},
+ {f:150,els:[["card-hysa",80,320,936,720,"HYSA Yield: +4%","settled"],["card-inflation",984,320,1840,720,"Inflation Rate: -5%","settled"],["card-chart",80,768,1840,1000,"-1% real trend","static"]]},
+ {f:280,els:[["card-hysa",80,320,936,720,"HYSA Yield: +4%","settled"],["card-inflation",984,320,1840,720,"Inflation Rate: -5%","settled"],["card-chart",80,768,1840,1000,"-1% real trend","static"]]}
+];
+const W=1920,H=1080,S=0.42; // scale to fit
+const vals=[100,99,98.01,97.03,96.06,95.1];
+const host=document.getElementById('frames');
+FRAMES.forEach(({f,els})=>{
+  const d=document.createElement('div');d.className='card';
+  let inner=`<h3>Frame ${f} <span style="color:#8A8AA3;font-weight:400">(${(f/30).toFixed(2)}s)</span></h3>`;
+  inner+=`<svg viewBox="0 0 ${W} ${H}">`;
+  // dot grid hint
+  inner+=`<rect x="80" y="80" width="${W-160}" height="${H-160}" class="safe"/>`;
+  els.forEach(([id,x1,y1,x2,y2,label,state])=>{
+    const dim=state!=="settled"&&state!=="static"?" dim":"";
+    inner+=`<rect x="${x1}" y="${y1}" width="${x2-x1}" height="${y2-y1}" rx="16" class="box${dim}"/>`;
+    inner+=`<text x="${x1+28}" y="${y1+64}" class="lbl">${label}</text>`;
+    inner+=`<text x="${x1+28}" y="${y1+96}" class="sub2">${state} · [${Math.round(x1)},${Math.round(y1)} → ${Math.round(x2)},${Math.round(y2)}]</text>`;
+  });
+  // chart curve inside chart card
+  const cx1=80+40,cy1=768+36,cx2=1840-40,cy2=1000-36;
+  const px=i=>cx1+(cx2-cx1)*i/5, py=v=>cy2-(cy2-cy1)*(v-94)/8;
+  let path=`M ${px(0)} ${py(vals[0])}`;
+  for(let i=1;i<6;i++)path+=` L ${px(i)} ${py(vals[i])}`;
+  inner+=`<path d="${path}" class="curve"/>`;
+  vals.forEach((v,i)=>{inner+=`<circle cx="${px(i)}" cy="${py(v)}" r="9" class="dot"/>`;});
+  inner+=`</svg><div class="meta">Dashed = 80px safe margin · red = −1% real trend (100 → 95.10)</div>`;
+  d.innerHTML=inner;host.appendChild(d);
+});
+</script>
+</body></html>

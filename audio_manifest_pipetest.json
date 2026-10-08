@@ -1,0 +1,432 @@
+{
+ "version": "pipetest-v1",
+ "video": "PipeTestVideo",
+ "fps": 30,
+ "duration_sec": 30,
+ "pools": {
+  "pluck": [
+   "ppluck1",
+   "ppluck2",
+   "ppluck3"
+  ],
+  "snap": [
+   "psnap1",
+   "psnap2",
+   "psnap3",
+   "psnap4"
+  ],
+  "bell": [
+   "bell",
+   "bell_alt"
+  ],
+  "drop": [
+   "pdrop1",
+   "pdrop2",
+   "pdrop3",
+   "pdrop4",
+   "pdrop5"
+  ],
+  "wheel": [
+   "wheel"
+  ]
+ },
+ "shaped_peaks": {
+  "ppluck1": 0.009546485260770975,
+  "ppluck2": 0.11582766439909296,
+  "ppluck3": 0.0017687074829931973,
+  "psnap1": 0.007800453514739229,
+  "psnap2": 0.1653061224489796,
+  "psnap3": 0.006643990929705215,
+  "psnap4": 0.08138321995464852,
+  "pdrop1": 0.3,
+  "pdrop2": 0.3,
+  "pdrop3": 0.3,
+  "pdrop4": 0.3,
+  "pdrop5": 0.3
+ },
+ "scene_cuts_sec": [
+  5,
+  10,
+  15,
+  20,
+  25
+ ],
+ "vo_segments": [
+  [
+   0.5,
+   2.73
+  ],
+  [
+   5.5,
+   9.53
+  ],
+  [
+   10.5,
+   14.53
+  ],
+  [
+   15.5,
+   19.34
+  ],
+  [
+   20.5,
+   24.39
+  ],
+  [
+   25.5,
+   27.3
+  ]
+ ],
+ "ducking": {
+  "depth_db": -4,
+  "ramp_frames": 12,
+  "ramp_sec": 0.4
+ },
+ "stems": {
+  "amb": "public/audio/sfx/pro/shaped/amb_pt.wav"
+ },
+ "layout": {
+  "cards": [
+   {
+    "h": 160,
+    "id": "badge",
+    "pad": 32,
+    "scene": 1,
+    "w": 520,
+    "x": 700,
+    "y": 640
+   },
+   {
+    "h": 560,
+    "id": "chart",
+    "pad": 48,
+    "scene": 2,
+    "w": 1760,
+    "x": 80,
+    "y": 280
+   },
+   {
+    "h": 128,
+    "id": "total-strip",
+    "pad": 24,
+    "scene": 2,
+    "w": 1760,
+    "x": 80,
+    "y": 872
+   },
+   {
+    "h": 440,
+    "id": "card-save",
+    "pad": 48,
+    "scene": 3,
+    "w": 856,
+    "x": 80,
+    "y": 320
+   },
+   {
+    "h": 440,
+    "id": "card-market",
+    "pad": 48,
+    "scene": 3,
+    "w": 856,
+    "x": 984,
+    "y": 320
+   },
+   {
+    "h": 144,
+    "id": "badge",
+    "pad": 24,
+    "scene": 3,
+    "w": 480,
+    "x": 720,
+    "y": 800
+   },
+   {
+    "h": 560,
+    "id": "bars",
+    "pad": 48,
+    "scene": 4,
+    "w": 1760,
+    "x": 80,
+    "y": 280
+   },
+   {
+    "h": 128,
+    "id": "total-strip",
+    "pad": 24,
+    "scene": 4,
+    "w": 1760,
+    "x": 80,
+    "y": 872
+   },
+   {
+    "h": 280,
+    "id": "stat-cards",
+    "pad": 40,
+    "scene": 5,
+    "w": 560,
+    "xs": [
+     80,
+     680,
+     1280
+    ],
+    "ys": [
+     400,
+     712
+    ]
+   },
+   {
+    "h": 360,
+    "id": "logo-card",
+    "pad": 48,
+    "scene": 6,
+    "w": 800,
+    "x": 560,
+    "y": 360
+   }
+  ],
+  "grid": 8,
+  "margins": 80
+ },
+ "laws": [
+  "no-ticking: zero frame-increment / ticker-interval triggers",
+  "transit-peak: snaps/bells fire at spring local frame 11 overshoot",
+  "vo-exclusion: no one-shot SFX inside VO-active segments",
+  "drop-sync: transition drop peaks exactly 1 frame before each cut",
+  "ducking: -4dB isolated envelope under VO",
+  "swell: velocity-following, cut dead on stop frame"
+ ],
+ "numbers": {
+  "fee_cost": 719,
+  "market_5y": 16105,
+  "rate_market": 0.1,
+  "rate_save": 0.02,
+  "ratio": 1.46,
+  "save_5y": 11041,
+  "start": 10000,
+  "yearly_market": [
+   10000,
+   11000,
+   12100,
+   13310,
+   14641,
+   16105
+  ],
+  "yearly_save": [
+   10000,
+   10200,
+   10404,
+   10612,
+   10824,
+   11041
+  ],
+  "years": 5
+ },
+ "events": [
+  {
+   "t": 0.0,
+   "pool": "drop",
+   "asset": "pdrop1",
+   "seed": 0,
+   "dur": null,
+   "vel": null,
+   "why": "S1 entry impact, peak lands pre-VO",
+   "anchor": ""
+  },
+  {
+   "t": 0.167,
+   "pool": "pluck",
+   "asset": "ppluck1",
+   "seed": 1,
+   "dur": null,
+   "vel": null,
+   "why": "kicker entrance",
+   "anchor": "S1 kicker fade frame 0"
+  },
+  {
+   "t": 3.367,
+   "pool": "bell",
+   "asset": "bell",
+   "seed": 2,
+   "dur": null,
+   "vel": null,
+   "why": "badge impact",
+   "anchor": "S1 badge spring overshoot (local f101)"
+  },
+  {
+   "t": 4.6667,
+   "pool": "drop",
+   "asset": "pdrop2",
+   "seed": 15,
+   "dur": null,
+   "vel": null,
+   "why": "transition to S2",
+   "anchor": ""
+  },
+  {
+   "t": 5.167,
+   "pool": "pluck",
+   "asset": "ppluck2",
+   "seed": 3,
+   "dur": null,
+   "vel": null,
+   "why": "kicker entrance",
+   "anchor": "S2 kicker fade frame 0"
+  },
+  {
+   "t": 5.7,
+   "pool": "wheel",
+   "asset": "wheel",
+   "seed": 4,
+   "dur": 3.7,
+   "vel": "quad-out",
+   "why": "velocity swell under line draw",
+   "anchor": "S2 chart draw 0.7-4.4s"
+  },
+  {
+   "t": 9.6667,
+   "pool": "drop",
+   "asset": "pdrop3",
+   "seed": 16,
+   "dur": null,
+   "vel": null,
+   "why": "transition to S3",
+   "anchor": ""
+  },
+  {
+   "t": 9.767,
+   "pool": "snap",
+   "asset": "psnap1",
+   "seed": 5,
+   "dur": null,
+   "vel": null,
+   "why": "total settle",
+   "anchor": "S2 total card spring overshoot (local f143)"
+  },
+  {
+   "t": 10.167,
+   "pool": "pluck",
+   "asset": "ppluck3",
+   "seed": 6,
+   "dur": null,
+   "vel": null,
+   "why": "kicker entrance",
+   "anchor": "S3 kicker fade frame 0"
+  },
+  {
+   "t": 14.6667,
+   "pool": "drop",
+   "asset": "pdrop4",
+   "seed": 17,
+   "dur": null,
+   "vel": null,
+   "why": "transition to S4",
+   "anchor": ""
+  },
+  {
+   "t": 14.767,
+   "pool": "bell",
+   "asset": "bell_alt",
+   "seed": 7,
+   "dur": null,
+   "vel": null,
+   "why": "badge impact",
+   "anchor": "S3 ratio badge spring overshoot (local f143)"
+  },
+  {
+   "t": 15.167,
+   "pool": "pluck",
+   "asset": "ppluck1",
+   "seed": 8,
+   "dur": null,
+   "vel": null,
+   "why": "kicker entrance",
+   "anchor": "S4 kicker fade frame 0"
+  },
+  {
+   "t": 19.6667,
+   "pool": "drop",
+   "asset": "pdrop5",
+   "seed": 18,
+   "dur": null,
+   "vel": null,
+   "why": "transition to S5",
+   "anchor": ""
+  },
+  {
+   "t": 19.767,
+   "pool": "snap",
+   "asset": "psnap2",
+   "seed": 9,
+   "dur": null,
+   "vel": null,
+   "why": "total settle",
+   "anchor": "S4 total card spring overshoot (local f143)"
+  },
+  {
+   "t": 20.167,
+   "pool": "pluck",
+   "asset": "ppluck2",
+   "seed": 10,
+   "dur": null,
+   "vel": null,
+   "why": "kicker entrance",
+   "anchor": "S5 kicker fade frame 0"
+  },
+  {
+   "t": 24.6667,
+   "pool": "drop",
+   "asset": "pdrop1",
+   "seed": 19,
+   "dur": null,
+   "vel": null,
+   "why": "transition to S6",
+   "anchor": ""
+  },
+  {
+   "t": 24.767,
+   "pool": "snap",
+   "asset": "psnap3",
+   "seed": 11,
+   "dur": null,
+   "vel": null,
+   "why": "fee card impact",
+   "anchor": "S5 fee card spring overshoot (local f143)"
+  },
+  {
+   "t": 25.167,
+   "pool": "pluck",
+   "asset": "ppluck3",
+   "seed": 12,
+   "dur": null,
+   "vel": null,
+   "why": "kicker entrance",
+   "anchor": "S6 kicker fade frame 0"
+  },
+  {
+   "t": 27.967,
+   "pool": "snap",
+   "asset": "psnap4",
+   "seed": 13,
+   "dur": null,
+   "vel": null,
+   "why": "logo settle",
+   "anchor": "S6 logo card spring overshoot (local f89)"
+  },
+  {
+   "t": 28.967,
+   "pool": "bell",
+   "asset": "bell",
+   "seed": 14,
+   "dur": null,
+   "vel": null,
+   "why": "final punctuation",
+   "anchor": "S6 crackit badge spring overshoot (local f119)"
+  }
+ ],
+ "master": {
+  "file": "public/audio/pipetest-master.mp3",
+  "duration_sec": 30.0,
+  "true_peak_dbfs": -1.71
+ }
+}

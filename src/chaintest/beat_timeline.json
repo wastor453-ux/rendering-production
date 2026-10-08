@@ -1,0 +1,128 @@
+{
+ "schema": "astor-legacy-beat-timeline-v1",
+ "compiler": "compile_beats.py",
+ "source_words": "words.json",
+ "source_plan": "editorial_plan.json",
+ "beats": [
+  {
+   "beat_id": "t1",
+   "start_time": 0.0,
+   "end_time": 1.26,
+   "start_word": "Your",
+   "end_word": "leak.",
+   "start_word_index": 0,
+   "end_word_index": 4,
+   "text": "Your wallet has a leak.",
+   "semantic_role": "hook",
+   "visual_verb": "reveal",
+   "visual_mode": "hero_typography",
+   "preferred_visual_mode": "hero_typography",
+   "visual_intent": null,
+   "mode_source": "plan",
+   "visual_reason": "Hook claim \u2014 no data, pure emphasis.",
+   "duration_class": "normal",
+   "intensity": 0.9,
+   "music_intensity": 0.6,
+   "sfx_policy": "none",
+   "focal_object": "hook headline",
+   "claim": "Your wallet has a leak.",
+   "data_presence": false,
+   "data_type": null,
+   "comparison_state": "none",
+   "data_payload_ref": null,
+   "presentation": {
+    "accentLine": 1,
+    "kicker": "Astor Legacy",
+    "lines": [
+     "Your wallet",
+     "has a leak."
+    ]
+   },
+   "events": [
+    {
+     "event_id": "t1_e1",
+     "phrase": "leak",
+     "intent": "punch word lands",
+     "sfx": null
+    }
+   ]
+  },
+  {
+   "beat_id": "t2",
+   "start_time": 1.7,
+   "end_time": 6.18,
+   "start_word": "The",
+   "end_word": "fees.",
+   "start_word_index": 5,
+   "end_word_index": 15,
+   "text": "The average American pays $348 a year in hidden bank fees.",
+   "semantic_role": "number",
+   "visual_verb": "reveal",
+   "visual_mode": "hero_number",
+   "preferred_visual_mode": "hero_number",
+   "visual_intent": null,
+   "mode_source": "plan",
+   "visual_reason": "Single shocking statistic deserves the number.",
+   "duration_class": "hero",
+   "intensity": 1.0,
+   "music_intensity": 0.7,
+   "sfx_policy": "required",
+   "focal_object": "$348 hero number",
+   "claim": "The average American pays $348 a year in hidden bank fees.",
+   "data_presence": true,
+   "data_type": "statistic",
+   "comparison_state": "none",
+   "data_payload_ref": "payloads/hidden_fees_348.json",
+   "presentation": {
+    "caption": "Per year, per household",
+    "kicker": "Hidden bank fees"
+   },
+   "events": [
+    {
+     "event_id": "t2_e1",
+     "phrase": "$348",
+     "intent": "number punch lands on the amount",
+     "sfx": "click"
+    }
+   ]
+  },
+  {
+   "beat_id": "t3",
+   "start_time": 6.66,
+   "end_time": 8.3,
+   "start_word": "Banks",
+   "end_word": "notice.",
+   "start_word_index": 16,
+   "end_word_index": 22,
+   "text": "Banks profit when you do not notice.",
+   "semantic_role": "cause",
+   "visual_verb": "reveal",
+   "visual_mode": null,
+   "preferred_visual_mode": null,
+   "visual_intent": "show the mechanism of hidden fees flowing from customers to banks",
+   "mode_source": "selector",
+   "visual_reason": "intent: show the mechanism of hidden fees flowing from customers to banks",
+   "duration_class": "normal",
+   "intensity": 0.75,
+   "music_intensity": 0.65,
+   "sfx_policy": "none",
+   "focal_object": "fee flow mechanism",
+   "claim": "Banks profit when you do not notice.",
+   "data_presence": false,
+   "data_type": "mechanism",
+   "comparison_state": "none",
+   "data_payload_ref": null,
+   "presentation": {
+    "kicker": "The mechanism"
+   },
+   "events": [
+    {
+     "event_id": "t3_e1",
+     "phrase": "profit",
+     "intent": "mechanism reveal lands on 'profit'",
+     "sfx": null
+    }
+   ]
+  }
+ ]
+}

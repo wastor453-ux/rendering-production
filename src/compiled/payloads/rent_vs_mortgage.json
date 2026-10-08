@@ -1,0 +1,25 @@
+{
+ "payload_id": "rent_vs_mortgage",
+ "source": "proof script (illustrative medians)",
+ "source_ref": "SCRIPT.txt b4",
+ "metric": "monthly_housing_cost",
+ "unit": "$",
+ "values": [
+  {
+   "label": "Median rent",
+   "value": 2150
+  },
+  {
+   "label": "Median mortgage",
+   "value": 2980
+  }
+ ],
+ "date_range": "2026",
+ "baseline": 2150,
+ "comparison": {
+  "label": "monthly gap",
+  "value": 830
+ },
+ "formula": "2980 - 2150 = 830",
+ "as_of": "2026-10-08"
+}

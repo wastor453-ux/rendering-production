@@ -1,0 +1,35 @@
+{
+ "schema": "astor-legacy-arbitration-v1",
+ "records": [
+  {
+   "beat_id": "t1",
+   "visual_intent": null,
+   "preferred_visual_mode": "hero_typography",
+   "selected_visual_mode": "hero_typography",
+   "selector_disagreement": false,
+   "validated_reason": "AI preference 'hero_typography' confirmed by selector",
+   "resolved_mode": "hero_typography",
+   "mode_source": "plan"
+  },
+  {
+   "beat_id": "t2",
+   "visual_intent": null,
+   "preferred_visual_mode": "hero_number",
+   "selected_visual_mode": "hero_number",
+   "selector_disagreement": false,
+   "validated_reason": "AI preference 'hero_number' confirmed by selector",
+   "resolved_mode": "hero_number",
+   "mode_source": "plan"
+  },
+  {
+   "beat_id": "t3",
+   "visual_intent": "show the mechanism of hidden fees flowing from customers to banks",
+   "preferred_visual_mode": null,
+   "selected_visual_mode": "causal_diagram",
+   "selector_disagreement": false,
+   "validated_reason": "resolved from intent by selector: 'causal_diagram'",
+   "resolved_mode": "causal_diagram",
+   "mode_source": "selector"
+  }
+ ]
+}

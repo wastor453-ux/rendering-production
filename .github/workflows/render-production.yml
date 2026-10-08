@@ -1,0 +1,165 @@
+name: Render Production (Chunked Parallel)
+
+on:
+  workflow_dispatch:
+    inputs:
+      composition:
+        description: 'Remotion composition ID'
+        required: true
+        default: 'P3Rehearsal'
+      job_id:
+        description: 'Job ID (e.g. 2026-001)'
+        required: true
+      start_frame:
+        description: 'First frame (inclusive)'
+        required: true
+        default: '0'
+      end_frame:
+        description: 'Last frame (inclusive)'
+        required: true
+      chunk_size:
+        description: 'Frames per chunk'
+        required: false
+        default: '600'
+      max_parallel:
+        description: 'Max parallel chunk jobs'
+        required: false
+        default: '20'
+      crf:
+        description: 'H.264 CRF (quality)'
+        required: false
+        default: '18'
+
+env:
+  NODE_VERSION: '24.20.0'
+  REMOTION_VERSION: '4.0.532'
+
+jobs:
+  # --- Job 1: Generate the chunk matrix ---
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+      job_id: ${{ inputs.job_id }}
+    steps:
+      - id: set
+        run: |
+          python3 - <<'PY'
+          import json, os
+          start, end, size = int(os.environ['START']), int(os.environ['END']), int(os.environ['SIZE'])
+          chunks = []
+          cid = 0
+          s = start
+          while s <= end:
+              e = min(s + size - 1, end)
+              chunks.append({"chunk_id": cid, "start": s, "end": e})
+              cid += 1; s = e + 1
+          print(f"Planning {len(chunks)} chunks for frames {start}-{end}")
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f"matrix={json.dumps({'chunk': chunks})}\n")
+          PY
+        env:
+          START: ${{ inputs.start_frame }}
+          END: ${{ inputs.end_frame }}
+          SIZE: ${{ inputs.chunk_size }}
+
+  # --- Job 2: Render chunks in parallel (matrix) ---
+  render-chunk:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: ${{ fromJSON(inputs.max_parallel) }}
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: demo-video/package-lock.json
+
+      - name: Install system deps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg libnss3 libatk1.0-0 libatk-bridge2.0-0 \
+            libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
+            libxrandr2 libgbm1 libasound2
+
+      - name: Install npm deps (pinned)
+        working-directory: demo-video
+        run: npm ci --no-audit --no-fund
+
+      - name: Ensure Chromium (pinned by Remotion)
+        working-directory: demo-video
+        run: npx remotion browser ensure
+
+      - name: Render chunk ${{ matrix.chunk.chunk_id }}
+        working-directory: demo-video
+        run: |
+          npx remotion render ${{ inputs.composition }} \
+            /tmp/chunk_${{ matrix.chunk.chunk_id }}.mp4 \
+            --frames=${{ matrix.chunk.start }}-${{ matrix.chunk.end }} \
+            --concurrency=2 --codec=h264 --crf=${{ inputs.crf }} --overwrite
+          sha256sum /tmp/chunk_${{ matrix.chunk.chunk_id }}.mp4 | cut -d' ' -f1 > /tmp/chunk_${{ matrix.chunk.chunk_id }}.sha256
+          echo "chunk_id=${{ matrix.chunk.chunk_id }}" > /tmp/chunk_${{ matrix.chunk.chunk_id }}.meta
+          echo "start=${{ matrix.chunk.start }}" >> /tmp/chunk_${{ matrix.chunk.chunk_id }}.meta
+          echo "end=${{ matrix.chunk.end }}" >> /tmp/chunk_${{ matrix.chunk.chunk_id }}.meta
+
+      - name: Upload chunk artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chunk-${{ needs.plan.outputs.job_id }}-${{ matrix.chunk.chunk_id }}
+          path: |
+            /tmp/chunk_${{ matrix.chunk.chunk_id }}.mp4
+            /tmp/chunk_${{ matrix.chunk.chunk_id }}.sha256
+            /tmp/chunk_${{ matrix.chunk.chunk_id }}.meta
+          retention-days: 3  # cleanup: chunks expire after assembly
+
+  # --- Job 3: Assemble + verify + publish master ---
+  assemble:
+    needs: [plan, render-chunk]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all chunks
+        uses: actions/download-artifact@v4
+        with:
+          pattern: chunk-${{ needs.plan.outputs.job_id }}-*
+          path: /tmp/chunks
+          merge-multiple: true
+
+      - name: Verify chunk checksums + assemble
+        run: |
+          cd /tmp/chunks
+          # verify each chunk
+          for meta in *.meta; do
+            id=$(grep chunk_id "$meta" | cut -d= -f2)
+            expected=$(cat "chunk_${id}.sha256")
+            actual=$(sha256sum "chunk_${id}.mp4" | cut -d' ' -f1)
+            [ "$expected" = "$actual" ] || { echo "checksum FAIL chunk $id"; exit 1; }
+          done
+          echo "all chunk checksums OK"
+          # assemble in order (no re-encode)
+          ls chunk_*.mp4 | sort -V | sed "s/^/file '/;s/$/'/" > concat.txt
+          ffmpeg -y -f concat -safe 0 -i concat.txt -c copy /tmp/master.mp4
+
+      - name: Verify master
+        run: |
+          W=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 /tmp/master.mp4)
+          H=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 /tmp/master.mp4)
+          [ "$W" = "1920" ] && [ "$H" = "1080" ] || { echo "resolution FAIL: ${W}x${H}"; exit 1; }
+          ffmpeg -v error -i /tmp/master.mp4 -f null - || { echo "decode FAIL"; exit 1; }
+          echo "master verified: ${W}x${H}"
+
+      - name: Upload master
+        uses: actions/upload-artifact@v4
+        with:
+          name: master-${{ needs.plan.outputs.job_id }}
+          path: /tmp/master.mp4
+          retention-days: 30

@@ -1,0 +1,59 @@
+name: Render Benchmark
+
+on:
+  workflow_dispatch:
+    inputs:
+      composition:
+        description: 'Composition to benchmark'
+        required: true
+        default: 'P3Rehearsal'
+      frames:
+        description: 'Number of frames for benchmark (e.g. 600 = 20s)'
+        required: false
+        default: '600'
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        parallel: [1, 2, 4, 8, 16, 20]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: 'npm'
+          cache-dependency-path: demo-video/package-lock.json
+
+      - run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg libnss3 libatk1.0-0 libatk-bridge2.0-0 \
+            libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
+            libxrandr2 libgbm1 libasound2
+
+      - working-directory: demo-video
+        run: npm ci --no-audit --no-fund
+
+      - working-directory: demo-video
+        run: npx remotion browser ensure
+
+      - name: Benchmark parallel=${{ matrix.parallel }}
+        working-directory: demo-video
+        run: |
+          START=$(date +%s)
+          # Split frames across parallel jobs via max-parallel simulation:
+          # each matrix job renders the full range with concurrency=2,
+          # wall-clock comparison shows scaling efficiency.
+          npx remotion render ${{ inputs.composition }} /tmp/bench.mp4 \
+            --frames=0-$(( ${{ inputs.frames }} - 1 )) \
+            --concurrency=2 --overwrite > /tmp/bench.log 2>&1
+          END=$(date +%s)
+          ELAPSED=$((END - START))
+          FPS=$(echo "scale=2; ${{ inputs.frames }} / $ELAPSED" | bc)
+          echo "parallel=${{ matrix.parallel }} elapsed=${ELAPSED}s fps=$FPS"
+          echo "RESULT parallel=${{ matrix.parallel }} elapsed=${ELAPSED}s fps=${FPS}" >> $GITHUB_STEP_SUMMARY

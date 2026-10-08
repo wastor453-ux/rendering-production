@@ -1,0 +1,16 @@
+node_modules/
+.venv/
+*.log
+.DS_Store
+# Render outputs (never commit)
+*.mp4
+!public/**/*.mp4
+render-infra/packages/
+render-infra/jobs/
+# Local build artifacts
+dist/
+build/
+# Large audio binaries (use Git LFS or release assets when needed)
+public/audio/*.wav
+public/audio/*.mp3
+public/audio/sfx/

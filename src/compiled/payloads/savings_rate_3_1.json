@@ -1,0 +1,15 @@
+{
+ "payload_id": "savings_rate_3_1",
+ "source": "proof script (stylized Fed/FRED-style claim)",
+ "source_ref": "SCRIPT.txt b2",
+ "metric": "personal_savings_rate",
+ "unit": "%",
+ "values": [
+  3.1
+ ],
+ "date_range": "2026",
+ "baseline": 12.4,
+ "comparison": null,
+ "formula": null,
+ "as_of": "2026-10-08"
+}

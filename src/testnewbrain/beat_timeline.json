@@ -1,0 +1,307 @@
+{
+ "beats": [
+  {
+   "id": "b01",
+   "kind": "headline",
+   "start": 0.0,
+   "title": "Americans Are Running Out of Money",
+   "sub": "The personal savings rate just fell to three percent.",
+   "verb": "reveal",
+   "title_frame": 20,
+   "sub_frame": 90,
+   "intensity": 5,
+   "end": 5.69,
+   "kicker": "THE VERDICT"
+  },
+  {
+   "id": "b02",
+   "kind": "number",
+   "start": 5.69,
+   "title": "3%",
+   "sub": "personal savings rate \u2014 near a record low",
+   "verb": "slam",
+   "impact_lf": 13,
+   "intensity": 4,
+   "end": 10.03
+  },
+  {
+   "id": "b03",
+   "kind": "barfall",
+   "start": 10.03,
+   "title": "Savings buffers",
+   "sub": "buffers burning fast",
+   "verb": "fall",
+   "bar_lf": [
+    10,
+    190
+   ],
+   "intensity": 3,
+   "end": 17.53
+  },
+  {
+   "id": "b04",
+   "kind": "number",
+   "start": 17.53,
+   "title": "$765/mo",
+   "sub": "average new car payment \u2014 a record",
+   "verb": "slam",
+   "impact_lf": 13,
+   "intensity": 4,
+   "end": 18.9
+  },
+  {
+   "id": "b05",
+   "kind": "cascade",
+   "start": 18.9,
+   "title": "The squeeze",
+   "sub": "everything climbing at once",
+   "verb": "accumulate",
+   "items": [
+    "Groceries rising",
+    "Insurance rising",
+    "Electricity rising"
+   ],
+   "card_frames": [
+    13,
+    40,
+    61
+   ],
+   "intensity": 3,
+   "end": 25.15
+  },
+  {
+   "id": "b06",
+   "kind": "number",
+   "start": 25.15,
+   "title": "$1.26T",
+   "sub": "US credit card debt",
+   "verb": "count",
+   "impact_lf": 13,
+   "intensity": 4,
+   "end": 27.81
+  },
+  {
+   "id": "b07",
+   "kind": "split",
+   "start": 27.81,
+   "title": "60%",
+   "sub": "of cardholders don't pay in full",
+   "verb": "split",
+   "left": "Pay in full",
+   "right": "Don't pay in full",
+   "title_frame": 10,
+   "cards_frames": [
+    79
+   ],
+   "sub_frame": 66,
+   "intensity": 3,
+   "end": 32.6
+  },
+  {
+   "id": "b08",
+   "kind": "headline",
+   "start": 32.6,
+   "title": "Not luxuries.",
+   "sub": "They're financing survival.",
+   "verb": "transform",
+   "title_frame": 53,
+   "sub_frame": 117,
+   "intensity": 4,
+   "end": 39.49
+  },
+  {
+   "id": "b09",
+   "kind": "split",
+   "start": 39.49,
+   "title": "Top 10%",
+   "sub": "drive more than half of all spending",
+   "verb": "split",
+   "left": "Top 10%",
+   "right": "Bottom 90%",
+   "title_frame": 38,
+   "cards_frames": [
+    126
+   ],
+   "intensity": 4,
+   "end": 44.5
+  },
+  {
+   "id": "b10",
+   "kind": "headline",
+   "start": 44.5,
+   "title": "Retail looks fine",
+   "sub": "while the bottom half drowns.",
+   "verb": "compare",
+   "title_frame": 16,
+   "sub_frame": 116,
+   "intensity": 3,
+   "end": 49.11
+  },
+  {
+   "id": "b11",
+   "kind": "number",
+   "start": 49.11,
+   "title": "6%",
+   "sub": "of workers raided their 401(k) last year",
+   "verb": "slam",
+   "impact_lf": 13,
+   "sub_frame": 87,
+   "intensity": 4,
+   "end": 55.25
+  },
+  {
+   "id": "b12",
+   "kind": "headline",
+   "start": 55.25,
+   "title": "The #1 reason",
+   "sub": "mostly to avoid foreclosure or eviction",
+   "verb": "fall",
+   "title_frame": 20,
+   "intensity": 4,
+   "end": 60.27
+  },
+  {
+   "id": "b13",
+   "kind": "cascade",
+   "start": 60.27,
+   "title": "How people go broke",
+   "sub": "always the same sequence",
+   "verb": "accumulate",
+   "items": [
+    "Backup cash",
+    "Savings",
+    "Credit cards",
+    "Retirement"
+   ],
+   "card_frames": [
+    26,
+    57,
+    87,
+    123
+   ],
+   "intensity": 3,
+   "end": 66.85
+  },
+  {
+   "id": "b14",
+   "kind": "headline",
+   "start": 66.85,
+   "title": "The trap",
+   "sub": "The escape hatch just slammed shut.",
+   "verb": "lock",
+   "title_frame": 20,
+   "intensity": 5,
+   "end": 71.31
+  },
+  {
+   "id": "b15",
+   "kind": "headline",
+   "start": 71.31,
+   "title": "No rescue coming",
+   "sub": "The Fed didn't cut \u2014 it raised.",
+   "verb": "contrast",
+   "title_frame": 20,
+   "intensity": 4,
+   "end": 75.25
+  },
+  {
+   "id": "b16",
+   "kind": "number",
+   "start": 75.25,
+   "title": "3%",
+   "sub": "inflation \u2014 still above 3%, so borrowing costs more",
+   "verb": "rise",
+   "impact_lf": 13,
+   "sub_frame": 98,
+   "intensity": 4,
+   "end": 81.11
+  },
+  {
+   "id": "b17",
+   "kind": "headline",
+   "start": 81.11,
+   "title": "The highest rates in decades",
+   "sub": "exactly when borrowing hurts most.",
+   "verb": "collide",
+   "title_frame": 20,
+   "sub_frame": 84,
+   "intensity": 5,
+   "end": 85.07
+  },
+  {
+   "id": "b18",
+   "kind": "headline",
+   "start": 85.07,
+   "title": "Three moves.",
+   "sub": "",
+   "verb": "reveal",
+   "title_frame": 20,
+   "intensity": 3,
+   "end": 87.0
+  },
+  {
+   "id": "b19",
+   "kind": "headline",
+   "start": 87.0,
+   "title": "Move 1: kill the debt",
+   "sub": "Kill anything charging 20% \u2014 no investment beats that.",
+   "verb": "reveal",
+   "title_frame": 2,
+   "sub_frame": 29,
+   "intensity": 3,
+   "end": 90.49
+  },
+  {
+   "id": "b20",
+   "kind": "split",
+   "start": 90.49,
+   "title": "4% vs 0.6%",
+   "sub": "high-yield vs national average",
+   "verb": "compare",
+   "left": "High-yield 4%",
+   "right": "Average 0.6%",
+   "title_frame": 38,
+   "cards_frames": [
+    122,
+    198
+   ],
+   "intensity": 3,
+   "end": 97.41
+  },
+  {
+   "id": "b21",
+   "kind": "headline",
+   "start": 97.41,
+   "title": "Move 3: build margin",
+   "sub": "Save 15% before lifestyle eats your raise.",
+   "verb": "build",
+   "title_frame": 20,
+   "sub_frame": 69,
+   "intensity": 3,
+   "end": 103.9
+  },
+  {
+   "id": "b21b",
+   "kind": "headline",
+   "start": 103.9,
+   "title": "The economy is splitting in two.",
+   "sub": "Make sure you're on the side with cash.",
+   "verb": "compare",
+   "title_frame": 30,
+   "sub_frame": 126,
+   "intensity": 4,
+   "end": 109.01
+  },
+  {
+   "id": "b22",
+   "kind": "close",
+   "start": 109.01,
+   "title": "Wealth is a legacy.",
+   "sub": "Build yours.",
+   "verb": "lock",
+   "impact_lf": 14,
+   "intensity": 3,
+   "end": 111.1
+  }
+ ]
+}

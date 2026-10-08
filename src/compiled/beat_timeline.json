@@ -1,0 +1,359 @@
+{
+ "schema": "astor-legacy-beat-timeline-v1",
+ "compiler": "compile_beats.py",
+ "source_words": "words_v1.json",
+ "source_plan": "editorial_plan_v1.json",
+ "beats": [
+  {
+   "beat_id": "b1",
+   "start_time": 0.0,
+   "end_time": 2.0,
+   "start_word": "Your",
+   "end_word": "you.",
+   "start_word_index": 0,
+   "end_word_index": 6,
+   "text": "Your savings account is lying to you.",
+   "semantic_role": "hook",
+   "visual_verb": "reveal",
+   "visual_mode": "hero_typography",
+   "preferred_visual_mode": "hero_typography",
+   "visual_intent": null,
+   "mode_source": "plan",
+   "visual_reason": "Hook claim \u2014 no data, pure emphasis.",
+   "duration_class": "normal",
+   "intensity": 0.9,
+   "music_intensity": 0.6,
+   "sfx_policy": "none",
+   "focal_object": "hook headline",
+   "claim": "Your savings account is lying to you.",
+   "data_presence": false,
+   "data_type": null,
+   "comparison_state": "none",
+   "comparison_kind": null,
+   "data_payload_ref": null,
+   "presentation": {
+    "kicker": "Astor Legacy",
+    "lines": [
+     "Your savings account",
+     "is lying to you."
+    ],
+    "accentLine": 1
+   },
+   "events": [
+    {
+     "event_id": "b1_e1",
+     "phrase": "account",
+     "intent": "emphasis word lands",
+     "sfx": null
+    }
+   ]
+  },
+  {
+   "beat_id": "b2",
+   "start_time": 2.32,
+   "end_time": 6.4,
+   "start_word": "The",
+   "end_word": "2008.",
+   "start_word_index": 7,
+   "end_word_index": 19,
+   "text": "The personal savings rate just hit 3 .1 % the lowest since 2008.",
+   "semantic_role": "number",
+   "visual_verb": "reveal",
+   "visual_mode": "hero_number",
+   "preferred_visual_mode": "hero_number",
+   "visual_intent": null,
+   "mode_source": "plan",
+   "visual_reason": "Single shocking statistic deserves the number.",
+   "duration_class": "hero",
+   "intensity": 1.0,
+   "music_intensity": 0.7,
+   "sfx_policy": "required",
+   "focal_object": "3.1% hero number",
+   "claim": "The personal savings rate just hit 3.1%, the lowest since 2008.",
+   "data_presence": true,
+   "data_type": "statistic",
+   "comparison_state": "none",
+   "comparison_kind": null,
+   "data_payload_ref": "payloads/savings_rate_3_1.json",
+   "presentation": {
+    "kicker": "Personal savings rate",
+    "caption": "Lowest since 2008"
+   },
+   "events": [
+    {
+     "event_id": "b2_e1",
+     "phrase": "hit",
+     "intent": "number punch lands on verb",
+     "sfx": "click"
+    }
+   ]
+  },
+  {
+   "beat_id": "b3",
+   "start_time": 6.94,
+   "end_time": 18.62,
+   "start_word": "And",
+   "end_word": ".1.",
+   "start_word_index": 20,
+   "end_word_index": 58,
+   "text": "And while your cash sits still, prices kept moving. Look at the last 10 years, savings spiked in 2020 stimulus checks lockdowns know where to spend. Then the long slide, 12 % to 8 to 5 to 3 .1.",
+   "semantic_role": "trend",
+   "visual_verb": "reveal",
+   "visual_mode": "line_chart",
+   "preferred_visual_mode": "line_chart",
+   "visual_intent": null,
+   "mode_source": "plan",
+   "visual_reason": "10-year trend with 2020 spike \u2014 line + annotation.",
+   "duration_class": "complex",
+   "intensity": 0.7,
+   "music_intensity": 0.6,
+   "sfx_policy": "required",
+   "focal_object": "10-year savings trend with 2020 spike",
+   "claim": "Cash sat still while prices moved; savings spiked in 2020 then slid to 3.1%.",
+   "data_presence": true,
+   "data_type": "trend",
+   "comparison_state": "none",
+   "comparison_kind": null,
+   "data_payload_ref": "payloads/savings_trend_10y.json",
+   "presentation": {
+    "kicker": "Savings rate \u00b7 10 years",
+    "labels": [
+     "2016",
+     "2018",
+     "2020",
+     "2022",
+     "2024",
+     "2026"
+    ],
+    "eventIndex": 5,
+    "eventLabel": "2020 spike",
+    "eventSub": "Stimulus + lockdown saving",
+    "metric": "3.1%"
+   },
+   "events": [
+    {
+     "event_id": "b3_e1",
+     "phrase": "10",
+     "intent": "spike highlight lands on '10 years'",
+     "sfx": "whoosh"
+    }
+   ]
+  },
+  {
+   "beat_id": "b4",
+   "start_time": 19.0,
+   "end_time": 38.2,
+   "start_word": "Every",
+   "end_word": "zero.",
+   "start_word_index": 59,
+   "end_word_index": 109,
+   "text": "Every point is money that stopped working for you. Here is what that costs. The median mortgage payment hit $2 ,980 a month. Median rent $2 ,150. That is an $830 gap every single month between owning and renting. But owners are building $41 ,000 in equity while renters build zero.",
+   "semantic_role": "comparison",
+   "visual_verb": "reveal",
+   "visual_mode": "two_sided_comparison",
+   "preferred_visual_mode": "two_sided_comparison",
+   "visual_intent": null,
+   "mode_source": "plan",
+   "visual_reason": "Rent vs own \u2014 A/B comparison with equity contrast.",
+   "duration_class": "complex",
+   "intensity": 0.8,
+   "music_intensity": 0.7,
+   "sfx_policy": "required",
+   "focal_object": "renter vs owner comparison",
+   "claim": "Owning costs $830/mo more but builds $41k equity; renting builds zero.",
+   "data_presence": true,
+   "data_type": "comparison",
+   "comparison_state": "A_vs_B",
+   "comparison_kind": "attribute_contrast",
+   "data_payload_ref": "payloads/rent_vs_mortgage.json",
+   "presentation": {
+    "left": {
+     "title": "Renter",
+     "rows": [
+      [
+       "Monthly cost",
+       "$2,150"
+      ],
+      [
+       "Equity built",
+       "$0"
+      ],
+      [
+       "Gap",
+       "$0"
+      ]
+     ]
+    },
+    "right": {
+     "title": "Owner",
+     "rows": [
+      [
+       "Monthly cost",
+       "$2,980"
+      ],
+      [
+       "Equity built",
+       "$41k"
+      ],
+      [
+       "Gap",
+       "$830"
+      ]
+     ]
+    },
+    "impactRow": 0
+   },
+   "events": [
+    {
+     "event_id": "b4_e1",
+     "phrase": "payment",
+     "intent": "monthly-cost row punches on 'payment'",
+     "sfx": "click"
+    }
+   ]
+  },
+  {
+   "beat_id": "b5",
+   "start_time": 38.66,
+   "end_time": 47.58,
+   "start_word": "Why",
+   "end_word": "year.",
+   "start_word_index": 110,
+   "end_word_index": 136,
+   "text": "Why did this happen? The Fed raised rates. Borrowing got expensive, spending slowed, and savers who stayed in cash watched inflation eat 2 .9 % a year.",
+   "semantic_role": "cause",
+   "visual_verb": "reveal",
+   "visual_mode": "causal_diagram",
+   "preferred_visual_mode": "causal_diagram",
+   "visual_intent": null,
+   "mode_source": "plan",
+   "visual_reason": "Rate hikes -> borrowing -> spending -> inflation chain.",
+   "duration_class": "complex",
+   "intensity": 0.75,
+   "music_intensity": 0.65,
+   "sfx_policy": "required",
+   "focal_object": "causal chain of 4 nodes",
+   "claim": "Fed rate hikes \u2192 expensive borrowing \u2192 slowed spending \u2192 inflation ate cash.",
+   "data_presence": false,
+   "data_type": "mechanism",
+   "comparison_state": "none",
+   "comparison_kind": null,
+   "data_payload_ref": null,
+   "presentation": {
+    "kicker": "Why it happened",
+    "steps": [
+     {
+      "label": "Fed raised rates",
+      "sub": "borrowing costs up"
+     },
+     {
+      "label": "Spending slowed",
+      "sub": "demand cooled"
+     },
+     {
+      "label": "Cash sat still",
+      "sub": "savers waited"
+     },
+     {
+      "label": "Inflation ate 2.9%",
+      "sub": "every year"
+     }
+    ],
+    "impactNode": 0
+   },
+   "events": [
+    {
+     "event_id": "b5_e1",
+     "phrase": "The",
+     "intent": "first node punches on 'The Fed raised rates'",
+     "sfx": "whoosh"
+    }
+   ]
+  },
+  {
+   "beat_id": "b6",
+   "start_time": 48.3,
+   "end_time": 56.5,
+   "start_word": "The",
+   "end_word": "3.",
+   "start_word_index": 137,
+   "end_word_index": 156,
+   "text": "The fix is not complicated. Move cash into assets that outrun inflation. Stocks return 12 % this year. Bonds 3.",
+   "semantic_role": "comparison",
+   "visual_verb": "reveal",
+   "visual_mode": "bar_chart",
+   "preferred_visual_mode": "bar_chart",
+   "visual_intent": null,
+   "mode_source": "plan",
+   "visual_reason": "Stocks vs bonds return comparison \u2014 bars make the gap visceral.",
+   "duration_class": "complex",
+   "intensity": 0.85,
+   "music_intensity": 0.75,
+   "sfx_policy": "required",
+   "focal_object": "stocks vs bonds bars",
+   "claim": "Move cash into assets: stocks returned 12%, bonds 3%.",
+   "data_presence": true,
+   "data_type": "comparison",
+   "comparison_state": "A_vs_B",
+   "comparison_kind": "magnitude_gap",
+   "data_payload_ref": "payloads/stocks_vs_bonds.json",
+   "presentation": {
+    "kicker": "This year's return",
+    "highlight": 0,
+    "impactBar": 0
+   },
+   "events": [
+    {
+     "event_id": "b6_e1",
+     "phrase": "12",
+     "intent": "stocks bar punches on '12'",
+     "sfx": "click"
+    }
+   ]
+  },
+  {
+   "beat_id": "b7",
+   "start_time": 56.82,
+   "end_time": 60.66,
+   "start_word": "The",
+   "end_word": "yours.",
+   "start_word_index": 157,
+   "end_word_index": 168,
+   "text": "The saver is becoming the investor. Wealth is a legacy. Build yours.",
+   "semantic_role": "close",
+   "visual_verb": "reveal",
+   "visual_mode": "closing_composition",
+   "preferred_visual_mode": "closing_composition",
+   "visual_intent": null,
+   "mode_source": "plan",
+   "visual_reason": "Thesis + brand close \u2014 typographic payoff.",
+   "duration_class": "hero",
+   "intensity": 0.9,
+   "music_intensity": 0.8,
+   "sfx_policy": "none",
+   "focal_object": "closing thesis",
+   "claim": "The saver is becoming the investor. Wealth is a legacy. Build yours.",
+   "data_presence": false,
+   "data_type": null,
+   "comparison_state": "none",
+   "comparison_kind": null,
+   "data_payload_ref": null,
+   "presentation": {
+    "thesisClaim": "The saver is becoming the investor.",
+    "thesisValue": "12%",
+    "thesisDelta": 12,
+    "closeLine1": "Wealth is a legacy.",
+    "closeLine2": "Build yours."
+   },
+   "events": [
+    {
+     "event_id": "b7_e1",
+     "phrase": "is",
+     "intent": "thesis line lands",
+     "sfx": null,
+     "anchor_word_index": 159
+    }
+   ]
+  }
+ ]
+}

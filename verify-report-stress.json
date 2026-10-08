@@ -1,0 +1,29 @@
+{
+ "at": "2026-10-04T20:12:31.516Z",
+ "pass": true,
+ "grade": "PASS",
+ "notes": [
+  "manifest stress-v3, 2 events, 6 pools",
+  "master duration 5.000s, manifest peak -2.1 dBFS",
+  "measured true peak -2.40 dBFS",
+  "anti-fatigue pool rotation checked",
+  "drop sync checked for cuts []",
+  "density checked over 2 one-shot gestures",
+  "no-ticking law checked",
+  "spring-overshoot alignment checked",
+  "VO band exclusion checked",
+  "8px grid checked over 12 layout values",
+  "envelope isolated: ducked -4.00dB (target -4dB), open 0.00dB (target 0), ramp: skipped (VO runs to end)",
+  "separation subhit.wav: 34.6dB (min 8dB)",
+  "separation drop.wav: 23.5dB (min 8dB)",
+  "separation pluck.wav: 11.9dB (min 8dB)",
+  "separation snap.wav: 10.2dB (min 8dB)",
+  "separation bell.wav: 52.5dB (min 8dB)",
+  "frame 20: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 40: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 75: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 110: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 149: 1920x1080, hairline ok, ink ok, safe-area ok"
+ ],
+ "violations": []
+}

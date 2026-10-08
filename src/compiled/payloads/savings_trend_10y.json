@@ -1,0 +1,28 @@
+{
+ "payload_id": "savings_trend_10y",
+ "source": "proof script (illustrative 10y trajectory)",
+ "source_ref": "SCRIPT.txt b3",
+ "metric": "personal_savings_rate",
+ "unit": "%",
+ "values": [
+  7.8,
+  7.2,
+  8.1,
+  6.9,
+  7.5,
+  12.4,
+  11.8,
+  6.1,
+  4.9,
+  3.8,
+  3.1
+ ],
+ "date_range": "2016-2026",
+ "baseline": null,
+ "comparison": {
+  "label": "2020 spike",
+  "value": 12.4
+ },
+ "formula": null,
+ "as_of": "2026-10-08"
+}

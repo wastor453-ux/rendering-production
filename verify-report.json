@@ -1,0 +1,91 @@
+{
+ "at": "2026-10-06T17:17:25.928Z",
+ "pass": false,
+ "grade": "FAIL",
+ "notes": [
+  "manifest recut-v1, 44 events, 6 pools",
+  "production mode: auditing 10 frames across 180.0s",
+  "master duration 180.024s, manifest peak -1.32 dBFS",
+  "measured true peak -1.30 dBFS",
+  "anti-fatigue pool rotation checked",
+  "drop sync checked for cuts [6.5, 15.1, 30.8, 39, 59.6, 81.2, 103.39999999999999, 107.2, 129.8, 157.6, 166.1]",
+  "density checked over 43 one-shot gestures",
+  "separation subhit.wav: 34.6dB (min 8dB)",
+  "separation drop.wav: 23.5dB (min 8dB)",
+  "separation pluck.wav: 11.9dB (min 8dB)",
+  "separation snap.wav: 10.2dB (min 8dB)",
+  "separation bell.wav: 52.5dB (min 8dB)",
+  "frame 97: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 324: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 688: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 1479: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 2112: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 2769: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 3159: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 4311: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 4855: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 5191: 1920x1080, hairline ok, ink ok, safe-area ok"
+ ],
+ "violations": [
+  {
+   "kind": "audio",
+   "where": "window 109.20–110.20s",
+   "detail": "density: 7 one-shot gestures in 1s (cap 5)"
+  },
+  {
+   "kind": "audio",
+   "where": "amb stem",
+   "detail": "ducked ambient stem missing: /home/hatch/workspace/crackit/demo-video/shaped/recut_amb.wav"
+  },
+  {
+   "kind": "visual",
+   "where": "frame 97",
+   "detail": "hairline color off at x=200: got rgb(228,224,245), want rgb(92,75,233)"
+  },
+  {
+   "kind": "visual",
+   "where": "frame 324",
+   "detail": "hairline color off at x=200: got rgb(216,222,246), want rgb(92,75,233)"
+  },
+  {
+   "kind": "visual",
+   "where": "frame 688",
+   "detail": "hairline color off at x=200: got rgb(243,223,234), want rgb(92,75,233)"
+  },
+  {
+   "kind": "visual",
+   "where": "frame 1479",
+   "detail": "hairline color off at x=200: got rgb(217,223,246), want rgb(92,75,233)"
+  },
+  {
+   "kind": "visual",
+   "where": "frame 2112",
+   "detail": "hairline color off at x=200: got rgb(229,225,245), want rgb(92,75,233)"
+  },
+  {
+   "kind": "visual",
+   "where": "frame 2769",
+   "detail": "hairline color off at x=200: got rgb(243,222,234), want rgb(92,75,233)"
+  },
+  {
+   "kind": "visual",
+   "where": "frame 3159",
+   "detail": "hairline color off at x=200: got rgb(216,222,246), want rgb(92,75,233)"
+  },
+  {
+   "kind": "visual",
+   "where": "frame 4311",
+   "detail": "hairline color off at x=200: got rgb(219,224,245), want rgb(92,75,233)"
+  },
+  {
+   "kind": "visual",
+   "where": "frame 4855",
+   "detail": "hairline color off at x=200: got rgb(243,224,235), want rgb(92,75,233)"
+  },
+  {
+   "kind": "visual",
+   "where": "frame 5191",
+   "detail": "hairline color off at x=200: got rgb(211,225,245), want rgb(92,75,233)"
+  }
+ ]
+}

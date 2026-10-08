@@ -1,0 +1,374 @@
+{
+ "version": "premium-v3",
+ "video": "TrialVideo",
+ "fps": 30,
+ "duration_sec": 30,
+ "pools": {
+  "pluck": [
+   "pluck",
+   "pluck_alt"
+  ],
+  "bell": [
+   "bell",
+   "bell_alt"
+  ],
+  "drop": [
+   "drop"
+  ],
+  "snap": [
+   "snap",
+   "snap_alt"
+  ],
+  "wheel": [
+   "wheel"
+  ],
+  "subhit": [
+   "subhit"
+  ]
+ },
+ "shaped_peaks": {
+  "drop": 0.5572789115646258,
+  "subhit": 0.5383219954648526,
+  "pluck": 0.006643990929705215,
+  "pluck_alt": 0.36376417233560093,
+  "snap": 0.1653061224489796,
+  "bell": 2.360861678004535,
+  "bell_alt": 1.6357369614512471,
+  "snap_alt": 0.005464852607709751
+ },
+ "scene_cuts_sec": [
+  6.0,
+  15.0,
+  24.0
+ ],
+ "vo_segments": [
+  [
+   0.0,
+   3.528
+  ],
+  [
+   6.0,
+   11.088
+  ],
+  [
+   15.0,
+   19.608
+  ],
+  [
+   24.0,
+   26.352
+  ]
+ ],
+ "ducking": {
+  "depth_db": -4,
+  "ramp_frames": 12,
+  "ramp_sec": 0.4
+ },
+ "stems": {
+  "amb": "public/audio/sfx/pro/shaped/amb.wav"
+ },
+ "events": [
+  {
+   "t": 0.2,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S1 kicker 'THE TRAP' entrance"
+  },
+  {
+   "t": 0.4,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S1 headline line 1 entrance"
+  },
+  {
+   "t": 0.6667,
+   "pool": "wheel",
+   "asset": "wheel",
+   "dur": 3.8333,
+   "ripple": false,
+   "vel": "quad-out",
+   "why": "S1 zigzag draw 0.667\u21924.5s, swell grows, stops dead at 4.5s"
+  },
+  {
+   "t": 0.8667,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S1 headline line 2 entrance"
+  },
+  {
+   "t": 4.3333,
+   "pool": "subhit",
+   "asset": "subhit",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S1 red crash-drop begins (frame 130)"
+  },
+  {
+   "t": 5.0,
+   "pool": "snap",
+   "asset": "snap",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S1 'The crash always comes' label pops"
+  },
+  {
+   "t": 5.4094,
+   "pool": "drop",
+   "asset": "drop",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S1\u2192S2 transition: peak lands at 5.9667s = 1 frame before the 6.0s cut"
+  },
+  {
+   "t": 6.2,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S2 kicker 'THE PLAN' entrance"
+  },
+  {
+   "t": 6.4,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S2 headline entrance"
+  },
+  {
+   "t": 6.6667,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": true,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 6.7667,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": true,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 6.8667,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": true,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 6.9667,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": true,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 7.0667,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": true,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 7.1667,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": true,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 7.2667,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": true,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 7.3667,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": true,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 7.4667,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": true,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 7.5667,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": true,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 7.6667,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": true,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 7.6667,
+   "pool": "wheel",
+   "asset": "wheel",
+   "dur": 6.0,
+   "ripple": false,
+   "vel": "quad-out",
+   "why": "S2 card fill sweep 7.667\u219213.667s, swell grows, stops dead"
+  },
+  {
+   "t": 7.7667,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": true,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 13.8333,
+   "pool": "snap",
+   "asset": "snap_alt",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S2 '$6,000 a year' total lands"
+  },
+  {
+   "t": 14.4094,
+   "pool": "drop",
+   "asset": "drop",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S2\u2192S3 transition: peak at 14.9667s = 1 frame before the 15.0s cut"
+  },
+  {
+   "t": 15.2,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S3 kicker 'THE ENGINE' entrance"
+  },
+  {
+   "t": 15.4,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S3 headline entrance"
+  },
+  {
+   "t": 15.5667,
+   "pool": "bell",
+   "asset": "bell",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S3 $1M badge spring MAX OVERSHOOT (spring-local frame 11 \u2192 global frame 467). Impact rule, not animation start (15.2s)."
+  },
+  {
+   "t": 16.0,
+   "pool": "wheel",
+   "asset": "wheel",
+   "dur": 5.6667,
+   "ripple": false,
+   "vel": "quad-out",
+   "why": "S3 curve draw + count-up 16.0\u219221.6667s, swell grows, stops dead"
+  },
+  {
+   "t": 22.5,
+   "pool": "snap",
+   "asset": "snap",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S3 assumption caption lands"
+  },
+  {
+   "t": 23.4094,
+   "pool": "drop",
+   "asset": "drop",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S3\u2192S4 transition: peak at 23.9667s = 1 frame before the 24.0s cut"
+  },
+  {
+   "t": 24.2,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S4 kicker 'YOUR MOVE' entrance"
+  },
+  {
+   "t": 24.4,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S4 headline entrance"
+  },
+  {
+   "t": 26.7,
+   "pool": "snap",
+   "asset": "snap_alt",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": "S4 logo card spring MAX OVERSHOOT (spring-local frame 11 \u2192 global frame 801). Impact rule."
+  }
+ ],
+ "master": {
+  "file": "public/audio/trial-master.mp3",
+  "duration_sec": 30.0,
+  "true_peak_dbfs": -1.03
+ }
+}

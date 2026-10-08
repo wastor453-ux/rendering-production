@@ -1,0 +1,328 @@
+{
+ "schema": "astor-legacy-beat-timeline-v1",
+ "compiler": "compile_beats.py",
+ "source_words": "words_aligned.json",
+ "source_plan": "plan_B_real.json",
+ "beats": [
+  {
+   "beat_id": "b1",
+   "start_time": 0.0,
+   "end_time": 10.5,
+   "start_word": "Most",
+   "end_word": "get",
+   "start_word_index": 0,
+   "end_word_index": 31,
+   "text": "Most people keep all their money in one place, one checking account, everything mixed together, bills, savings, fund money, all in the same pile, and then they wonder why they never get",
+   "semantic_role": "contrast",
+   "visual_verb": "reveal",
+   "visual_mode": "hero_typography",
+   "preferred_visual_mode": "hero_typography",
+   "visual_intent": "show the messy status quo",
+   "mode_source": "selector",
+   "visual_reason": "p3 b1 rehearsal",
+   "duration_class": "normal",
+   "intensity": 0.6,
+   "music_intensity": null,
+   "sfx_policy": "none",
+   "focal_object": "one mixed pile",
+   "claim": "Most people keep all their money in one place. One checking account. Everything ",
+   "data_presence": false,
+   "data_type": null,
+   "comparison_state": null,
+   "comparison_kind": null,
+   "comparison_scope": null,
+   "allocation_form": null,
+   "ui_form": null,
+   "causal_structure": null,
+   "trend_character": null,
+   "temporal_frame": null,
+   "data_payload_ref": null,
+   "presentation": {
+    "kicker": "The problem",
+    "title": "One pile. Zero progress.",
+    "subtitle": "Most people mix everything together"
+   },
+   "events": [
+    {
+     "event_id": "b1_e1",
+     "phrase": "keep",
+     "intent": "",
+     "sfx": null,
+     "anchor_word_index": 2
+    }
+   ]
+  },
+  {
+   "beat_id": "b2",
+   "start_time": 10.5,
+   "end_time": 27.82,
+   "start_word": "ahead.",
+   "end_word": "market,",
+   "start_word_index": 32,
+   "end_word_index": 81,
+   "text": "ahead. There is a better way split your money into three buckets. Bucket 1 is your operating account, rent, bills, groceries, the essentials. Bucket 2 is your safety net, three to six months of expenses, sitting in high yield savings. Bucket 3 is your growth engine, invested in the market,",
+   "semantic_role": "allocation",
+   "visual_verb": "split",
+   "visual_mode": "portfolio_card_stack",
+   "preferred_visual_mode": "portfolio_card_stack",
+   "visual_intent": "present the three-bucket system",
+   "mode_source": "selector",
+   "visual_reason": "p3 b2 rehearsal",
+   "duration_class": "normal",
+   "intensity": 0.6,
+   "music_intensity": null,
+   "sfx_policy": "none",
+   "focal_object": "three buckets",
+   "claim": "There is a better way. Split your money into three buckets. Bucket one is your o",
+   "data_presence": false,
+   "data_type": null,
+   "comparison_state": null,
+   "comparison_kind": null,
+   "comparison_scope": null,
+   "allocation_form": "accounts",
+   "ui_form": null,
+   "causal_structure": null,
+   "trend_character": null,
+   "temporal_frame": null,
+   "data_payload_ref": null,
+   "presentation": {
+    "kicker": "The system",
+    "cards": [
+     {
+      "name": "Operating",
+      "value": "$2,400",
+      "delta": 0,
+      "sub": "Rent, bills, groceries"
+     },
+     {
+      "name": "Safety Net",
+      "value": "$8,500",
+      "delta": 4.2,
+      "sub": "3-6 months expenses"
+     },
+     {
+      "name": "Growth",
+      "value": "$11,000",
+      "delta": 18.5,
+      "sub": "Invested, compounding"
+     }
+    ]
+   },
+   "events": [
+    {
+     "event_id": "b2_e1",
+     "phrase": "is",
+     "intent": "",
+     "sfx": null,
+     "anchor_word_index": 34
+    }
+   ]
+  },
+  {
+   "beat_id": "b3",
+   "start_time": 28.1,
+   "end_time": 42.92,
+   "start_word": "compounding",
+   "end_word": "same",
+   "start_word_index": 82,
+   "end_word_index": 121,
+   "text": "compounding for decades. Before this system, Maya saved whatever was left at the end of the month, usually nothing. After switching to three buckets, she automated transfers on payday. 18 months later, she had $11 ,000 saved and invested, same",
+   "semantic_role": "comparison",
+   "visual_verb": "transform",
+   "visual_mode": "before_after",
+   "preferred_visual_mode": "before_after",
+   "visual_intent": "show Maya's before/after transformation",
+   "mode_source": "selector",
+   "visual_reason": "p3 b3 rehearsal",
+   "duration_class": "normal",
+   "intensity": 0.6,
+   "music_intensity": null,
+   "sfx_policy": "none",
+   "focal_object": "Maya's savings",
+   "claim": "Before this system, Maya saved whatever was left at the end of the month. Usuall",
+   "data_presence": false,
+   "data_type": null,
+   "comparison_state": null,
+   "comparison_kind": null,
+   "comparison_scope": null,
+   "allocation_form": null,
+   "ui_form": null,
+   "causal_structure": null,
+   "trend_character": null,
+   "temporal_frame": "transition",
+   "data_payload_ref": null,
+   "presentation": {
+    "kicker": "Maya's transformation",
+    "before": {
+     "label": "Before",
+     "value": "$0",
+     "sub": "Saved whatever was left"
+    },
+    "after": {
+     "label": "After 18 months",
+     "value": "$11,000",
+     "sub": "Automated buckets"
+    }
+   },
+   "events": [
+    {
+     "event_id": "b3_e1",
+     "phrase": "decades.",
+     "intent": "",
+     "sfx": null,
+     "anchor_word_index": 84
+    }
+   ]
+  },
+  {
+   "beat_id": "b4",
+   "start_time": 42.92,
+   "end_time": 59.8,
+   "start_word": "income,",
+   "end_word": "is",
+   "start_word_index": 122,
+   "end_word_index": 160,
+   "text": "income, different system. Here is the number that matters. Automating just $200 a month at an 8 % return builds to nearly $350 ,000 over 30 years. $200, the cost of eating out twice a week. The flow is",
+   "semantic_role": "number",
+   "visual_verb": "count",
+   "visual_mode": "hero_number",
+   "preferred_visual_mode": "hero_number",
+   "visual_intent": "land the compounding number",
+   "mode_source": "selector",
+   "visual_reason": "p3 b4 rehearsal",
+   "duration_class": "normal",
+   "intensity": 1.0,
+   "music_intensity": null,
+   "sfx_policy": "none",
+   "focal_object": "$350k over 30 years",
+   "claim": "Here is the number that matters: automating just two hundred dollars a month at ",
+   "data_presence": true,
+   "data_type": "statistic",
+   "comparison_state": null,
+   "comparison_kind": null,
+   "comparison_scope": null,
+   "allocation_form": null,
+   "ui_form": null,
+   "causal_structure": null,
+   "trend_character": null,
+   "temporal_frame": null,
+   "data_payload_ref": "payloads/hero_number_350k.json",
+   "presentation": {
+    "kicker": "The number that matters",
+    "value": 350000,
+    "prefix": "$",
+    "label": "from $200/month over 30 years",
+    "caption": "At 8% annual return"
+   },
+   "events": [
+    {
+     "event_id": "b4_e1",
+     "phrase": "system.",
+     "intent": "",
+     "sfx": null,
+     "anchor_word_index": 124
+    }
+   ]
+  },
+  {
+   "beat_id": "b5",
+   "start_time": 59.8,
+   "end_time": 74.28,
+   "start_word": "simple,",
+   "end_word": "Start",
+   "start_word_index": 161,
+   "end_word_index": 194,
+   "text": "simple, paycheck arrives, fixed amounts move automatically, bills to bucket 1, safety to bucket 2, growth to bucket 3, what remains is guilt -free spending, no budgeting apps, no spreadsheets, no willpower required. Start",
+   "semantic_role": "cause",
+   "visual_verb": "track",
+   "visual_mode": "flow_diagram",
+   "preferred_visual_mode": "flow_diagram",
+   "visual_intent": "show the automatic money flow",
+   "mode_source": "selector",
+   "visual_reason": "p3 b5 rehearsal",
+   "duration_class": "normal",
+   "intensity": 0.6,
+   "music_intensity": null,
+   "sfx_policy": "none",
+   "focal_object": "paycheck flow",
+   "claim": "The flow is simple. Paycheck arrives. Fixed amounts move automatically: bills to",
+   "data_presence": false,
+   "data_type": null,
+   "comparison_state": null,
+   "comparison_kind": null,
+   "comparison_scope": null,
+   "allocation_form": null,
+   "ui_form": null,
+   "causal_structure": "flow",
+   "trend_character": null,
+   "temporal_frame": null,
+   "data_payload_ref": null,
+   "presentation": {
+    "kicker": "The flow",
+    "nodes": [
+     "Paycheck",
+     "Bucket 1: Bills",
+     "Bucket 2: Safety",
+     "Bucket 3: Growth"
+    ]
+   },
+   "events": [
+    {
+     "event_id": "b5_e1",
+     "phrase": "arrives,",
+     "intent": "",
+     "sfx": null,
+     "anchor_word_index": 163
+    }
+   ]
+  },
+  {
+   "beat_id": "b6",
+   "start_time": 74.28,
+   "end_time": 82.08,
+   "start_word": "today,",
+   "end_word": "now.",
+   "start_word_index": 195,
+   "end_word_index": 217,
+   "text": "today, open the second and third buckets, set the automatic transfers, your future self is counting on the system you build right now.",
+   "semantic_role": "close",
+   "visual_verb": "emphasize",
+   "visual_mode": "closing_composition",
+   "preferred_visual_mode": "closing_composition",
+   "visual_intent": "call to action",
+   "mode_source": "selector",
+   "visual_reason": "p3 b6 rehearsal",
+   "duration_class": "normal",
+   "intensity": 0.6,
+   "music_intensity": null,
+   "sfx_policy": "none",
+   "focal_object": "start today",
+   "claim": "Start today. Open the second and third buckets. Set the automatic transfers. You",
+   "data_presence": false,
+   "data_type": null,
+   "comparison_state": null,
+   "comparison_kind": null,
+   "comparison_scope": null,
+   "allocation_form": null,
+   "ui_form": null,
+   "causal_structure": null,
+   "trend_character": null,
+   "temporal_frame": null,
+   "data_payload_ref": null,
+   "presentation": {
+    "kicker": "Start today",
+    "title": "Your future self is counting on you.",
+    "subtitle": "Build the system now"
+   },
+   "events": [
+    {
+     "event_id": "b6_e1",
+     "phrase": "the",
+     "intent": "",
+     "sfx": null,
+     "anchor_word_index": 197
+    }
+   ]
+  }
+ ]
+}

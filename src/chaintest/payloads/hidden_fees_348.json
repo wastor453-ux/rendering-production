@@ -1,0 +1,8 @@
+{
+  "payload_id": "hidden_fees_348",
+  "source": "chain test fixture (illustrative)",
+  "metric": "annual_hidden_bank_fees",
+  "unit": "$",
+  "values": [348],
+  "as_of": "2026-10-08"
+}

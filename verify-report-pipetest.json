@@ -1,0 +1,33 @@
+{
+ "at": "2026-10-04T21:19:38.238Z",
+ "pass": true,
+ "grade": "PASS",
+ "notes": [
+  "manifest pipetest-v1, 20 events, 5 pools",
+  "master duration 30.000s, manifest peak -1.71 dBFS",
+  "measured true peak -1.71 dBFS",
+  "anti-fatigue pool rotation checked",
+  "150ms identical-asset separation checked",
+  "drop sync checked for cuts [5, 10, 15, 20, 25]",
+  "density checked over 19 one-shot gestures",
+  "envelope isolated: ducked -4.00dB (target -4dB), open 0.00dB (target 0), ramp-mid -1.40dB (target -2.00dB)",
+  "separation subhit.wav: 34.6dB (min 8dB)",
+  "separation drop.wav: 23.5dB (min 8dB)",
+  "separation pluck.wav: 11.9dB (min 8dB)",
+  "separation snap.wav: 10.2dB (min 8dB)",
+  "separation bell.wav: 52.5dB (min 8dB)",
+  "frame 60: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 101: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 200: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 290: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 400: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 443: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 550: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 590: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 700: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 743: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 839: 1920x1080, hairline ok, ink ok, safe-area ok",
+  "frame 880: 1920x1080, hairline ok, ink ok, safe-area ok"
+ ],
+ "violations": []
+}

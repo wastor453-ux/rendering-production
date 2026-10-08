@@ -1,0 +1,61 @@
+{
+ "schema": "astor-legacy-events-v1",
+ "compiler": "compile_events.py",
+ "fps": 30,
+ "events": [
+  {
+   "event_id": "t1_e1",
+   "beat_id": "t1",
+   "phrase": "leak",
+   "word_start": 1.1,
+   "word_end": 1.26,
+   "anchor_time_s": 1.1,
+   "anchor_word_index": 4,
+   "semantic_role": "hook",
+   "visual_verb": "reveal",
+   "visual_mode": "hero_typography",
+   "visual_start_frame": 0,
+   "visual_impact_frame": 33,
+   "visual_settle_frame": 37,
+   "lead_lag_ms": 0,
+   "sfx": null,
+   "data_payload_ref": null
+  },
+  {
+   "event_id": "t2_e1",
+   "beat_id": "t2",
+   "phrase": "$348",
+   "word_start": 2.92,
+   "word_end": 4.16,
+   "anchor_time_s": 2.92,
+   "anchor_word_index": 9,
+   "semantic_role": "number",
+   "visual_verb": "reveal",
+   "visual_mode": "hero_number",
+   "visual_start_frame": 51,
+   "visual_impact_frame": 87,
+   "visual_settle_frame": 124,
+   "lead_lag_ms": 0,
+   "sfx": "click",
+   "data_payload_ref": "payloads/hidden_fees_348.json"
+  },
+  {
+   "event_id": "t3_e1",
+   "beat_id": "t3",
+   "phrase": "profit",
+   "word_start": 6.88,
+   "word_end": 7.34,
+   "anchor_time_s": 6.88,
+   "anchor_word_index": 17,
+   "semantic_role": "cause",
+   "visual_verb": "reveal",
+   "visual_mode": null,
+   "visual_start_frame": 199,
+   "visual_impact_frame": 206,
+   "visual_settle_frame": 220,
+   "lead_lag_ms": 0,
+   "sfx": null,
+   "data_payload_ref": null
+  }
+ ]
+}

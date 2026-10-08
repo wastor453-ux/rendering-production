@@ -1,0 +1,6 @@
+[
+  {
+    "module": "MONOTONICITY",
+    "message": "Invalid velocity drop. Series 0 dips at n=2. V[n]=-10"
+  }
+]

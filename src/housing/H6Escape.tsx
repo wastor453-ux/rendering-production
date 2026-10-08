@@ -1,0 +1,117 @@
+import React from "react";
+import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { MeshBackground } from "../premium/components/MeshBackground";
+import { GlassCard } from "../premium/components/GlassCard";
+import { KineticHeadline } from "../premium/components/Type";
+import { P } from "../premium/theme";
+
+const CLAMP = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
+const expo = Easing.bezier(0.16, 1, 0.3, 1);
+
+const CARDS = [
+  { who: "BUYERS", what: "Waiting is a strategy now", sub: "inventory builds · sellers get desperate" },
+  { who: "OWNERS", what: "Your 3% mortgage is armor", sub: "never trade it for 7.45%" },
+  { who: "INVESTORS", what: "$500K → $26K risk-free", sub: "vs $24K rental with all the headaches" },
+  { who: "RENTERS", what: "You're not losing", sub: "optionality while owners argue with arithmetic" },
+];
+
+/**
+ * H6 — The Escape (5574f / 184.8s).
+ * Beats: 4 audience cards (0–90s) → landlord math (90–130s) →
+ * bull/bear scenarios (130–165s) → dashboard close (165–184s).
+ */
+export const H6Escape: React.FC = () => {
+  const frame = useCurrentFrame();
+
+  const mOp = interpolate(frame, [2700, 2740], [0, 1], CLAMP);
+  const mOut = interpolate(frame, [3900, 3950], [1, 0], CLAMP);
+  const mPulse = interpolate(frame, [2850, 2856, 2868], [1, 1.08, 1], CLAMP);
+
+  const sOp = interpolate(frame, [4000, 4040], [0, 1], CLAMP);
+  const sOut = interpolate(frame, [5000, 5050], [1, 0], CLAMP);
+
+  const dOp = interpolate(frame, [5100, 5140], [0, 1], CLAMP);
+
+  return (
+    <AbsoluteFill>
+      <MeshBackground />
+
+      {/* BEAT 1: audience cards */}
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28 }}>
+          {CARDS.map((c, i) => {
+            const d = 60 + i * 700;
+            const p = interpolate(frame, [d, d + 24], [0, 1], { ...CLAMP, easing: expo });
+            const y = interpolate(p, [0, 1], [50, 0], CLAMP);
+            const out = interpolate(frame, [2400, 2450], [1, 0], CLAMP);
+            return (
+              <div key={c.who} style={{ opacity: p * out, transform: `translateY(${y}px)` }}>
+                <GlassCard width={560} delay={0}>
+                  <div style={{ fontFamily: P.font, padding: "16px 24px" }}>
+                    <div style={{ fontWeight: 800, fontSize: 26, letterSpacing: 6, color: P.neonBlue }}>{c.who}</div>
+                    <div style={{ fontWeight: 800, fontSize: 38, color: P.ink, marginTop: 8 }}>{c.what}</div>
+                    <div style={{ fontWeight: 600, fontSize: 26, color: P.muted, marginTop: 6 }}>{c.sub}</div>
+                  </div>
+                </GlassCard>
+              </div>
+            );
+          })}
+        </div>
+      </AbsoluteFill>
+
+      {/* BEAT 2: landlord math */}
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: mOp * mOut }}>
+        <div style={{ transform: `scale(${mPulse})` }}>
+          <GlassCard width={1150} delay={0}>
+            <div style={{ fontFamily: P.font, padding: "16px 28px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", textAlign: "center" }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 800, fontSize: 64, color: P.gain }}>$26K</div>
+                  <div style={{ fontWeight: 600, fontSize: 26, color: P.muted }}>Treasuries · guaranteed<br />no tenants, no toilets</div>
+                </div>
+                <div style={{ fontWeight: 800, fontSize: 56, color: P.muted, alignSelf: "center" }}>vs</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 800, fontSize: 64, color: P.loss }}>$24K</div>
+                  <div style={{ fontWeight: 600, fontSize: 26, color: P.muted }}>Rental · all the headaches<br />on the same $500K</div>
+                </div>
+              </div>
+            </div>
+          </GlassCard>
+        </div>
+      </AbsoluteFill>
+
+      {/* BEAT 3: scenarios */}
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: sOp * sOut }}>
+        <div style={{ display: "flex", gap: 32 }}>
+          <GlassCard width={560} delay={0}>
+            <div style={{ fontFamily: P.font, padding: "16px 28px", textAlign: "center" }}>
+              <div style={{ fontWeight: 800, fontSize: 40, color: P.gain }}>BULL CASE</div>
+              <div style={{ fontWeight: 600, fontSize: 28, color: P.ink, marginTop: 12 }}>
+                Oil under $80 · inflation cools<br />Fed holds · ice thaws slowly
+              </div>
+            </div>
+          </GlassCard>
+          <GlassCard width={560} delay={12}>
+            <div style={{ fontFamily: P.font, padding: "16px 28px", textAlign: "center" }}>
+              <div style={{ fontWeight: 800, fontSize: 40, color: P.loss }}>BEAR CASE</div>
+              <div style={{ fontWeight: 600, fontSize: 28, color: P.ink, marginTop: 12 }}>
+                Oil above $100 · Fed hikes again<br />mortgages touch 8%
+              </div>
+            </div>
+          </GlassCard>
+        </div>
+      </AbsoluteFill>
+
+      {/* BEAT 4: dashboard */}
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: dOp }}>
+        <div style={{ textAlign: "center" }}>
+          <KineticHeadline
+            lines={["Watch Brent crude", "and the 10-year yield.", "That's your dashboard."]}
+            delay={5110}
+            fontSize={80}
+          />
+        </div>
+      </AbsoluteFill>
+    </AbsoluteFill>
+  );
+};

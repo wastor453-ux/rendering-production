@@ -1,0 +1,444 @@
+{
+ "comp": "RecutVideo",
+ "duration_sec": 180.024,
+ "vo": "VO_3MIN.mp3",
+ "scene_cuts_sec": [
+  6.5,
+  15.1,
+  30.8,
+  39.0,
+  59.6,
+  81.2,
+  103.39999999999999,
+  107.2,
+  129.8,
+  157.6,
+  166.1
+ ],
+ "events": [
+  {
+   "t": 2.0,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 3.2,
+   "pool": "subhit",
+   "asset": "subhit",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 5.9094,
+   "pool": "drop",
+   "asset": "drop",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 8.6667,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 14.1667,
+   "pool": "snap",
+   "asset": "snap",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 14.5094,
+   "pool": "drop",
+   "asset": "drop",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 16.6667,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 20.1,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 20.2333,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 20.3667,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 23.1,
+   "pool": "snap",
+   "asset": "snap",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 30.2094,
+   "pool": "drop",
+   "asset": "drop",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 31.2,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 31.3667,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 31.5333,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 38.4094,
+   "pool": "drop",
+   "asset": "drop",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 39.4,
+   "pool": "snap",
+   "asset": "snap",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 59.0094,
+   "pool": "drop",
+   "asset": "drop",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 61.2667,
+   "pool": "bell",
+   "asset": "bell",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 80.6094,
+   "pool": "drop",
+   "asset": "drop",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 83.2,
+   "pool": "subhit",
+   "asset": "subhit",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 102.8094,
+   "pool": "drop",
+   "asset": "drop",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 106.6094,
+   "pool": "drop",
+   "asset": "drop",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 109.2,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 109.4667,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 109.7333,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 110.0,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 117.2,
+   "pool": "snap",
+   "asset": "snap",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 129.2094,
+   "pool": "drop",
+   "asset": "drop",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 130.2667,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 130.4333,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 130.6,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 130.7667,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 134.4667,
+   "pool": "wheel",
+   "asset": "wheel",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 136.3,
+   "pool": "subhit",
+   "asset": "subhit",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 145.1333,
+   "pool": "bell",
+   "asset": "bell_alt",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 157.0094,
+   "pool": "drop",
+   "asset": "drop",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 159.9333,
+   "pool": "pluck",
+   "asset": "pluck_alt",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 160.1333,
+   "pool": "pluck",
+   "asset": "pluck",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 165.5094,
+   "pool": "drop",
+   "asset": "drop",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  },
+  {
+   "t": 170.4333,
+   "pool": "bell",
+   "asset": "bell",
+   "dur": null,
+   "ripple": false,
+   "vel": null,
+   "why": ""
+  }
+ ],
+ "version": "recut-v2",
+ "fps": 30,
+ "pools": {
+  "pluck": [
+   "pluck",
+   "pluck_alt"
+  ],
+  "bell": [
+   "bell",
+   "bell_alt"
+  ],
+  "drop": [
+   "drop"
+  ],
+  "snap": [
+   "snap"
+  ],
+  "subhit": [
+   "subhit"
+  ],
+  "wheel": [
+   "wheel"
+  ]
+ },
+ "master": {
+  "file": "public/audio/recut-master.mp3",
+  "duration_sec": 180.024,
+  "true_peak_dbfs": -1.32
+ },
+ "vo_segments": [
+  [
+   0.0,
+   180.024
+  ]
+ ],
+ "video": "RECUT_v1.mp4",
+ "stems": {
+  "vo": "public/audio/sfx/pro/shaped/recut_vo.wav",
+  "sfx": "public/audio/sfx/pro/shaped/recut_sfx.wav",
+  "amb": "public/audio/sfx/pro/shaped/recut_amb.wav"
+ },
+ "shaped_peaks": {
+  "drop": 0.5573,
+  "subhit": 0.5383,
+  "pluck": 0.0066,
+  "pluck_alt": 0.3638,
+  "snap": 0.1653,
+  "bell": 2.3609,
+  "bell_alt": 1.6357,
+  "wheel": 0.0357
+ },
+ "ducking": {
+  "depth_db": 8,
+  "ramp_frames": 12
+ }
+}
