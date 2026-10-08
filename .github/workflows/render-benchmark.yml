@@ -50,7 +50,7 @@ jobs:
           # wall-clock comparison shows scaling efficiency.
           npx remotion render ${{ inputs.composition }} /tmp/bench.mp4 \
             --frames=0-$(( ${{ inputs.frames }} - 1 )) \
-            --concurrency=2 --overwrite > /tmp/bench.log 2>&1
+            --concurrency=2 --overwrite 2>&1 | tail -20
           END=$(date +%s)
           ELAPSED=$((END - START))
           FPS=$(echo "scale=2; ${{ inputs.frames }} / $ELAPSED" | bc)
