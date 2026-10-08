@@ -155,8 +155,8 @@ jobs:
 
       - name: Verify master
         run: |
-          W=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 /tmp/master.mp4)
-          H=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 /tmp/master.mp4)
+          W=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1 /tmp/master.mp4)
+          H=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 /tmp/master.mp4)
           [ "$W" = "1920" ] && [ "$H" = "1080" ] || { echo "resolution FAIL: ${W}x${H}"; exit 1; }
           ffmpeg -v error -i /tmp/master.mp4 -f null - || { echo "decode FAIL"; exit 1; }
           echo "master verified: ${W}x${H}"
