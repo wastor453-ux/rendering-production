@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "description": "Semantic visual modes for the Astor Legacy Light Premium Fintech visual engine.",
+  "modes": [
+    {"id":"hero_typography","family":"typography","verbs":["reveal","emphasize","lock","transform"],"best_for":["hook","claim","punchline","editorial emphasis"]},
+    {"id":"hero_number","family":"data","verbs":["count","morph","lock","compare"],"best_for":["statistic","threshold","financial value","percentage"]},
+    {"id":"line_chart","family":"data","verbs":["draw","rise","fall","compare","reveal"],"best_for":["trend","time series","growth","decline"]},
+    {"id":"area_chart","family":"data","verbs":["build","rise","fall","accumulate"],"best_for":["magnitude","volume","cumulative movement"]},
+    {"id":"bar_chart","family":"data","verbs":["grow","compare","rank","reorder"],"best_for":["quantities","rankings","changes"]},
+    {"id":"comparison_bars","family":"comparison","verbs":["compare","split","grow","resolve"],"best_for":["A_vs_B","current_vs_previous","before_vs_after"]},
+    {"id":"donut_allocation","family":"data","verbs":["build","allocate","highlight","rebalance"],"best_for":["portfolio","allocation","mix"]},
+    {"id":"metric_grid","family":"ui","verbs":["reveal","populate","emphasize","resolve"],"best_for":["KPI_group","summary","multi_metric"]},
+    {"id":"dashboard","family":"ui","verbs":["assemble","populate","update","reveal"],"best_for":["portfolio","account","financial_platform","multi_metric"]},
+    {"id":"portfolio_card_stack","family":"ui","verbs":["accumulate","reorder","expand","resolve"],"best_for":["assets","accounts","investment_categories"]},
+    {"id":"ranked_table","family":"ui","verbs":["reveal","rank","reorder","highlight"],"best_for":["ranking","holdings","debt_list","comparison"]},
+    {"id":"glass_notification","family":"ui","verbs":["reveal","confirm","resolve"],"best_for":["transaction","threshold","state_change"]},
+    {"id":"feature_icon_system","family":"ui","verbs":["reveal","sequence","group"],"best_for":["steps","actions","categories"]},
+    {"id":"before_after","family":"comparison","verbs":["transform","replace","resolve"],"best_for":["state_change","reform","rate_change"]},
+    {"id":"two_sided_comparison","family":"comparison","verbs":["split","compare","resolve"],"best_for":["A_vs_B","rich_vs_average","nominal_vs_real"]},
+    {"id":"causal_diagram","family":"explanation","verbs":["connect","build","propagate","resolve"],"best_for":["mechanism","cause_effect","system"]},
+    {"id":"causal_loop","family":"explanation","verbs":["connect","loop","propagate","resolve"],"best_for":["feedback_loop","self_reinforcing_system"]},
+    {"id":"timeline","family":"explanation","verbs":["draw","reveal","sequence","highlight"],"best_for":["history","event_sequence","policy_cycle"]},
+    {"id":"flow_diagram","family":"explanation","verbs":["flow","connect","accumulate","split"],"best_for":["money_flow","capital_flow","debt_flow","risk_flow"]},
+    {"id":"real_world_financial_imagery","family":"imagery","verbs":["reveal","reframe","overlay"],"best_for":["context","grounding","section_opener"]},
+    {"id":"imagery_plus_glass_overlay","family":"imagery","verbs":["reveal","overlay","resolve"],"best_for":["hero","section_opener","premium_context"]},
+    {"id":"thesis_composition","family":"editorial","verbs":["reveal","assemble","lock","resolve"],"best_for":["major_thesis","payoff"]},
+    {"id":"closing_composition","family":"editorial","verbs":["simplify","resolve","lock"],"best_for":["final_thesis","close"]}
+  ]
+}

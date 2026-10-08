@@ -1,6 +1,6 @@
 // STEP 9 — semantic visual selection (VISUAL_BRAIN §2, §5).
 // Never beat.kind -> template. Evaluate the semantic evidence, then select.
-import schema from "../../../visual_mode_schema.json";
+import schema from "../visual_mode_schema.json";
 
 export type SemanticEvidence = {
   semantic_role?: string;   // claim|number|comparison|trend|mechanism|ranking|allocation|timeline|consequence|thesis|imagery|ui
