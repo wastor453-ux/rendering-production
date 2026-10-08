@@ -41,6 +41,11 @@ on:
         description: 'Music bed source (relative to repo root)'
         required: false
         default: 'public/audio/bed.mp3'
+      # TEST ONLY: deliberately fail this chunk_id (for retry testing)
+      fail_chunk:
+        description: 'TEST: fail this chunk_id (-1 = disabled)'
+        required: false
+        default: '-1'
 
 env:
   NODE_VERSION: '24.20.0'
@@ -113,6 +118,11 @@ jobs:
         working-directory: .
         run: |
           set -euo pipefail
+          # TEST HOOK: deliberately fail one chunk for retry testing
+          if [ "${{ inputs.fail_chunk }}" = "${{ matrix.chunk.chunk_id }}" ]; then
+            echo "TEST: deliberately failing chunk ${{ matrix.chunk.chunk_id }}"
+            exit 1
+          fi
           npx remotion render ${{ inputs.composition }} \
             /tmp/chunk_${{ matrix.chunk.chunk_id }}.mp4 \
             --frames=${{ matrix.chunk.start }}-${{ matrix.chunk.end }} \
