@@ -118,11 +118,7 @@ jobs:
         working-directory: .
         run: |
           set -euo pipefail
-          # TEST HOOK: deliberately fail one chunk for retry testing
-          if [ "${{ inputs.fail_chunk }}" = "${{ matrix.chunk.chunk_id }}" ]; then
-            echo "TEST: deliberately failing chunk ${{ matrix.chunk.chunk_id }}"
-            exit 1
-          fi
+          # (fail_chunk test hook removed after RETRY-001 validation)
           npx remotion render ${{ inputs.composition }} \
             /tmp/chunk_${{ matrix.chunk.chunk_id }}.mp4 \
             --frames=${{ matrix.chunk.start }}-${{ matrix.chunk.end }} \
