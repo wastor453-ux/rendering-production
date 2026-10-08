@@ -27,8 +27,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24.20.0'
-          cache: 'npm'
-          cache-dependency-path: demo-video/package-lock.json
+          # cache disabled for stability
 
       - run: |
           sudo apt-get update -qq
