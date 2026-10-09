@@ -598,14 +598,16 @@ jobs:
   # --- Job 3: Assemble + verify + publish master ---
   assemble:
     needs: [plan, render-chunk]
-    # P3.12.1: assembly runs when render succeeded, OR when render was
-    # skipped due to a legitimate zero-render resume (all chunks reusable).
-    # Any other skip/failure blocks assembly.
+    # P3.12.1: assembly runs when render succeeded, OR when the plan declared
+    # a legitimate zero-render resume (all chunks reusable, verified).
+    # Any other case blocks assembly.
+    # 2026-10-10: simplified — the old condition required
+    # needs.render-chunk.result == 'skipped', but an empty matrix means the
+    # job never exists in the needs context. Trust plan.outputs.zero_render.
     if: >-
       ${{ needs.plan.result == 'success' &&
           (needs.render-chunk.result == 'success' ||
-           (needs.render-chunk.result == 'skipped' &&
-            needs.plan.outputs.zero_render == 'true')) }}
+           needs.plan.outputs.zero_render == 'true') }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
