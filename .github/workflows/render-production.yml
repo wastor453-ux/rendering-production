@@ -598,19 +598,33 @@ jobs:
   # --- Job 3: Assemble + verify + publish master ---
   assemble:
     needs: [plan, render-chunk]
-    # P3.12.1: assembly runs when render succeeded, OR when the plan declared
-    # a legitimate zero-render resume (all chunks reusable, verified).
-    # Any other case blocks assembly.
-    # 2026-10-10: simplified — the old condition required
-    # needs.render-chunk.result == 'skipped', but an empty matrix means the
-    # job never exists in the needs context. Trust plan.outputs.zero_render.
-    if: >-
-      ${{ needs.plan.result == 'success' &&
-          (needs.render-chunk.result == 'success' ||
-           needs.plan.outputs.zero_render == 'true') }}
+    # P3.12.1: assembly runs when the plan succeeded. The plan is the source
+    # of truth: zero_render=true means all chunks validated reusable;
+    # zero_render=false means render-chunk ran (its result is checked below).
+    # 2026-10-10: do NOT reference needs.render-chunk.result in the condition —
+    # an empty matrix means the job never exists, breaking the expression.
+    if: ${{ needs.plan.result == 'success' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Verify render completed (guard)
+        run: |
+          set -euo pipefail
+          # P3.12.1 guard: if the plan did NOT declare zero-render, the
+          # render-chunk job must have succeeded. Fail closed otherwise.
+          ZERO_RENDER="${{ needs.plan.outputs.zero_render }}"
+          RENDER_RESULT="${{ needs.render-chunk.result }}"
+          echo "zero_render=$ZERO_RENDER render-chunk result=$RENDER_RESULT"
+          if [ "$ZERO_RENDER" != "true" ]; then
+            if [ "$RENDER_RESULT" != "success" ]; then
+              echo "FATAL: render-chunk did not succeed (result=$RENDER_RESULT) and zero_render != true" >&2
+              exit 1
+            fi
+            echo "Render succeeded; assembling fresh chunks."
+          else
+            echo "Zero-render resume; assembling prior chunks."
+          fi
 
       - name: Install ffmpeg (minimal)
         run: |
