@@ -19,7 +19,7 @@ on:
 
 jobs:
   benchmark:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -34,15 +34,22 @@ jobs:
       - name: Install system deps
         run: |
           set -euo pipefail
+          SETUP_START=$(date +%s)
           sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg libnss3 libatk1.0-0 libatk-bridge2.0-0 \
-            libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
+          # P3.6: t64 package names for Ubuntu 24.04 Noble
+          sudo apt-get install -y -qq ffmpeg libnss3 libnspr4 libatk1.0-0t64 libatk-bridge2.0-0t64 \
+            libcups2t64 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
             libxrandr2 libgbm1 libasound2t64 bc
+          SETUP_END=$(date +%s)
+          echo "SETUP_ELAPSED=$((SETUP_END - SETUP_START))s" >> $GITHUB_ENV
 
       - name: Install npm deps
         run: |
           set -euo pipefail
+          NPM_START=$(date +%s)
           npm ci --no-audit --no-fund
+          NPM_END=$(date +%s)
+          echo "NPM_ELAPSED=$((NPM_END - NPM_START))s" >> $GITHUB_ENV
 
       - name: Ensure Chromium
         run: |
@@ -89,4 +96,4 @@ jobs:
           FPS=$(echo "scale=2; $FRAMES / $RENDER_ELAPSED" | bc)
 
           echo "concurrency=${{ matrix.concurrency }} render=${RENDER_ELAPSED}s fps=$FPS"
-          echo "RESULT concurrency=${{ matrix.concurrency }} render=${RENDER_ELAPSED}s fps=${FPS} frames=${OUT_FRAMES} res=${OUT_W}x${OUT_H}" >> $GITHUB_STEP_SUMMARY
+          echo "RESULT concurrency=${{ matrix.concurrency }} setup=${SETUP_ELAPSED:-?} npm=${NPM_ELAPSED:-?} render=${RENDER_ELAPSED}s fps=${FPS} frames=${OUT_FRAMES} res=${OUT_W}x${OUT_H}" >> $GITHUB_STEP_SUMMARY
