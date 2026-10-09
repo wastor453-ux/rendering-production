@@ -182,3 +182,60 @@ class TestChunkLedger(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestAssemblyOnlySourceSha(unittest.TestCase):
+    """2026-10-10: assembly_only mode must not invalidate chunks when the
+    commit hash changes (e.g. after fixing assembly code). chunk_recovery
+    keeps the strict check."""
+
+    def setUp(self):
+        sys.path.insert(0, os.path.join(REPO_ROOT, "tests"))
+        from test_recovery import base_inputs, make_job_manifest
+        from recovery import validate_resume_source
+        self.base_inputs = base_inputs
+        self.make_job_manifest = make_job_manifest
+        self.validate = validate_resume_source
+
+    def test_assembly_only_ignores_source_sha_change(self):
+        prior = self.make_job_manifest(
+            run_id="111", sha="a" * 40, inputs=self.base_inputs())
+        current = self.base_inputs(source_sha="b" * 40)
+        current["_plan_chunks"] = [
+            {"chunk_id": c["chunk_id"], "start": c["start"], "end": c["end"]}
+            for c in prior["plan"]["chunks"]
+        ]
+        r = self.validate(
+            prior, current, current["asset_manifest_sha256"],
+            prior_run_status={"status": "completed", "conclusion": "failure"},
+            mode="assembly_only")
+        self.assertTrue(r["ok"], f"assembly_only rejected: {r.get('errors', [])[:3]}")
+
+    def test_chunk_recovery_still_strict_on_source_sha(self):
+        prior = self.make_job_manifest(
+            run_id="111", sha="a" * 40, inputs=self.base_inputs())
+        current = self.base_inputs(source_sha="b" * 40)
+        current["_plan_chunks"] = [
+            {"chunk_id": c["chunk_id"], "start": c["start"], "end": c["end"]}
+            for c in prior["plan"]["chunks"]
+        ]
+        r = self.validate(
+            prior, current, current["asset_manifest_sha256"],
+            prior_run_status={"status": "completed", "conclusion": "failure"},
+            mode="chunk_recovery")
+        self.assertFalse(r["ok"], "chunk_recovery should stay strict")
+
+    def test_assembly_only_still_rejects_render_changes(self):
+        prior = self.make_job_manifest(
+            run_id="111", sha="a" * 40, inputs=self.base_inputs())
+        # Different codec = genuinely different render, must be rejected
+        current = self.base_inputs(source_sha="b" * 40, codec="vp9")
+        current["_plan_chunks"] = [
+            {"chunk_id": c["chunk_id"], "start": c["start"], "end": c["end"]}
+            for c in prior["plan"]["chunks"]
+        ]
+        r = self.validate(
+            prior, current, current["asset_manifest_sha256"],
+            prior_run_status={"status": "completed", "conclusion": "failure"},
+            mode="assembly_only")
+        self.assertFalse(r["ok"], "real render changes must still be rejected")

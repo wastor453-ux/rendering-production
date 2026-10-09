@@ -129,17 +129,35 @@ def validate_resume_source(prior_manifest: dict, current_inputs: dict,
 
     # 3. Generation fingerprints must match exactly.
     # P4.4 SPLIT: The render fingerprint no longer includes workflow_content_sha.
-    # Assembly-only changes do NOT cause a mismatch. Both modes require a
-    # strict match — this is what guarantees chunk bytes are compatible.
-    # The old bypass_generation_check is removed; the split IS the fix.
-    if prior_gen != current_gen:
+    # 2026-10-10 FIX (Hamza's rule): in assembly_only mode, source_sha (the
+    # git commit hash) is EXCLUDED from comparison. Every commit — even an
+    # assembly-script fix — changes source_sha, which used to invalidate all
+    # chunks and force a full re-render after every assembly fix. In
+    # assembly-only mode we concatenate existing chunks; their bytes are
+    # verified per-chunk against their own manifests. What matters is that
+    # the RENDER inputs match (composition, frames, codec, assets, etc.),
+    # not the commit hash. chunk_recovery mode keeps the strict check.
+    if mode == "assembly_only":
+        # Normalize source_sha: the commit hash is irrelevant in assembly-only
+        # mode (we concatenate existing chunks; their bytes are verified
+        # per-chunk). Without this, every commit invalidates all chunks.
+        prior_cmp = dict(prior_inputs); prior_cmp["source_sha"] = "assembly-only"
+        curr_cmp = dict(current_inputs); curr_cmp["source_sha"] = "assembly-only"
+        prior_gen_cmp = compute_generation_fingerprint(prior_cmp)
+        curr_gen_cmp = compute_generation_fingerprint(curr_cmp)
+        if prior_gen_cmp != curr_gen_cmp:
+            _err(errors, "generation fingerprint mismatch (excl. source_sha): "
+                          "prior run produced a different render generation")
+            for d in describe_fingerprint_diff(curr_cmp, prior_cmp):
+                _err(errors, f"  diff: {d}")
+        else:
+            print("P4.4: assembly-only mode — render fingerprint MATCHES "
+                  "(source_sha excluded), zero render jobs will be scheduled")
+    elif prior_gen != current_gen:
         _err(errors, "generation fingerprint mismatch: prior run produced a "
                       "different render generation")
         for d in describe_fingerprint_diff(current_inputs, prior_inputs):
             _err(errors, f"  diff: {d}")
-    elif mode == "assembly_only":
-        print("P4.4: assembly-only mode — render fingerprint MATCHES, "
-              "zero render jobs will be scheduled")
 
     # 4. Asset manifest digest must match (defense in depth; also in fingerprint).
     # P4.4: This check is NOT bypassed. Different assets mean different
