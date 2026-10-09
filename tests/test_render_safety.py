@@ -123,7 +123,10 @@ class TestChunkLedger(unittest.TestCase):
         self.build_ledger = build_ledger
 
     def _job(self, n):
-        return {"job_identity": "test-job", "chunks": {"count": n}}
+        # Real job manifest structure: plan.chunks as [{"chunk_id","start","end"}]
+        return {"job_identity": "test-job",
+                "plan": {"chunks": [{"chunk_id": i, "start": i*100,
+                                     "end": i*100+99} for i in range(n)]}}
 
     def _chunk(self, cid, ok=True, reused=False):
         return {

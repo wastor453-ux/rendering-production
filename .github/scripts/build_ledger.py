@@ -37,13 +37,11 @@ def sha256_file(path):
 
 def build_ledger(job_manifest, chunk_manifests):
     """Build the ledger dict from a job manifest and {chunk_id: manifest}."""
-    expected = job_manifest.get("chunks", {}).get("count")
-    if expected is None:
-        # Fall back to explicit chunk list if present.
-        expected_ids = job_manifest.get("chunks", {}).get("ids", [])
-        expected = len(expected_ids)
-    else:
-        expected_ids = list(range(expected))
+    # Job manifest stores chunks at plan.chunks as [{"chunk_id","start","end"}].
+    plan = job_manifest.get("plan", {})
+    chunk_defs = plan.get("chunks", [])
+    expected_ids = [c["chunk_id"] for c in chunk_defs if "chunk_id" in c]
+    expected = len(expected_ids)
 
     entries = []
     for cid in expected_ids:
@@ -96,19 +94,24 @@ def main(argv):
 
     job = json.load(open(args.job_manifest))
 
-    # Collect chunk manifests: accept <dir>/chunk-<id>/chunk_manifest.json
-    # or <dir>/chunk_manifest_<id>.json or flat chunk_manifest.json files.
+    # Collect chunk manifests: accept chunk_<id>_manifest.json (the actual
+    # render-step naming), chunk_manifest.json, or chunk_manifest_<id>.json.
     chunk_manifests = {}
     for root, _dirs, files in os.walk(args.chunks_dir):
         for fn in files:
-            if fn == "chunk_manifest.json" or (fn.startswith("chunk_manifest") and fn.endswith(".json")):
-                try:
-                    cm = json.load(open(os.path.join(root, fn)))
-                    cid = cm.get("chunk_id")
-                    if cid is not None:
-                        chunk_manifests[cid] = cm
-                except (json.JSONDecodeError, OSError):
-                    continue
+            if not fn.endswith(".json"):
+                continue
+            if not (fn == "chunk_manifest.json"
+                    or fn.startswith("chunk_manifest")
+                    or (fn.startswith("chunk_") and fn.endswith("_manifest.json"))):
+                continue
+            try:
+                cm = json.load(open(os.path.join(root, fn)))
+                cid = cm.get("chunk_id")
+                if cid is not None:
+                    chunk_manifests[cid] = cm
+            except (json.JSONDecodeError, OSError):
+                continue
 
     ledger = build_ledger(job, chunk_manifests)
     with open(args.out, "w") as f:
