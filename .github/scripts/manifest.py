@@ -429,8 +429,13 @@ def verify_assembly(job_manifest: dict, chunk_manifests: list,
                     f"chunk {cid}: same-identity chunk not in resume plan's "
                     f"render list — unaccounted chunk rejected"
                 )
-        # 2. Same source SHA (applies even for allowed cross-attempt chunks)
-        if cm.get("source_sha") != job_sha:
+        # 2. Same source SHA — SKIPPED for resume-authorized chunks.
+        # 2026-10-10: resume chunks come from the PRIOR run by design; their
+        # source_sha differs from the current job. The resume plan already
+        # validated them. (Non-resume chunks must match.)
+        is_resume_reuse = (resume_enabled and cm_identity != job_id
+                           and cid in planned_reuse)
+        if not is_resume_reuse and cm.get("source_sha") != job_sha:
             errors.append(
                 f"chunk {cid}: source SHA mismatch "
                 f"({cm.get('source_sha')!r} != {job_sha!r}) — mixed revision rejected"
