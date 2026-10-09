@@ -601,9 +601,11 @@ jobs:
     # P3.12.1: assembly runs when the plan succeeded. The plan is the source
     # of truth: zero_render=true means all chunks validated reusable;
     # zero_render=false means render-chunk ran (its result is checked below).
-    # 2026-10-10: do NOT reference needs.render-chunk.result in the condition —
-    # an empty matrix means the job never exists, breaking the expression.
-    if: ${{ needs.plan.result == 'success' }}
+    # 2026-10-10: always() is required — when render-chunk is skipped (empty
+    # matrix), GitHub skips dependents unless the condition uses always().
+    # Do NOT reference needs.render-chunk.result here; the guard step below
+    # verifies render success when zero_render is false.
+    if: ${{ always() && needs.plan.result == 'success' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
