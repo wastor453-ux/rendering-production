@@ -138,7 +138,7 @@ class TestChunkLedger(unittest.TestCase):
             "generation_fingerprint": "fp",
             "provenance": {"reused": reused, "origin_run_id": "1",
                            "origin_job_identity": "test-job"},
-            "validation": {"passed": ok},
+            "validation": {"output_exists": ok, "output_non_empty": ok},
         }
 
     def test_complete_ledger(self):

@@ -54,7 +54,10 @@ def build_ledger(job_manifest, chunk_manifests):
             })
             continue
         validation = cm.get("validation") or {}
-        ok = validation.get("passed", False)
+        # 2026-10-10: manifests set output_exists/output_non_empty (not
+        # 'passed'). A chunk is OK if the output exists and is non-empty.
+        ok = bool(validation.get("output_exists") and
+                  validation.get("output_non_empty"))
         provenance = cm.get("provenance", {})
         status = ("reused_ok" if provenance.get("reused") else "rendered_ok") if ok else "failed"
         entries.append({
