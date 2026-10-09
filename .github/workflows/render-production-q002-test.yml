@@ -1,0 +1,71 @@
+name: Render Production Q-002 Test (Failure Injection)
+
+# P4.1: Dedicated TEST-ONLY workflow for Q-002 selective-recovery validation.
+# This workflow is NEVER used for production. It exists solely to deliberately
+# fail one chunk before rendering, proving that the recovery system handles
+# partial failures correctly.
+#
+# The production workflow (.github/workflows/render-production.yml) contains
+# NO failure hook. This separation ensures the hook cannot leak into production.
+
+on:
+  workflow_dispatch:
+    inputs:
+      composition:
+        description: 'Remotion composition ID'
+        required: true
+        default: 'P3Rehearsal'
+      start_frame:
+        description: 'First frame (inclusive)'
+        required: true
+        default: '0'
+      end_frame:
+        description: 'Last frame (inclusive)'
+        required: true
+        default: '599'
+      chunk_size:
+        description: 'Frames per chunk'
+        required: false
+        default: '30'
+      fail_chunk:
+        description: 'Deliberately fail this chunk ID before rendering'
+        required: true
+      resume_from_run_id:
+        description: 'Resume from prior run (for recovery testing)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  test-failure-injection:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate test inputs via environment
+        # P4.1: No raw ${{ inputs.* }} interpolation in shell. All inputs
+        # pass through env vars with quoted expansions.
+        run: |
+          set -euo pipefail
+          echo "Test composition: $COMPOSITION"
+          echo "Fail chunk: $FAIL_CHUNK"
+          echo "Frames: $START_FRAME to $END_FRAME"
+        env:
+          COMPOSITION: ${{ inputs.composition }}
+          FAIL_CHUNK: ${{ inputs.fail_chunk }}
+          START_FRAME: ${{ inputs.start_frame }}
+          END_FRAME: ${{ inputs.end_frame }}
+
+      - name: Deliberate failure injection (test only)
+        # P4.1: Failure injection via env vars, not shell interpolation.
+        # This job fails deliberately to simulate a chunk failure.
+        run: |
+          set -euo pipefail
+          echo "Q-002 TEST: Simulating failure for chunk $FAIL_CHUNK"
+          echo "This is a controlled test failure, not a production error."
+          exit 1
+        env:
+          FAIL_CHUNK: ${{ inputs.fail_chunk }}
