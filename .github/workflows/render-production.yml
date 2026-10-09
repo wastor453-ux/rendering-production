@@ -43,6 +43,10 @@ on:
         description: 'Music bed source (relative to repo root)'
         required: false
         default: 'public/audio/bed.mp3'
+      fail_chunk:
+        description: 'TEST ONLY: deliberately fail this chunk ID before rendering. Guarded to p3-11-recovery-test branch only. Empty = disabled.'
+        required: false
+        default: ''
       # NOTE: resume_from was deliberately REMOVED (P3.5.2).
       # Cross-attempt chunk reuse is not supported. If a chunk fails,
       # trigger a fresh workflow_dispatch — a new run_id means a new
@@ -300,6 +304,15 @@ jobs:
           CID="${{ matrix.chunk.chunk_id }}"
           START="${{ matrix.chunk.start }}"
           END="${{ matrix.chunk.end }}"
+
+          # P3.11 TEST HOOK: deliberately fail one chunk before rendering.
+          # BRANCH-GUARDED: only fires on p3-11-recovery-test. On any other
+          # branch (including main) the input is ignored. Disabled by default.
+          # This hook is test-only and must NOT be merged to main.
+          if [ "${{ github.ref_name }}" = "p3-11-recovery-test" ] && [ -n "${{ inputs.fail_chunk }}" ] && [ "${{ inputs.fail_chunk }}" = "$CID" ]; then
+            echo "P3.11 TEST: deliberately failing chunk $CID before render"
+            exit 1
+          fi
 
           # P3.6.2: validate inputs via env vars (no raw ${{ inputs.* }} in shell).
           # plan.py already validated, but defense in depth for direct dispatches.
