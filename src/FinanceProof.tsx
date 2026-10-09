@@ -1,5 +1,10 @@
 // FinanceProof — integrated proof: real VO + measured beats + visual engine +
 // locked SFX bench + music. 7 beats, 1860 frames @30fps (62s).
+//
+// ⚠️  FIXTURE MARKER (P4.4 B-11): This file contains SYNTHETIC/ILLUSTRATIVE data
+// for visual proof purposes only. It is NOT part of the production chain.
+// Production visuals (HousingBroke, MoneyDying) use validated payloads via
+// PayloadValidator. Do not copy these values into production.
 import React from "react";
 import { Sequence, useCurrentFrame } from "remotion";
 import { LightCanvas, GlassCard, Kicker } from "./light/primitives";
@@ -7,6 +12,8 @@ import { HeroTypography, HeroNumber, ThesisComposition, ClosingComposition } fro
 import { LineChartStory, BarChart } from "./light/charts";
 import { TwoSidedComparison, CausalDiagram } from "./light/explain";
 
+// FIXTURE DATA (B-11): Synthetic illustrative values for visual proof.
+// NOT production data. Production uses PayloadValidator.
 const savings = [7.8, 7.2, 8.1, 6.9, 7.5, 12.4, 11.8, 6.1, 4.9, 3.8, 3.1];
 const saveLabels = ["2016", "2018", "2020", "2022", "2024", "2026"];
 

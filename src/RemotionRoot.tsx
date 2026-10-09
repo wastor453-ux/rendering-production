@@ -9,10 +9,8 @@ import { PipeTestVideo, PIPETEST_TOTAL } from "./pipetest/PipeTest";
 import { HysaTest, HYSA_TOTAL } from "./hysa/HysaTest";
 import { BankTestVideo, BANKTEST_TOTAL } from "./banktest/BankTestVideo";
 import { RecutVideo, RECUT_TOTAL, FPS as RECUT_FPS } from "./recut/RecutVideo";
-import { PremiumTest, TOTAL as PREMIUM_TOTAL, FPS as PREMIUM_FPS } from "./premium/PremiumTest";
 import { MoneyDyingVideo, MD_TOTAL, FPS as MD_FPS } from "./moneydying/MoneyDying";
 import { HousingBrokeVideo, HB_TOTAL, FPS as HB_FPS } from "./housing/HousingBroke";
-import { TestNewBrainVideo, TEST_TOTAL } from "./testnewbrain/TestBeats";
 import { VisualShowcase, SHOWCASE_TOTAL } from "./light/Showcase";
 import { FinanceProof, PROOF_TOTAL } from "./FinanceProof";
 import { ProductionBeats, PRODUCTION_TOTAL } from "./ProductionBeats";
@@ -98,14 +96,8 @@ export const RemotionRoot: React.FC = () => {
         width={1920}
         height={1080}
       />
-      <Composition
-        id="PremiumTest"
-        component={PremiumTest}
-        durationInFrames={PREMIUM_TOTAL}
-        fps={PREMIUM_FPS}
-        width={1920}
-        height={1080}
-      />
+      {/* P4.4: PremiumTest retired 2026-10-09 — old dark brain */}
+      {/* P4.4: TestNewBrain retired 2026-10-09 — used old dark brain, beat compiler does not exist */}
       <Composition
         id="MoneyDying"
         component={MoneyDyingVideo}
@@ -119,14 +111,6 @@ export const RemotionRoot: React.FC = () => {
         component={HousingBrokeVideo}
         durationInFrames={HB_TOTAL}
         fps={HB_FPS}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="TestNewBrain"
-        component={TestNewBrainVideo}
-        durationInFrames={TEST_TOTAL}
-        fps={30}
         width={1920}
         height={1080}
       />

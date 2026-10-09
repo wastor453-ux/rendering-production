@@ -50,7 +50,7 @@ def _err(errors, msg):
 def validate_resume_source(prior_manifest: dict, current_inputs: dict,
                            current_asset_digest: str,
                            prior_run_status: dict = None,
-                           bypass_generation_check: bool = False) -> dict:
+                           mode: str = "chunk_recovery") -> dict:
     """Validate a prior run's job manifest as a resume source.
 
     prior_manifest: the prior run's job_manifest.json (dict).
@@ -59,22 +59,25 @@ def validate_resume_source(prior_manifest: dict, current_inputs: dict,
     current_asset_digest: SHA-256 digest of the current asset manifest.
     prior_run_status: optional {"status", "conclusion"} from the GitHub API.
         When provided, in-progress/cancelled runs are rejected explicitly.
+    mode: "chunk_recovery" (default) or "assembly_only".
+        - chunk_recovery: render missing/invalid chunks. Render fingerprint
+          must match strictly.
+        - assembly_only: re-run assembly with zero render jobs. Render
+          fingerprint must match (chunks are valid). Assembly fingerprint
+          MAY differ (that's the point — assembly logic changed).
 
-    P3.12.1: a prior run whose job manifest is still at stage "planned"
-    (e.g. it failed during rendering, as in P3.11) IS eligible, provided its
-    selected chunks independently pass verification. What matters is chunk
-    validity, not prior assembly completion. Runs still in progress,
-    cancelled, or with a disallowed conclusion are rejected.
-
-    P4.4: bypass_generation_check=True skips the generation fingerprint
-    comparison. Use ONLY for reassembly (no re-render) when the workflow's
-    assembly logic changed but chunks are valid. All other validations
-    (manifest version, run status, chunk checksums, counts) still apply.
-    This is explicit user opt-in, not a default.
+    P4.4 SPLIT (§6.1): The render fingerprint no longer includes
+    workflow_content_sha. Assembly-only logic changes do NOT invalidate
+    rendered chunks. The old bypass_generation_check is removed — it was
+    a blunt instrument that skipped all validation. The split fingerprint
+    is the proper fix.
 
     Returns {"ok": True, ...} or {"ok": False, "errors": [...]}. Fail closed.
     """
     errors = []
+
+    if mode not in ("chunk_recovery", "assembly_only"):
+        return {"ok": False, "errors": [f"invalid mode: {mode!r}"]}
 
     if not isinstance(prior_manifest, dict):
         return {"ok": False, "errors": ["prior manifest is not a dict"]}
@@ -125,28 +128,29 @@ def validate_resume_source(prior_manifest: dict, current_inputs: dict,
         return {"ok": False, "errors": errors}
 
     # 3. Generation fingerprints must match exactly.
-    # P4.4: bypassed in reassembly mode (explicit opt-in).
-    if not bypass_generation_check:
-        if prior_gen != current_gen:
-            _err(errors, "generation fingerprint mismatch: prior run produced a "
-                          "different render generation")
-            for d in describe_fingerprint_diff(current_inputs, prior_inputs):
-                _err(errors, f"  diff: {d}")
-    else:
-        print("P4.4: generation fingerprint check BYPASSED (reassembly mode)")
+    # P4.4 SPLIT: The render fingerprint no longer includes workflow_content_sha.
+    # Assembly-only changes do NOT cause a mismatch. Both modes require a
+    # strict match — this is what guarantees chunk bytes are compatible.
+    # The old bypass_generation_check is removed; the split IS the fix.
+    if prior_gen != current_gen:
+        _err(errors, "generation fingerprint mismatch: prior run produced a "
+                      "different render generation")
+        for d in describe_fingerprint_diff(current_inputs, prior_inputs):
+            _err(errors, f"  diff: {d}")
+    elif mode == "assembly_only":
+        print("P4.4: assembly-only mode — render fingerprint MATCHES, "
+              "zero render jobs will be scheduled")
 
     # 4. Asset manifest digest must match (defense in depth; also in fingerprint).
-    # P4.4: bypassed in reassembly mode. The chunks are video-only; audio is
-    # muxed during assembly. Different audio assets don't invalidate chunks.
-    if not bypass_generation_check:
-        prior_asset_digest = prior_manifest.get("inputs", {}).get(
-            "asset_manifest_sha256")
-        if prior_asset_digest != current_asset_digest:
-            _err(errors, f"asset manifest digest mismatch: prior="
-                          f"{str(prior_asset_digest)[:12]} current="
-                          f"{str(current_asset_digest)[:12]}")
-    else:
-        print("P4.4: asset digest check BYPASSED (reassembly mode)")
+    # P4.4: This check is NOT bypassed. Different assets mean different
+    # chunks. The split fingerprint already excludes workflow changes, so
+    # a legitimate reassembly will pass this check.
+    prior_asset_digest = prior_manifest.get("inputs", {}).get(
+        "asset_manifest_sha256")
+    if prior_asset_digest != current_asset_digest:
+        _err(errors, f"asset manifest digest mismatch: prior="
+                      f"{str(prior_asset_digest)[:12]} current="
+                      f"{str(current_asset_digest)[:12]}")
 
     # 5. Plan must be identical (same chunk count and ranges).
     prior_plan = prior_manifest.get("plan", {}).get("chunks", [])
@@ -372,7 +376,7 @@ def build_resume_plan(prior_manifest: dict, prior_chunk_manifests: dict,
                       manifest_shas: dict = None,
                       expected_env: dict = None,
                       prior_run_status: dict = None,
-                      bypass_generation_check: bool = False) -> dict:
+                      mode: str = "chunk_recovery") -> dict:
     """Build the complete resume plan. Fail closed.
 
     artifact_shas: {chunk_id: sha256} of ACTUAL video bytes from inside the
@@ -382,6 +386,7 @@ def build_resume_plan(prior_manifest: dict, prior_chunk_manifests: dict,
         the video hash.
     expected_env: measured-environment compatibility policy.
     prior_run_status: {"status", "conclusion"} from the GitHub API.
+    mode: "chunk_recovery" or "assembly_only" (see validate_resume_source).
 
     Returns {"ok": True, "resume_plan": {...}} or
     {"ok": False, "errors": [...]}.
@@ -395,7 +400,7 @@ def build_resume_plan(prior_manifest: dict, prior_chunk_manifests: dict,
     validation = validate_resume_source(prior_manifest, current_inputs,
                                         current_asset_digest,
                                         prior_run_status,
-                                        bypass_generation_check=bypass_generation_check)
+                                        mode=mode)
     if not validation["ok"]:
         return {"ok": False, "errors": validation["errors"]}
 

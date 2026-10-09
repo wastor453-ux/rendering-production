@@ -19,7 +19,7 @@ const S4 = 3603; // 119.1s — the debt spiral
 const S5 = 3618; // 119.6s — the freeze
 const S6 = 5574; // 184.8s — the escape
 const S7 = 1155; // 37.5s — close
-export const HB_TOTAL = S1 + S2 + S3 + S4 + S5 + S6 + S7; // 24151 = 13.4min
+export const HB_TOTAL = S1 + S2 + S3 + S4 + S5 + S6 + S7; // 23151 = 12.9min (P4.4: was mislabeled 24151)
 
 export const HousingBrokeVideo: React.FC = () => {
   let at = 0;
@@ -40,7 +40,8 @@ export const HousingBrokeVideo: React.FC = () => {
   const Comps = [H1Hook, H2Spike, H3Autopsy, H4Debt, H5Freeze, H6Escape, H7Close];
 
   return (
-    <AbsoluteFill style={{ background: "#0F0D24" }}>
+    <AbsoluteFill style={{ background: "#F8FAFF" }}>
+      {/* P4.4 migration: light canvas (#F8FAFF), was dark #0F0D24 */}
       {parts.map((p, i) => {
         const Comp = Comps[i];
         return (

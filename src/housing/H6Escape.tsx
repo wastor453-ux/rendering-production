@@ -1,9 +1,8 @@
 import React from "react";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
-import { MeshBackground } from "../premium/components/MeshBackground";
-import { GlassCard } from "../premium/components/GlassCard";
-import { KineticHeadline } from "../premium/components/Type";
-import { P } from "../premium/theme";
+import { AbsoluteFill, Easing, interpolate, Sequence, useCurrentFrame } from "remotion";
+import { LightCanvas, GlassCard, Kicker } from "../light/primitives";
+import { HeroTypography } from "../light/editorial";
+import { T } from "../light/tokens";
 
 const CLAMP = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const expo = Easing.bezier(0.16, 1, 0.3, 1);
@@ -19,6 +18,7 @@ const CARDS = [
  * H6 — The Escape (5574f / 184.8s).
  * Beats: 4 audience cards (0–90s) → landlord math (90–130s) →
  * bull/bear scenarios (130–165s) → dashboard close (165–184s).
+ * MIGRATED 2026-10-09: Light Premium Fintech (was dark premium/theme).
  */
 export const H6Escape: React.FC = () => {
   const frame = useCurrentFrame();
@@ -33,8 +33,7 @@ export const H6Escape: React.FC = () => {
   const dOp = interpolate(frame, [5100, 5140], [0, 1], CLAMP);
 
   return (
-    <AbsoluteFill>
-      <MeshBackground />
+    <LightCanvas>
 
       {/* BEAT 1: audience cards */}
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
@@ -46,11 +45,11 @@ export const H6Escape: React.FC = () => {
             const out = interpolate(frame, [2400, 2450], [1, 0], CLAMP);
             return (
               <div key={c.who} style={{ opacity: p * out, transform: `translateY(${y}px)` }}>
-                <GlassCard width={560} delay={0}>
-                  <div style={{ fontFamily: P.font, padding: "16px 24px" }}>
-                    <div style={{ fontWeight: 800, fontSize: 26, letterSpacing: 6, color: P.neonBlue }}>{c.who}</div>
-                    <div style={{ fontWeight: 800, fontSize: 38, color: P.ink, marginTop: 8 }}>{c.what}</div>
-                    <div style={{ fontWeight: 600, fontSize: 26, color: P.muted, marginTop: 6 }}>{c.sub}</div>
+                <GlassCard width={560}>
+                  <div style={{ fontFamily: T.font, padding: "16px 24px" }}>
+                    <div style={{ fontWeight: 800, fontSize: 26, letterSpacing: 6, color: T.primary }}>{c.who}</div>
+                    <div style={{ fontWeight: 800, fontSize: 38, color: T.ink, marginTop: 8 }}>{c.what}</div>
+                    <div style={{ fontWeight: 600, fontSize: 26, color: T.inkMuted, marginTop: 6 }}>{c.sub}</div>
                   </div>
                 </GlassCard>
               </div>
@@ -62,17 +61,17 @@ export const H6Escape: React.FC = () => {
       {/* BEAT 2: landlord math */}
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: mOp * mOut }}>
         <div style={{ transform: `scale(${mPulse})` }}>
-          <GlassCard width={1150} delay={0}>
-            <div style={{ fontFamily: P.font, padding: "16px 28px" }}>
+          <GlassCard width={1150}>
+            <div style={{ fontFamily: T.font, padding: "16px 28px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", textAlign: "center" }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 800, fontSize: 64, color: P.gain }}>$26K</div>
-                  <div style={{ fontWeight: 600, fontSize: 26, color: P.muted }}>Treasuries · guaranteed<br />no tenants, no toilets</div>
+                  <div style={{ fontWeight: 800, fontSize: 64, color: T.success }}>$26K</div>
+                  <div style={{ fontWeight: 600, fontSize: 26, color: T.inkMuted }}>Treasuries · guaranteed<br />no tenants, no toilets</div>
                 </div>
-                <div style={{ fontWeight: 800, fontSize: 56, color: P.muted, alignSelf: "center" }}>vs</div>
+                <div style={{ fontWeight: 800, fontSize: 56, color: T.inkMuted, alignSelf: "center" }}>vs</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 800, fontSize: 64, color: P.loss }}>$24K</div>
-                  <div style={{ fontWeight: 600, fontSize: 26, color: P.muted }}>Rental · all the headaches<br />on the same $500K</div>
+                  <div style={{ fontWeight: 800, fontSize: 64, color: T.negative }}>$24K</div>
+                  <div style={{ fontWeight: 600, fontSize: 26, color: T.inkMuted }}>Rental · all the headaches<br />on the same $500K</div>
                 </div>
               </div>
             </div>
@@ -83,18 +82,18 @@ export const H6Escape: React.FC = () => {
       {/* BEAT 3: scenarios */}
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: sOp * sOut }}>
         <div style={{ display: "flex", gap: 32 }}>
-          <GlassCard width={560} delay={0}>
-            <div style={{ fontFamily: P.font, padding: "16px 28px", textAlign: "center" }}>
-              <div style={{ fontWeight: 800, fontSize: 40, color: P.gain }}>BULL CASE</div>
-              <div style={{ fontWeight: 600, fontSize: 28, color: P.ink, marginTop: 12 }}>
+          <GlassCard width={560}>
+            <div style={{ fontFamily: T.font, padding: "16px 28px", textAlign: "center" }}>
+              <div style={{ fontWeight: 800, fontSize: 40, color: T.success }}>BULL CASE</div>
+              <div style={{ fontWeight: 600, fontSize: 28, color: T.ink, marginTop: 12 }}>
                 Oil under $80 · inflation cools<br />Fed holds · ice thaws slowly
               </div>
             </div>
           </GlassCard>
-          <GlassCard width={560} delay={12}>
-            <div style={{ fontFamily: P.font, padding: "16px 28px", textAlign: "center" }}>
-              <div style={{ fontWeight: 800, fontSize: 40, color: P.loss }}>BEAR CASE</div>
-              <div style={{ fontWeight: 600, fontSize: 28, color: P.ink, marginTop: 12 }}>
+          <GlassCard width={560}>
+            <div style={{ fontFamily: T.font, padding: "16px 28px", textAlign: "center" }}>
+              <div style={{ fontWeight: 800, fontSize: 40, color: T.negative }}>BEAR CASE</div>
+              <div style={{ fontWeight: 600, fontSize: 28, color: T.ink, marginTop: 12 }}>
                 Oil above $100 · Fed hikes again<br />mortgages touch 8%
               </div>
             </div>
@@ -105,13 +104,14 @@ export const H6Escape: React.FC = () => {
       {/* BEAT 4: dashboard */}
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: dOp }}>
         <div style={{ textAlign: "center" }}>
-          <KineticHeadline
-            lines={["Watch Brent crude", "and the 10-year yield.", "That's your dashboard."]}
-            delay={5110}
-            fontSize={80}
-          />
+          <Sequence from={5100}>
+            <HeroTypography
+              kicker=""
+              lines={["Watch Brent crude", "and the 10-year yield.", "That's your dashboard."]}
+            />
+          </Sequence>
         </div>
       </AbsoluteFill>
-    </AbsoluteFill>
+    </LightCanvas>
   );
 };

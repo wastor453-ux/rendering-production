@@ -390,13 +390,15 @@ if __name__ == "__main__":
     }
 
     # 5. Validate and select.
-    # P4.4: REASSEMBLE_BYPASS_FINGERPRINT env var enables reassembly mode.
-    # When true, skips generation fingerprint comparison (assembly logic
-    # changed, chunks are valid). All other validations still apply.
+    # P4.4 SPLIT (§6.1): REASSEMBLE_BYPASS_FINGERPRINT env var selects
+    # assembly-only mode. The split fingerprint means assembly-logic changes
+    # no longer invalidate the render fingerprint — the mode flag declares
+    # intent (zero render jobs), not a validation bypass.
     import os as _os
-    _bypass = _os.environ.get("REASSEMBLE_BYPASS_FINGERPRINT", "false").lower() == "true"
-    if _bypass:
-        print("P4.4 REASSEMBLY MODE: bypassing generation fingerprint check")
+    _mode = "assembly_only" if _os.environ.get(
+        "REASSEMBLE_BYPASS_FINGERPRINT", "false").lower() == "true" else "chunk_recovery"
+    if _mode == "assembly_only":
+        print("P4.4 REASSEMBLY MODE: assembly-only (zero render jobs expected)")
     result = build_resume_plan(prior_manifest, prior_chunk_manifests,
                                current_inputs, current_plan,
                                current_asset_digest,
@@ -405,7 +407,7 @@ if __name__ == "__main__":
                                manifest_shas=manifest_shas,
                                expected_env=expected_env,
                                prior_run_status=prior_run_status,
-                               bypass_generation_check=_bypass)
+                               mode=_mode)
     if not result["ok"]:
         print("RESUME REJECTED:", file=sys.stderr)
         for e in result["errors"]:

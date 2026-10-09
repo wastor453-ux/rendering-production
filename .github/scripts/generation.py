@@ -20,15 +20,22 @@ If any output-affecting input changes, the fingerprint changes and prior
 chunks are NOT reused. When equivalence cannot be established, do not reuse.
 
 What is included (every field below affects rendered bytes):
-  source_sha, workflow_content_sha, composition, width, height, fps,
+  source_sha, composition, width, height, fps,
   start_frame, end_frame, chunk_size, codec, crf, with_audio,
   input_props_sha256, beats_sha256, events_sha256, payload_sha256 (sorted),
   asset_manifest_sha256, vo_sha256, bed_sha256 (when with_audio),
   package_lock_sha256, node_version, remotion_version, react_version,
   os, expected_chromium_version.
 
+P4.4 SPLIT: workflow_content_sha is REMOVED from the render fingerprint.
+The workflow file mixes render logic AND assembly logic. A change to
+assembly-only logic (e.g. fixing the frame-count validator) must NOT
+invalidate rendered chunks. See compute_assembly_fingerprint() and
+compute_audio_fingerprint() for the separated concerns.
+
 What is EXCLUDED (execution metadata, never affects output):
-  run_id, run_attempt, job_identity, label, timestamps, artifact names.
+  run_id, run_attempt, job_identity, label, timestamps, artifact names,
+  workflow_content_sha (moved to assembly/audio fingerprints).
 
 Fail-closed: missing or empty required fields raise ValueError.
 """
@@ -44,9 +51,10 @@ import json
 EXPECTED_CHROMIUM_VERSION = "149.0.7790.0"
 
 # Fields that must be present and non-empty for a valid fingerprint.
+# P4.4: workflow_content_sha REMOVED (see module docstring). The render
+# fingerprint covers only inputs that affect rendered chunk bytes.
 REQUIRED_FIELDS = [
     "source_sha",
-    "workflow_content_sha",
     "composition",
     "width",
     "height",
@@ -142,7 +150,8 @@ def fingerprint_inputs_from_job_manifest(job_manifest: dict) -> dict:
     inp = job_manifest.get("inputs", {})
     return {
         "source_sha": gh.get("source_sha"),
-        "workflow_content_sha": gh.get("workflow_content_sha"),
+        # P4.4: workflow_content_sha no longer part of render fingerprint.
+        # It is tracked separately in assembly/audio fingerprints.
         "composition": inp.get("composition"),
         "width": inp.get("width"),
         "height": inp.get("height"),
@@ -172,6 +181,59 @@ def fingerprint_inputs_from_job_manifest(job_manifest: dict) -> dict:
         "expected_chromium_version": inp.get(
             "expected_chromium_version", EXPECTED_CHROMIUM_VERSION),
     }
+
+
+# ---------------------------------------------------------------------------
+# P4.4: Separated fingerprints (§6.1)
+# ---------------------------------------------------------------------------
+
+def compute_assembly_fingerprint(assembly_inputs: dict) -> str:
+    """Compute the assembly-identity fingerprint.
+
+    Covers everything that affects how chunks are JOINED (not rendered):
+    - assembly script content hash (concat logic, timestamp normalization)
+    - frame validation logic hash
+    - container/mux settings for the video stream
+    - chunk plan (ranges, count, order)
+
+    A change here does NOT invalidate rendered chunks. It only means the
+    assembly step uses different logic — which is exactly the reassembly case.
+    """
+    required = ["assembly_script_sha256", "frame_validator_sha256",
+                "concat_settings_sha256", "chunk_plan_sha256"]
+    missing = [f for f in required if not assembly_inputs.get(f)]
+    if missing:
+        raise ValueError(
+            f"compute_assembly_fingerprint: missing required fields: {missing}"
+        )
+    canon = {f: str(assembly_inputs[f]).strip() for f in required}
+    blob = json.dumps(canon, sort_keys=True, separators=(",", ":"),
+                      ensure_ascii=True)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+
+
+def compute_audio_fingerprint(audio_inputs: dict) -> str:
+    """Compute the audio-mux identity fingerprint.
+
+    Covers the exact authorized audio sources and mix/mux configuration:
+    - VO source hashes (concatenated VO file)
+    - music bed source hash
+    - mux script/config hash
+    - audio codec, bitrate, sample rate settings
+
+    A change here means the audio output differs, but video chunks remain valid.
+    """
+    required = ["vo_concat_sha256", "bed_sha256", "mux_config_sha256",
+                "audio_codec", "audio_bitrate"]
+    missing = [f for f in required if not audio_inputs.get(f)]
+    if missing:
+        raise ValueError(
+            f"compute_audio_fingerprint: missing required fields: {missing}"
+        )
+    canon = {f: str(audio_inputs[f]).strip() for f in required}
+    blob = json.dumps(canon, sort_keys=True, separators=(",", ":"),
+                      ensure_ascii=True)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 
 def describe_fingerprint_diff(a_inputs: dict, b_inputs: dict) -> list:

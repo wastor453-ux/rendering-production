@@ -1,15 +1,15 @@
 import React from "react";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
-import { MeshBackground } from "../premium/components/MeshBackground";
-import { GlassCard } from "../premium/components/GlassCard";
-import { KineticHeadline } from "../premium/components/Type";
-import { P } from "../premium/theme";
+import { AbsoluteFill, Easing, interpolate, Sequence, useCurrentFrame } from "remotion";
+import { LightCanvas, GlassCard } from "../light/primitives";
+import { HeroTypography } from "../light/editorial";
+import { T } from "../light/tokens";
 
 const CLAMP = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const expo = Easing.bezier(0.16, 1, 0.3, 1);
 
 /**
  * H7 — Close (1155f / 37.5s). "Buy the math." + tagline.
+ * MIGRATED 2026-10-09: Light Premium Fintech (was dark premium/theme).
  */
 export const H7Close: React.FC = () => {
   const frame = useCurrentFrame();
@@ -18,27 +18,27 @@ export const H7Close: React.FC = () => {
   const finalPulse = interpolate(frame, [950, 956, 972], [1, 1.08, 1], CLAMP);
 
   return (
-    <AbsoluteFill>
-      <MeshBackground />
+    <LightCanvas>
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", flexDirection: "column", gap: 48 }}>
         <div style={{ textAlign: "center" }}>
-          <KineticHeadline
-            lines={["Don't buy the panic.", "Don't buy the dip.", "Buy the math."]}
-            accentWord="math."
-            delay={10}
-            fontSize={96}
-          />
+          <Sequence from={10}>
+            <HeroTypography
+              kicker=""
+              lines={["Don't buy the panic.", "Don't buy the dip.", "Buy the math."]}
+              accentLine={2}
+            />
+          </Sequence>
         </div>
         <div style={{ opacity: cardOp, transform: `translateY(${cardY}px) scale(${finalPulse})` }}>
-          <GlassCard width={900} delay={0}>
-            <div style={{ textAlign: "center", fontFamily: P.font }}>
-              <div style={{ fontWeight: 800, fontSize: 54, color: P.ink, letterSpacing: -1 }}>
+          <GlassCard width={900}>
+            <div style={{ textAlign: "center", fontFamily: T.font }}>
+              <div style={{ fontWeight: 800, fontSize: 54, color: T.ink, letterSpacing: -1 }}>
                 Wealth is a legacy.
               </div>
               <div
                 style={{
                   fontWeight: 800, fontSize: 54, letterSpacing: -1,
-                  background: `linear-gradient(90deg, ${P.purple}, ${P.magenta})`,
+                  background: `linear-gradient(90deg, ${T.primary}, ${T.primaryDeep})`,
                   WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent",
                 }}
               >
@@ -48,6 +48,6 @@ export const H7Close: React.FC = () => {
           </GlassCard>
         </div>
       </AbsoluteFill>
-    </AbsoluteFill>
+    </LightCanvas>
   );
 };

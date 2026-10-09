@@ -1,8 +1,8 @@
 import React from "react";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
-import { MeshBackground } from "../premium/components/MeshBackground";
-import { KineticHeadline } from "../premium/components/Type";
-import { P } from "../premium/theme";
+import { AbsoluteFill, Easing, interpolate, Sequence, useCurrentFrame } from "remotion";
+import { LightCanvas, GlassCard, Kicker } from "../light/primitives";
+import { HeroTypography } from "../light/editorial";
+import { T } from "../light/tokens";
 
 const CLAMP = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const expo = Easing.bezier(0.16, 1, 0.3, 1);
@@ -11,6 +11,7 @@ const expo = Easing.bezier(0.16, 1, 0.3, 1);
  * MD1 — Hook (450f / 14.0s). "Your money is DYING while you sleep."
  * SFX sync: tick@"dying" (42f) → accent pulse; coin@"savings account" (300f)
  * → chip pulse; impact@"obituary" (402f) → headline thump.
+ * MIGRATED 2026-10-09: Light Premium Fintech (was dark premium/theme).
  */
 export const MD1Hook: React.FC = () => {
   const frame = useCurrentFrame();
@@ -27,8 +28,7 @@ export const MD1Hook: React.FC = () => {
   const thump = interpolate(frame, [402, 408, 422], [1, 0.96, 1], { ...CLAMP, easing: expo });
 
   return (
-    <AbsoluteFill>
-      <MeshBackground />
+    <LightCanvas>
       <AbsoluteFill
         style={{
           justifyContent: "center",
@@ -38,45 +38,39 @@ export const MD1Hook: React.FC = () => {
           transform: `scale(${thump * dyingPulse})`,
         }}
       >
-        <div
-          style={{
-            fontFamily: P.font,
-            fontWeight: 800,
-            fontSize: 30,
-            letterSpacing: 14,
-            color: P.neonBlue,
-            opacity: interpolate(frame, [5, 20], [0, 1], CLAMP),
-          }}
-        >
-          THE SLOW LEAK
+        <div style={{ opacity: interpolate(frame, [5, 20], [0, 1], CLAMP) }}>
+          <Kicker text="THE SLOW LEAK" />
         </div>
         <div style={{ textAlign: "center" }}>
-          <KineticHeadline
-            lines={["Your money is dying", "while you sleep"]}
-            accentWord="dying"
-            delay={10}
-            fontSize={110}
-          />
+          <Sequence from={10}>
+            <HeroTypography
+              kicker=""
+              lines={["Your money is dying", "while you sleep"]}
+              accentLine={0}
+            />
+          </Sequence>
         </div>
         {/* savings chip — visual anchor for the coin SFX */}
         <div
           style={{
             opacity: chipP,
             transform: `translateX(${chipX}px) scale(${chipPulse})`,
-            background: P.glassFill,
-            border: `1px solid ${P.glassBorder}`,
-            borderRadius: 20,
-            padding: "16px 36px",
-            fontFamily: P.font,
-            fontWeight: 700,
-            fontSize: 34,
-            color: P.ink,
-            letterSpacing: 4,
           }}
         >
-          SAVINGS ACCOUNT · 0.5%
+          <GlassCard width={560}>
+            <div style={{
+              fontFamily: T.font,
+              fontWeight: 700,
+              fontSize: 34,
+              color: T.ink,
+              letterSpacing: 4,
+              textAlign: "center",
+            }}>
+              SAVINGS ACCOUNT · 0.5%
+            </div>
+          </GlassCard>
         </div>
       </AbsoluteFill>
-    </AbsoluteFill>
+    </LightCanvas>
   );
 };

@@ -35,6 +35,11 @@ on:
         required: false
         type: boolean
         default: false
+  # C-14 FIX (2026-10-10): repository_dispatch makes reassembly a single API call.
+  # POST /repos/{owner}/{repo}/dispatches with {"event_type":"reassemble","client_payload":{...}}
+  # Inputs resolve from client_payload when workflow_dispatch inputs are absent.
+  repository_dispatch:
+    types: [reassemble]
 
 permissions:
   actions: read
@@ -57,10 +62,10 @@ jobs:
         env:
           REPO: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
-          VO_FILE: ${{ inputs.vo_file }}
-          BED_FILE: ${{ inputs.bed_file }}
-          SKIP_AUDIO_SHA_CHECK: ${{ inputs.skip_audio_sha_check }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id || github.event.client_payload.source_run_id }}
+          VO_FILE: ${{ inputs.vo_file || github.event.client_payload.vo_file || 'public/audio/vo_p3.wav' }}
+          BED_FILE: ${{ inputs.bed_file || github.event.client_payload.bed_file || 'public/audio/bed.mp3' }}
+          SKIP_AUDIO_SHA_CHECK: ${{ inputs.skip_audio_sha_check || github.event.client_payload.skip_audio_sha_check }}
         run: |
           set -euo pipefail
           python3 - <<'PY'
@@ -68,7 +73,13 @@ jobs:
 
           repo = os.environ["REPO"]
           token = os.environ["GITHUB_TOKEN"]
-          source_run_id = os.environ["SOURCE_RUN_ID"]
+          source_run_id = os.environ.get("SOURCE_RUN_ID", "").strip()
+          # C-14: fail fast if neither workflow_dispatch inputs nor
+          # repository_dispatch client_payload supplied a run ID.
+          if not source_run_id:
+              print("FATAL: no source_run_id — provide via workflow_dispatch inputs "
+                    "or repository_dispatch client_payload.source_run_id", file=sys.stderr)
+              sys.exit(2)
 
           class NoRedirect(urllib.request.HTTPRedirectHandler):
               def redirect_request(self, req, fp, code, msg, headers, newurl):
@@ -233,13 +244,13 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       JOB_IDENTITY: ${{ needs.validate-source.outputs.job_identity }}
-      SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+      SOURCE_RUN_ID: ${{ inputs.source_run_id || github.event.client_payload.source_run_id }}
       COMPOSITION: ${{ needs.validate-source.outputs.composition }}
       START_FRAME: ${{ needs.validate-source.outputs.start_frame }}
       END_FRAME: ${{ needs.validate-source.outputs.end_frame }}
       WITH_AUDIO: ${{ needs.validate-source.outputs.with_audio }}
-      VO_FILE: ${{ inputs.vo_file }}
-      BED_FILE: ${{ inputs.bed_file }}
+      VO_FILE: ${{ inputs.vo_file || github.event.client_payload.vo_file || 'public/audio/vo_p3.wav' }}
+      BED_FILE: ${{ inputs.bed_file || github.event.client_payload.bed_file || 'public/audio/bed.mp3' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -263,7 +274,10 @@ jobs:
 
           repo = os.environ["REPO"]
           token = os.environ["GITHUB_TOKEN"]
-          source_run_id = os.environ["SOURCE_RUN_ID"]
+          source_run_id = os.environ.get("SOURCE_RUN_ID", "").strip()
+          if not source_run_id:
+              print("FATAL: no source_run_id in download step", file=sys.stderr)
+              sys.exit(2)
           job_identity = os.environ["JOB_IDENTITY"]
 
           class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -375,6 +389,21 @@ jobs:
               print("FATAL: no chunk artifacts found", file=sys.stderr)
               sys.exit(1)
           PY
+
+      - name: Build chunk ledger (gate)
+        # 2026-10-10 (Hamza's rule): reassembly also gates on the ledger.
+        # If the source run's chunks are incomplete, this fails naming the
+        # missing IDs instead of producing a short master.
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/ledger/chunks
+          for mf in /tmp/chunks/prior/chunk_*/chunk_*_manifest.json; do
+            [ -f "$mf" ] && cp "$mf" "/tmp/ledger/chunks/$(basename $mf)"
+          done
+          python3 .github/scripts/build_ledger.py \
+            --job-manifest /tmp/job/job_manifest.json \
+            --chunks-dir /tmp/ledger/chunks \
+            --out /tmp/ledger/chunk-ledger-reassembled.json
 
       - name: Verify manifests + stage chunks
         run: |
@@ -504,7 +533,7 @@ jobs:
           FRAMES=$(ffprobe -v error -select_streams v:0 -show_entries stream=nb_read_frames -of default=noprint_wrappers=1:nokey=1 -count_frames $MASTER)
           if [ -z "$FRAMES" ] || [ "$FRAMES" = "N/A" ]; then
             V_DUR_TMP=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $MASTER)
-            FRAMES=$(python3 -c "import sys; print(int(float(sys.argv[1]) * 30))" "$V_DUR_TMP")
+            FRAMES=$(python3 -c "import sys; print(round(float(sys.argv[1]) * 30))" "$V_DUR_TMP")
           fi
           V_DUR=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $MASTER)
           [ "$W" = "1920" ] && [ "$H" = "1080" ] || { echo "resolution FAIL"; exit 1; }

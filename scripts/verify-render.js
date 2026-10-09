@@ -2,6 +2,10 @@
 /*
  * verify-render.js — programmatic Quality Gate for CrackIt Finance videos.
  *
+ * ⚠️  STATUS (P4.4 B-13): Legacy audio assumptions (drop pool, -4dB ducking).
+ * NOT in active workflow routing. Current: event-driven SFX, 36-entry bench,
+ * 18dB bed under VO. Preserved for reference. Active validation via Python tests.
+ *
  * Audits the deterministic build BEFORE it ships:
  *   AUDIO (from audio_manifest.json + built files)
  *     1. Master exists, duration = manifest duration_sec ±0.05, true peak < 0 dBFS.

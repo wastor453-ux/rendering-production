@@ -48,7 +48,7 @@ on:
         required: false
         default: ''
       reassemble_bypass_fingerprint:
-        description: 'P4.4: bypass generation fingerprint check in resume (for reassembly when assembly logic changed but chunks are valid). Use ONLY when re-assembling, never for re-rendering.'
+        description: 'P4.4 SPLIT (§6.1): assembly-only reassembly mode. Declares zero render jobs expected. The split fingerprint (render vs assembly vs audio) means assembly-logic changes no longer invalidate chunks — this flag selects mode, not a validation bypass. Use ONLY for re-assembly, never for re-rendering.'
         required: false
         type: boolean
         default: false
@@ -887,6 +887,34 @@ jobs:
                 f"digest {asset_m['manifest_sha256'][:16]}...")
           PY
 
+      - name: Build chunk ledger (gate)
+        # 2026-10-10 (Hamza's rule): the ledger is the ground truth for
+        # "which chunks are safely rendered". Assembly NEVER proceeds on an
+        # incomplete ledger — it fails naming the exact missing chunk IDs.
+        # The ledger is uploaded as an artifact so any future resume or
+        # reassembly can read it instead of re-discovering chunk state.
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/ledger/chunks
+          # Normalize: copy every chunk manifest into one flat dir.
+          for mf in /tmp/chunks/current/chunk_*_manifest.json; do
+            [ -f "$mf" ] && cp "$mf" "/tmp/ledger/chunks/$(basename $mf)"
+          done
+          for mf in /tmp/chunks/prior/chunk_*/chunk_*_manifest.json; do
+            [ -f "$mf" ] && cp "$mf" "/tmp/ledger/chunks/$(basename $mf)"
+          done
+          python3 .github/scripts/build_ledger.py \
+            --job-manifest /tmp/job/job_manifest.json \
+            --chunks-dir /tmp/ledger/chunks \
+            --out /tmp/ledger/chunk-ledger-${{ needs.plan.outputs.job_identity }}.json
+
+      - name: Upload chunk ledger
+        uses: actions/upload-artifact@v4
+        with:
+          name: chunk-ledger-${{ needs.plan.outputs.job_identity }}
+          path: /tmp/ledger/chunk-ledger-${{ needs.plan.outputs.job_identity }}.json
+          retention-days: 90
+
       - name: Verify checksums match manifest
         run: |
           set -euo pipefail
@@ -935,14 +963,19 @@ jobs:
           print(f"all chunk checksums OK: {len(staged)} staged "
                 f"({sum(staged.values())} reused)")
 
-          # Assemble in chunk_id order (no re-encode)
+          # Assemble in chunk_id order.
+          # P4.4 §6.5 FIX: Use -c copy (stream copy, NO re-encode).
+          # The old command used -c:v libx264 (re-encode) which duplicated
+          # 14 frames at chunk boundaries (23,165 vs 23,151 expected).
+          # All chunks are identically-encoded H.264, so stream copy is
+          # safe and preserves exact frame counts.
           ordered = sorted(staged.keys())
           with open('/tmp/assemble/concat.txt', 'w') as f:
               for cid in ordered:
                   f.write(f"file 'chunk_{cid}.mp4'\n")
           print(f'Concat list: {len(ordered)} chunks in order')
           PY
-          ffmpeg -y -f concat -safe 0 -i /tmp/assemble/concat.txt -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p /tmp/master_video.mp4
+          ffmpeg -y -f concat -safe 0 -i /tmp/assemble/concat.txt -c copy /tmp/master_video.mp4
           echo "video assembled: /tmp/master_video.mp4"
 
       - name: Build concatenated VO (if needed)
@@ -1029,10 +1062,10 @@ jobs:
           FPS_R=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 $MASTER)
           # P4.4: nb_frames is unreliable for H.264. Use count_frames.
           FRAMES=$(ffprobe -v error -select_streams v:0 -show_entries stream=nb_read_frames -of default=noprint_wrappers=1:nokey=1 -count_frames $MASTER)
-          # Fallback: duration * fps if count_frames fails
+          # Fallback: duration * fps if count_frames fails (use round, not int, for fp precision)
           if [ -z "$FRAMES" ] || [ "$FRAMES" = "N/A" ]; then
             V_DUR_TMP=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $MASTER)
-            FRAMES=$(python3 -c "import sys; print(int(float(sys.argv[1]) * 30))" "$V_DUR_TMP")
+            FRAMES=$(python3 -c "import sys; print(round(float(sys.argv[1]) * 30))" "$V_DUR_TMP")
           fi
           V_DUR=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $MASTER)
 

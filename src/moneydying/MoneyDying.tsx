@@ -28,7 +28,8 @@ export const MoneyDyingVideo: React.FC = () => {
   const d = seq(S4, "audio/md_s4.wav");
 
   return (
-    <AbsoluteFill style={{ background: "#0F0D24" }}>
+    <AbsoluteFill style={{ background: "#F8FAFF" }}>
+      {/* P4.4 migration: light canvas (#F8FAFF), was dark #0F0D24 */}
       <Sequence from={a.s} durationInFrames={a.dur}><MD1Hook /></Sequence>
       <Sequence from={b.s} durationInFrames={b.dur}><MD2Math /></Sequence>
       <Sequence from={c.s} durationInFrames={c.dur}><MD3Why /></Sequence>
