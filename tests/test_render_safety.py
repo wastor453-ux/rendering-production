@@ -239,3 +239,42 @@ class TestAssemblyOnlySourceSha(unittest.TestCase):
             prior_run_status={"status": "completed", "conclusion": "failure"},
             mode="assembly_only")
         self.assertFalse(r["ok"], "real render changes must still be rejected")
+
+
+class TestAssemblyOnlyResumePlan(unittest.TestCase):
+    """2026-10-10: build_resume_plan in assembly_only mode must produce a
+    zero-render plan (all chunks reusable) even when source_sha changed.
+    This is the exact production bug from run 37987633411."""
+
+    def test_assembly_only_zero_render_on_sha_change(self):
+        import sys as _sys, os as _os
+        _sys.path.insert(0, _os.path.join(REPO_ROOT, "tests"))
+        from test_recovery import (base_inputs, make_job_manifest,
+                                   make_chunk_manifest, build_manifest_shas)
+        from recovery import build_resume_plan
+
+        prior = make_job_manifest(run_id="111", sha="a" * 40,
+                                  inputs=base_inputs())
+        gen = prior["generation_fingerprint"]
+        src = prior["github"]["source_sha"]
+        pcm = {i: make_chunk_manifest(prior["job_identity"], i,
+                                      i * 100, i * 100 + 99, gen,
+                                      source_sha=src)
+               for i in range(3)}
+        # Current run at a DIFFERENT commit, identical render inputs
+        current = base_inputs(source_sha="b" * 40)
+        plan = [{"chunk_id": i, "start": i * 100, "end": i * 100 + 99}
+                for i in range(3)]
+        real_shas = {cid: cm["output_sha256"] for cid, cm in pcm.items()}
+        result = build_resume_plan(
+            prior, pcm, current, plan,
+            prior["inputs"]["asset_manifest_sha256"],
+            artifact_shas=real_shas,
+            manifest_shas=build_manifest_shas(pcm),
+            prior_run_status={"status": "completed", "conclusion": "failure"},
+            mode="assembly_only")
+        self.assertTrue(result["ok"], f"errors: {result.get('errors')}")
+        rp = result["resume_plan"]
+        self.assertEqual(rp["render_count"], 0,
+                         f"expected zero render, got: {rp['render']}")
+        self.assertEqual(rp["reused_count"], 3)

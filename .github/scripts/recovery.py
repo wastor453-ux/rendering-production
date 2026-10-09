@@ -47,6 +47,30 @@ def _err(errors, msg):
     errors.append(msg)
 
 
+def generation_fingerprint_for_mode(inputs: dict, mode: str,
+                                    prior_source_sha: str = None) -> str:
+    """Compute the generation fingerprint for a resume mode.
+
+    2026-10-10 (Hamza's rule): in assembly_only mode, source_sha (the git
+    commit hash) must not invalidate chunks. Every commit changes source_sha,
+    which used to force a full re-render after any fix. Assembly-only
+    concatenates existing chunks (bytes verified per-chunk); what matters is
+    the render inputs match, not the commit hash. chunk_recovery keeps the
+    strict check.
+
+    In assembly_only mode the current inputs are fingerprinted AS IF they
+    were the prior commit (prior_source_sha). This makes the fingerprint
+    exactly match the generation_fingerprint stored in the prior chunks'
+    manifests, so per-chunk eligibility passes. For job-level
+    prior-vs-current comparison, pass prior_source_sha=None and both sides
+    normalize to the same constant.
+    """
+    inputs = dict(inputs)
+    if mode == "assembly_only":
+        inputs["source_sha"] = prior_source_sha or "assembly-only"
+    return compute_generation_fingerprint(inputs)
+
+
 def validate_resume_source(prior_manifest: dict, current_inputs: dict,
                            current_asset_digest: str,
                            prior_run_status: dict = None,
@@ -129,35 +153,23 @@ def validate_resume_source(prior_manifest: dict, current_inputs: dict,
 
     # 3. Generation fingerprints must match exactly.
     # P4.4 SPLIT: The render fingerprint no longer includes workflow_content_sha.
-    # 2026-10-10 FIX (Hamza's rule): in assembly_only mode, source_sha (the
-    # git commit hash) is EXCLUDED from comparison. Every commit — even an
-    # assembly-script fix — changes source_sha, which used to invalidate all
-    # chunks and force a full re-render after every assembly fix. In
-    # assembly-only mode we concatenate existing chunks; their bytes are
-    # verified per-chunk against their own manifests. What matters is that
-    # the RENDER inputs match (composition, frames, codec, assets, etc.),
-    # not the commit hash. chunk_recovery mode keeps the strict check.
-    if mode == "assembly_only":
-        # Normalize source_sha: the commit hash is irrelevant in assembly-only
-        # mode (we concatenate existing chunks; their bytes are verified
-        # per-chunk). Without this, every commit invalidates all chunks.
-        prior_cmp = dict(prior_inputs); prior_cmp["source_sha"] = "assembly-only"
-        curr_cmp = dict(current_inputs); curr_cmp["source_sha"] = "assembly-only"
-        prior_gen_cmp = compute_generation_fingerprint(prior_cmp)
-        curr_gen_cmp = compute_generation_fingerprint(curr_cmp)
-        if prior_gen_cmp != curr_gen_cmp:
+    # 2026-10-10 FIX (Hamza's rule): generation_fingerprint_for_mode()
+    # excludes source_sha in assembly_only mode (see helper above).
+    # chunk_recovery mode keeps the strict check.
+    prior_gen_cmp = generation_fingerprint_for_mode(prior_inputs, mode)
+    curr_gen_cmp = generation_fingerprint_for_mode(current_inputs, mode)
+    if prior_gen_cmp != curr_gen_cmp:
+        if mode == "assembly_only":
             _err(errors, "generation fingerprint mismatch (excl. source_sha): "
                           "prior run produced a different render generation")
-            for d in describe_fingerprint_diff(curr_cmp, prior_cmp):
-                _err(errors, f"  diff: {d}")
         else:
-            print("P4.4: assembly-only mode — render fingerprint MATCHES "
-                  "(source_sha excluded), zero render jobs will be scheduled")
-    elif prior_gen != current_gen:
-        _err(errors, "generation fingerprint mismatch: prior run produced a "
-                      "different render generation")
+            _err(errors, "generation fingerprint mismatch: prior run produced a "
+                          "different render generation")
         for d in describe_fingerprint_diff(current_inputs, prior_inputs):
             _err(errors, f"  diff: {d}")
+    elif mode == "assembly_only":
+        print("P4.4: assembly-only mode — render fingerprint MATCHES "
+              "(source_sha excluded), zero render jobs will be scheduled")
 
     # 4. Asset manifest digest must match (defense in depth; also in fingerprint).
     # P4.4: This check is NOT bypassed. Different assets mean different
@@ -423,7 +435,12 @@ def build_resume_plan(prior_manifest: dict, prior_chunk_manifests: dict,
         return {"ok": False, "errors": validation["errors"]}
 
     try:
-        generation = compute_generation_fingerprint(current_inputs)
+        # 2026-10-10: mode-aware — assembly_only fingerprints current inputs
+        # as the prior commit, so per-chunk eligibility matches the stored
+        # chunk fingerprints. See generation_fingerprint_for_mode().
+        prior_sha = prior_manifest.get("github", {}).get("source_sha")
+        generation = generation_fingerprint_for_mode(
+            current_inputs, mode, prior_source_sha=prior_sha)
     except ValueError as e:
         return {"ok": False, "errors": [f"current inputs invalid: {e}"]}
 
