@@ -1,6 +1,17 @@
-# Large binary assets via Git LFS (audio, video)
-*.wav filter=lfs diff=lfs merge=lfs -text
-*.mp3 filter=lfs diff=lfs merge=lfs -text
-*.mp4 filter=lfs diff=lfs merge=lfs -text
-*.pth filter=lfs diff=lfs merge=lfs -text
-*.bin filter=lfs diff=lfs merge=lfs -text
+# Git LFS policy: NOT USED
+#
+# All binary assets in this repository are under 10MB and are managed
+# as normal Git blobs. Git LFS is intentionally not used because:
+#   1. git-lfs is not available in this build environment
+#   2. All committed binaries are well under GitHub's 100MB/file limit
+#   3. The workflow's `lfs: true` checkout would fetch pointer files
+#      instead of real content if LFS were half-configured
+#
+# If a future asset exceeds 50MB, set up Git LFS properly:
+#   1. Install git-lfs locally and on all runner images
+#   2. Add specific path patterns below (not wildcards)
+#   3. Migrate with `git lfs migrate import`
+#   4. Verify with `git lfs ls-files` before pushing
+#
+# The workflow's audio mux step checks for LFS pointer files
+# and fails closed if one is found instead of real audio.

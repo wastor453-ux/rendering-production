@@ -7,9 +7,10 @@ on:
         description: 'Remotion composition ID'
         required: true
         default: 'P3Rehearsal'
-      job_id:
-        description: 'Job ID (e.g. 2026-001)'
-        required: true
+      label:
+        description: 'Human-readable label (display only, NOT used for artifact identity)'
+        required: false
+        default: ''
       start_frame:
         description: 'First frame (inclusive)'
         required: true
@@ -30,9 +31,10 @@ on:
         required: false
         default: '18'
       with_audio:
-        description: 'Mux canonical VO+music mix (true/false)'
+        description: 'Mux canonical VO+music mix'
         required: false
-        default: 'true'
+        type: boolean
+        default: true
       vo_file:
         description: 'VO source (relative to repo root)'
         required: false
@@ -41,216 +43,613 @@ on:
         description: 'Music bed source (relative to repo root)'
         required: false
         default: 'public/audio/bed.mp3'
-      # TEST ONLY: deliberately fail this chunk_id (for retry testing)
-      fail_chunk:
-        description: 'TEST: fail this chunk_id (-1 = disabled)'
-        required: false
-        default: '-1'
+      # NOTE: resume_from was deliberately REMOVED (P3.5.2).
+      # Cross-attempt chunk reuse is not supported. If a chunk fails,
+      # trigger a fresh workflow_dispatch — a new run_id means a new
+      # canonical identity, and all chunks render under it. Do NOT use
+      # `gh run rerun --failed` for partial retries: the new attempt would
+      # generate a different identity and the assembly would reject the mix.
 
 env:
   NODE_VERSION: '24.20.0'
   REMOTION_VERSION: '4.0.532'
+  # Custom runner-image label. Do NOT name this RUNNER_OS — that is a GitHub
+  # reserved variable (always "Linux" on ubuntu runners).
+  RUNNER_IMAGE: 'ubuntu-24.04'
 
 jobs:
-  # --- Job 1: Generate the chunk matrix ---
+  # --- Job 1: Generate canonical identity + chunk plan + job manifest ---
   plan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
-      job_id: ${{ inputs.job_id }}
+      job_identity: ${{ steps.identity.outputs.job_identity }}
     steps:
-      - id: set
+      - uses: actions/checkout@v4
+
+      - name: Setup Node (for manifest version measurement)
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - id: identity
+        name: Generate canonical job identity
         run: |
+          set -euo pipefail
+          JOB_ID=$(python3 .github/scripts/job_identity.py generate \
+            "${{ github.run_id }}" "${{ github.run_attempt }}" "${{ github.sha }}")
+          echo "Canonical job identity: $JOB_ID"
+          # Label via env var (validated by plan.py); display only
+          echo "Label (display only): $LABEL"
+          # Validate before starting expensive rendering (P0 requirement 8)
+          python3 .github/scripts/job_identity.py validate "$JOB_ID"
+          echo "job_identity=$JOB_ID" >> $GITHUB_OUTPUT
+        env:
+          LABEL: ${{ inputs.label }}
+
+      - id: manifest
+        name: Build job manifest
+        run: |
+          set -euo pipefail
+          # P3.6.2: planning logic extracted to .github/scripts/plan.py
+          # (testable module; all inputs via env vars, validated inside).
+          python3 .github/scripts/plan.py
+        env:
+          JOB_IDENTITY: ${{ steps.identity.outputs.job_identity }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
+          GITHUB_SHA: ${{ github.sha }}
+          COMPOSITION: ${{ inputs.composition }}
+          START_FRAME: ${{ inputs.start_frame }}
+          END_FRAME: ${{ inputs.end_frame }}
+          CHUNK_SIZE: ${{ inputs.chunk_size }}
+          MAX_PARALLEL: ${{ inputs.max_parallel }}
+          CRF: ${{ inputs.crf }}
+          WITH_AUDIO: ${{ inputs.with_audio }}
+          VO_FILE: ${{ inputs.vo_file }}
+          BED_FILE: ${{ inputs.bed_file }}
+          LABEL: ${{ inputs.label }}
+          OUTPUT_DIR: /tmp/job
+          REPO_ROOT: .
+
+      - id: set
+        name: Generate chunk matrix
+        run: |
+          set -euo pipefail
           python3 - <<'PY'
           import json, os
-          start, end, size = int(os.environ['START']), int(os.environ['END']), int(os.environ['SIZE'])
-          chunks = []
-          cid = 0
-          s = start
-          while s <= end:
-              e = min(s + size - 1, end)
-              chunks.append({"chunk_id": cid, "start": s, "end": e})
-              cid += 1; s = e + 1
-          print(f"Planning {len(chunks)} chunks for frames {start}-{end}")
+          with open('/tmp/job/job_manifest.json') as f:
+              m = json.load(f)
+          chunks = m['plan']['chunks']
+          print(f"Planning {len(chunks)} chunks for job {m['job_identity']}")
           with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
               f.write(f"matrix={json.dumps({'chunk': chunks})}\n")
           PY
-        env:
-          START: ${{ inputs.start_frame }}
-          END: ${{ inputs.end_frame }}
-          SIZE: ${{ inputs.chunk_size }}
+
+      - name: Upload job manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: job-${{ steps.identity.outputs.job_identity }}
+          path: |
+            /tmp/job/job_manifest.json
+            /tmp/job/asset_manifest.json
+          retention-days: 30
 
   # --- Job 2: Render chunks in parallel (matrix) ---
   render-chunk:
     needs: plan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       max-parallel: ${{ fromJSON(inputs.max_parallel) }}
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
 
-      - name: Setup Node
+      - name: Setup Node (with npm cache)
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          # cache disabled for stability
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
 
-      - name: Install system deps
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg libnss3 libatk1.0-0 libatk-bridge2.0-0 \
-            libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 \
-            libxrandr2 libgbm1 libasound2t64
-
-      - name: Install npm deps (pinned)
-        working-directory: .
-        run: npm ci --no-audit --no-fund
-
-      - name: Ensure Chromium (pinned by Remotion)
-        working-directory: .
-        run: npx remotion browser ensure
-
-      - name: Render chunk ${{ matrix.chunk.chunk_id }}
-        working-directory: .
+      - name: Preflight system dependencies
+        id: preflight
         run: |
           set -euo pipefail
-          # (fail_chunk test hook removed after RETRY-001 validation)
-          npx remotion render ${{ inputs.composition }} \
-            /tmp/chunk_${{ matrix.chunk.chunk_id }}.mp4 \
-            --frames=${{ matrix.chunk.start }}-${{ matrix.chunk.end }} \
-            --concurrency=2 --codec=h264 --crf=${{ inputs.crf }} --overwrite
-          [ -f /tmp/chunk_${{ matrix.chunk.chunk_id }}.mp4 ] || { echo "chunk output missing"; exit 1; }
-          sha256sum /tmp/chunk_${{ matrix.chunk.chunk_id }}.mp4 | cut -d' ' -f1 > /tmp/chunk_${{ matrix.chunk.chunk_id }}.sha256
-          echo "chunk_id=${{ matrix.chunk.chunk_id }}" > /tmp/chunk_${{ matrix.chunk.chunk_id }}.meta
-          echo "start=${{ matrix.chunk.start }}" >> /tmp/chunk_${{ matrix.chunk.chunk_id }}.meta
-          echo "end=${{ matrix.chunk.end }}" >> /tmp/chunk_${{ matrix.chunk.chunk_id }}.meta
+          # Render jobs need chromium libs only (ffmpeg not used for rendering)
+          if python3 .github/scripts/preflight.py "${{ env.NODE_VERSION }}" --for render; then
+            echo "skip_apt=true" >> $GITHUB_OUTPUT
+            echo "All deps present, skipping apt-get."
+          else
+            echo "skip_apt=false" >> $GITHUB_OUTPUT
+            echo "Missing deps, will install."
+          fi
+
+      - name: Install system deps (only if preflight failed)
+        if: steps.preflight.outputs.skip_apt == 'false'
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          # Note: ffmpeg NOT installed on render jobs (only needed for assembly)
+          # R-021 (P3.8): ONE unified package set from preflight.py::BROWSER_PACKAGES.
+          PKGS=$(python3 -c "import sys; sys.path.insert(0, '.github/scripts'); from preflight import BROWSER_PACKAGES; print(' '.join(BROWSER_PACKAGES))")
+          echo "Installing: $PKGS"
+          sudo apt-get install -y -qq --no-install-recommends $PKGS
+          # Re-verify after install
+          python3 .github/scripts/preflight.py "${{ env.NODE_VERSION }}" --for render
+
+      - name: Install npm deps (pinned)
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          # Verify Remotion version matches pin
+          INSTALLED=$(node -p "require('remotion/package.json').version")
+          [ "$INSTALLED" = "${{ env.REMOTION_VERSION }}" ] || {
+            echo "Remotion version mismatch: got $INSTALLED, expected ${{ env.REMOTION_VERSION }}"
+            exit 1
+          }
+          echo "Remotion $INSTALLED verified."
+
+      - name: Ensure Chromium (cached)
+        uses: actions/cache@v4
+        with:
+          # P3.6: Remotion 4.0.532 downloads the browser to
+          # <project>/node_modules/.remotion (NOT ~/.cache/remotion).
+          # Verified from @remotion/renderer/dist/browser/get-download-destination.js.
+          # This restore runs AFTER `npm ci`, so the directory survives.
+          # Exact key only — no restore-keys prefix. Bump -vN to invalidate.
+          path: node_modules/.remotion
+          key: chromium-${{ env.RUNNER_IMAGE }}-remotion-${{ env.REMOTION_VERSION }}-v1
+
+      - name: Download Chromium if cache missed
+        id: browser
+        run: |
+          set -euo pipefail
+          npx remotion browser ensure
+          # P3.5.2: `npx remotion browser version` does NOT exist in 4.0.532.
+          # Find the actual binary Remotion downloaded.
+          # Version is recorded AFTER dependency verification (next step).
+          CHROME_BIN=$(find node_modules/.remotion -name "chrome-headless-shell" -type f 2>/dev/null | head -1)
+          if [ -z "$CHROME_BIN" ] || [ ! -x "$CHROME_BIN" ]; then
+            echo "FATAL: Chromium executable not found in node_modules/.remotion after browser ensure" >&2
+            exit 1
+          fi
+          echo "Chromium binary: $CHROME_BIN"
+          echo "binary_path=$CHROME_BIN" >> $GITHUB_OUTPUT
+          echo "$CHROME_BIN" > /tmp/chromium_binary.txt
+
+      - name: Verify browser dependencies (real binary)
+        run: |
+          set -euo pipefail
+          # R-021 (P3.6.5): Three-outcome contract via verify_browser_for_render().
+          # Python writes the outcome to JSON and exits 0 for all three
+          # classified outcomes. Only an unexpected Python crash exits non-zero
+          # (set -e then fails closed, which is correct).
+          # This avoids the set -e trap where sys.exit(2) would kill the step
+          # before the repair branch could run.
+          echo "Checking dependencies for: $CHROME_BIN_PATH"
+          python3 - <<'PY'
+          import json, os, sys
+          sys.path.insert(0, '.github/scripts')
+          from preflight import verify_browser_for_render
+          binary = os.environ['CHROME_BIN_PATH']
+          outcome = verify_browser_for_render(binary)
+          with open('/tmp/browser_check.json', 'w') as f:
+              json.dump(outcome, f)
+          print(f"Outcome: {outcome['outcome']}")
+          # Exit 0 for all classified outcomes; shell branches on JSON.
+          # Non-zero only on unexpected crash (fail closed via set -e).
+          PY
+          OUTCOME=$(python3 -c "import json; print(json.load(open('/tmp/browser_check.json'))['outcome'])")
+          if [ "$OUTCOME" = "verified" ]; then
+            echo "Browser dependencies verified."
+          elif [ "$OUTCOME" = "unrepairable" ]; then
+            REASON=$(python3 -c "import json; print(json.load(open('/tmp/browser_check.json')).get('reason','unknown'))")
+            echo "FATAL: browser unrepairable: $REASON" >&2
+            echo "Not a package-install problem; failing closed." >&2
+            exit 1
+          elif [ "$OUTCOME" = "repairable" ]; then
+            echo "Missing dependencies detected; attempting repair..."
+            sudo apt-get update -qq
+            # R-021 (P3.8): ONE unified package set from preflight.py::BROWSER_PACKAGES.
+            # Do not define a separate list here.
+            PKGS=$(python3 -c "import sys; sys.path.insert(0, '.github/scripts'); from preflight import BROWSER_PACKAGES; print(' '.join(BROWSER_PACKAGES))")
+            echo "Installing: $PKGS"
+            sudo apt-get install -y $PKGS
+            echo "Rechecking after repair..."
+            python3 - <<'PY2'
+          import json, os, sys
+          sys.path.insert(0, '.github/scripts')
+          from preflight import verify_browser_for_render
+          binary = os.environ['CHROME_BIN_PATH']
+          outcome = verify_browser_for_render(binary)
+          with open('/tmp/browser_recheck.json', 'w') as f:
+              json.dump(outcome, f)
+          print(f"Recheck outcome: {outcome['outcome']}")
+          PY2
+            RECHECK=$(python3 -c "import json; print(json.load(open('/tmp/browser_recheck.json'))['outcome'])")
+            if [ "$RECHECK" = "verified" ]; then
+              echo "Browser dependencies verified after repair."
+            else
+              DETAIL=$(python3 -c "import json; d=json.load(open('/tmp/browser_recheck.json')); print(d.get('reason', d.get('missing','unknown')))")
+              echo "FATAL: still failing after repair: $DETAIL" >&2
+              exit 1
+            fi
+          else
+            echo "FATAL: unknown browser check outcome: $OUTCOME" >&2
+            exit 1
+          fi
+          # Record version ONLY after executable and dependencies verified.
+          CHROME_BIN="$CHROME_BIN_PATH"
+          CHROME_VER=$("$CHROME_BIN" --version 2>/dev/null)
+          if [ -z "$CHROME_VER" ]; then
+            echo "FATAL: version inspection failed for verified binary" >&2
+            exit 1
+          fi
+          echo "Chromium: $CHROME_VER"
+          echo "$CHROME_VER" > /tmp/chromium_version.txt
+        env:
+          CHROME_BIN_PATH: ${{ steps.browser.outputs.binary_path }}
+
+      - name: Render chunk ${{ matrix.chunk.chunk_id }}
+        run: |
+          set -euo pipefail
+          JOB_ID="${{ needs.plan.outputs.job_identity }}"
+          CID="${{ matrix.chunk.chunk_id }}"
+          START="${{ matrix.chunk.start }}"
+          END="${{ matrix.chunk.end }}"
+
+          # P3.6.2: validate inputs via env vars (no raw ${{ inputs.* }} in shell).
+          # plan.py already validated, but defense in depth for direct dispatches.
+          python3 - <<'PY'
+          import os, sys
+          sys.path.insert(0, '.github/scripts')
+          from plan import validate_composition, validate_crf
+          validate_composition(os.environ['COMPOSITION'])
+          validate_crf(os.environ['CRF'])
+          PY
+
+          # Record render start
+          RENDER_START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          T0=$(date +%s)
+
+          if ! npx remotion render "$COMPOSITION" \
+            /tmp/chunk_${CID}.mp4 \
+            --frames=${START}-${END} \
+            --concurrency=2 --codec=h264 --crf="$CRF" --overwrite \
+            > /tmp/render_${CID}.log 2>&1; then
+            echo "RENDER FAILED for chunk $CID (job $JOB_ID)"
+            echo "=== render log (tail 50) ==="
+            tail -50 /tmp/render_${CID}.log
+            exit 1
+          fi
+
+          T1=$(date +%s)
+          RENDER_END=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          DURATION=$((T1 - T0))
+          export RENDER_START RENDER_END DURATION
+
+          # Verify output exists and is non-empty
+          [ -f /tmp/chunk_${CID}.mp4 ] || { echo "chunk output missing"; exit 1; }
+          [ -s /tmp/chunk_${CID}.mp4 ] || { echo "chunk output empty"; exit 1; }
+
+          OUT_SHA=$(sha256sum /tmp/chunk_${CID}.mp4 | cut -d' ' -f1)
+          OUT_BYTES=$(stat -c%s /tmp/chunk_${CID}.mp4)
+          export OUT_SHA OUT_BYTES
+          echo "$OUT_SHA" > /tmp/chunk_${CID}.sha256
+
+          # Build chunk manifest with ACTUAL runtime environment (not placeholders)
+          # Collect real versions from the runner — verify_assembly() rejects
+          # "unknown" or "resolved-at-render" values.
+          ACTUAL_NODE=$(node --version)
+          ACTUAL_NPM=$(npm --version)
+          ACTUAL_REMOTION=$(node -p "require('remotion/package.json').version")
+          # React version: fail closed if not determinable (no "from-lockfile" fallback)
+          ACTUAL_REACT=$(node -p "require('react/package.json').version")
+          # Chromium version: must have been recorded by the browser step.
+          # Fail closed — never accept "unknown" as a measured fact.
+          if [ ! -s /tmp/chromium_version.txt ]; then
+            echo "FATAL: /tmp/chromium_version.txt missing or empty — Chromium version not measured" >&2
+            exit 1
+          fi
+          ACTUAL_CHROMIUM=$(cat /tmp/chromium_version.txt)
+          ACTUAL_OS=$(lsb_release -ds)
+          export ACTUAL_NODE ACTUAL_NPM ACTUAL_REMOTION ACTUAL_REACT ACTUAL_CHROMIUM ACTUAL_OS
+
+          python3 - <<PY
+          import json, os, sys
+          sys.path.insert(0, '.github/scripts')
+          from manifest import build_chunk_manifest
+          # Actual runtime environment — every field must be a real measured value
+          env_dict = {
+              "node_version": os.environ['ACTUAL_NODE'],
+              "npm_version": os.environ['ACTUAL_NPM'],
+              "remotion_version": os.environ['ACTUAL_REMOTION'],
+              "react_version": os.environ['ACTUAL_REACT'],
+              "chromium_version": os.environ['ACTUAL_CHROMIUM'],
+              "os": os.environ['ACTUAL_OS'],
+              "runner_image": "ubuntu-24.04",
+          }
+          cm = build_chunk_manifest(
+              job_identity=os.environ['JOB_ID'],
+              chunk_id=int(os.environ['CID']),
+              start=int(os.environ['START']),
+              end=int(os.environ['END']),
+              source_sha=os.environ['GITHUB_SHA'],
+              env_dict=env_dict,
+              attempt=int(os.environ['GITHUB_RUN_ATTEMPT']),
+          )
+          cm['render_started_at'] = os.environ['RENDER_START']
+          cm['render_finished_at'] = os.environ['RENDER_END']
+          cm['render_duration_s'] = int(os.environ['DURATION'])
+          cm['output_bytes'] = int(os.environ['OUT_BYTES'])
+          cm['output_sha256'] = os.environ['OUT_SHA']
+          cm['validation'] = {'output_exists': True, 'output_non_empty': True}
+          with open(f"/tmp/chunk_{os.environ['CID']}_manifest.json", 'w') as f:
+              json.dump(cm, f, indent=2)
+          print(f"Chunk manifest written for chunk {os.environ['CID']}")
+          print(f"  env fingerprint: {cm['env_fingerprint']}")
+          PY
+        env:
+          JOB_ID: ${{ needs.plan.outputs.job_identity }}
+          CID: ${{ matrix.chunk.chunk_id }}
+          START: ${{ matrix.chunk.start }}
+          END: ${{ matrix.chunk.end }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
+          COMPOSITION: ${{ inputs.composition }}
+          CRF: ${{ inputs.crf }}
 
       - name: Upload chunk artifact
         uses: actions/upload-artifact@v4
         with:
-          name: chunk-${{ needs.plan.outputs.job_id }}-${{ matrix.chunk.chunk_id }}
+          # P0: artifact name uses canonical identity, NOT manual label
+          name: chunk-${{ needs.plan.outputs.job_identity }}-${{ matrix.chunk.chunk_id }}
           path: |
             /tmp/chunk_${{ matrix.chunk.chunk_id }}.mp4
             /tmp/chunk_${{ matrix.chunk.chunk_id }}.sha256
-            /tmp/chunk_${{ matrix.chunk.chunk_id }}.meta
-          retention-days: 3  # cleanup: chunks expire after assembly
+            /tmp/chunk_${{ matrix.chunk.chunk_id }}_manifest.json
+          retention-days: 3
 
   # --- Job 3: Assemble + verify + publish master ---
   assemble:
     needs: [plan, render-chunk]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install ffmpeg
+      - name: Install ffmpeg (minimal)
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg
+          set -euo pipefail
+          if ! python3 .github/scripts/preflight.py --for assemble >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq --no-install-recommends ffmpeg
+          fi
+          python3 .github/scripts/preflight.py --for assemble | head -5
 
-      - name: Download all chunks
+      - name: Download job manifest
         uses: actions/download-artifact@v4
         with:
-          pattern: chunk-${{ needs.plan.outputs.job_id }}-*
+          name: job-${{ needs.plan.outputs.job_identity }}
+          path: /tmp/job
+
+      - name: Download all chunks (this job only)
+        uses: actions/download-artifact@v4
+        with:
+          # P0: pattern scoped to canonical identity — no cross-job mixing.
+          # P3.5.2: cross-attempt resume is DISABLED. If a chunk fails, trigger
+          # a fresh workflow_dispatch — do not attempt to mix chunks across runs.
+          pattern: chunk-${{ needs.plan.outputs.job_identity }}-*
           path: /tmp/chunks
           merge-multiple: true
 
-      - name: Verify chunk checksums + assemble video
+      - name: Verify manifests + assemble video
+        run: |
+          set -euo pipefail
+          JOB_ID="${{ needs.plan.outputs.job_identity }}"
+          echo "Assembling job: $JOB_ID"
+
+          # P0/P1: enforce manifest invariants before touching video.
+          # P3.5.2: resume is DISABLED — only chunks matching the current
+          # job identity are accepted. No allowed_identities override.
+          python3 - <<'PY'
+          import json, os, sys, glob
+          sys.path.insert(0, '.github/scripts')
+          from manifest import verify_assembly
+
+          with open('/tmp/job/job_manifest.json') as f:
+              job_m = json.load(f)
+
+          # Identity must match
+          if job_m['job_identity'] != os.environ['JOB_ID']:
+              print(f"FATAL: manifest job {job_m['job_identity']} != expected {os.environ['JOB_ID']}",
+                    file=sys.stderr)
+              sys.exit(1)
+
+          chunk_ms = []
+          for mf in sorted(glob.glob('/tmp/chunks/chunk_*_manifest.json')):
+              with open(mf) as f:
+                  chunk_ms.append(json.load(f))
+
+          result = verify_assembly(job_m, chunk_ms)
+          if not result['ok']:
+              print("ASSEMBLY REJECTED:", file=sys.stderr)
+              for e in result['errors']:
+                  print(f"  - {e}", file=sys.stderr)
+              sys.exit(1)
+          print(f"Manifest verification passed: {len(chunk_ms)} chunks, job {job_m['job_identity']}")
+          # Mark stage
+          job_m['stage'] = 'video_only'
+          with open('/tmp/job/job_manifest.json', 'w') as f:
+              json.dump(job_m, f, indent=2)
+          PY
+        env:
+          JOB_ID: ${{ needs.plan.outputs.job_identity }}
+
+      - name: Verify asset manifest provenance
+        run: |
+          set -euo pipefail
+          # P3.6.1: verify the retained asset manifest before publication.
+          # Rejects missing, malformed, altered, or mismatched manifests.
+          python3 - <<'PY'
+          import json, os, sys
+          sys.path.insert(0, '.github/scripts')
+          from manifest import verify_asset_manifest
+
+          with open('/tmp/job/job_manifest.json') as f:
+              job_m = json.load(f)
+          with open('/tmp/job/asset_manifest.json') as f:
+              asset_m = json.load(f)
+
+          result = verify_asset_manifest(job_m, asset_m, repo_root='.')
+          if not result['ok']:
+              print("ASSET MANIFEST REJECTED:", file=sys.stderr)
+              for e in result['errors']:
+                  print(f"  - {e}", file=sys.stderr)
+              sys.exit(1)
+          print(f"Asset manifest verified: {len(asset_m['files'])} files, "
+                f"digest {asset_m['manifest_sha256'][:16]}...")
+          PY
+
+      - name: Verify checksums match manifest
         run: |
           set -euo pipefail
           cd /tmp/chunks
-          # verify each chunk
-          for meta in *.meta; do
-            id=$(grep chunk_id "$meta" | cut -d= -f2)
-            expected=$(cat "chunk_${id}.sha256")
-            actual=$(sha256sum "chunk_${id}.mp4" | cut -d' ' -f1)
-            [ "$expected" = "$actual" ] || { echo "checksum FAIL chunk $id"; exit 1; }
+          for mf in chunk_*_manifest.json; do
+            cid=$(python3 -c "import json; print(json.load(open('$mf'))['chunk_id'])")
+            expected=$(python3 -c "import json; print(json.load(open('$mf'))['output_sha256'])")
+            actual=$(sha256sum "chunk_${cid}.mp4" | cut -d' ' -f1)
+            [ "$expected" = "$actual" ] || { echo "checksum FAIL chunk $cid"; exit 1; }
           done
           echo "all chunk checksums OK"
-          # assemble in order (no re-encode)
-          ls chunk_*.mp4 | sort -V | sed "s/^/file '/;s/$/'/" > concat.txt
+
+          # Assemble in chunk_id order (no re-encode)
+          python3 -c "
+          import json, glob
+          ms = []
+          for mf in sorted(glob.glob('chunk_*_manifest.json')):
+              ms.append(json.load(open(mf)))
+          ms.sort(key=lambda m: m['chunk_id'])
+          with open('concat.txt', 'w') as f:
+              for m in ms:
+                  f.write(f\"file 'chunk_{m['chunk_id']}.mp4'\n\")
+          print(f'Concat list: {len(ms)} chunks in order')
+          "
           ffmpeg -y -f concat -safe 0 -i concat.txt -c copy /tmp/master_video.mp4
           echo "video assembled: /tmp/master_video.mp4"
 
       - name: Mux canonical audio (VO + music bed)
-        if: inputs.with_audio == 'true'
+        if: inputs.with_audio
         run: |
           set -euo pipefail
-          # Canonical P3 mix: VO dominant + bed at -18dB (from mix_audio.sh)
-          # Audio segment matches the rendered frame range
           FPS=30
-          START_S=$(echo "scale=3; ${{ inputs.start_frame }} / $FPS" | bc)
-          DUR_S=$(echo "scale=3; (${{ inputs.end_frame }} - ${{ inputs.start_frame }} + 1) / $FPS" | bc)
-          echo "audio segment: start=${START_S}s duration=${DUR_S}s"
+          # P3.6.2: inputs via env vars, validated by plan.py already.
+          # Validate again here (defense in depth) using plan validators.
+          python3 - <<'PY'
+          import os, sys
+          sys.path.insert(0, '.github/scripts')
+          from plan import validate_int, validate_repo_path
+          validate_int("START_FRAME", os.environ['START_FRAME'], min_val=0)
+          validate_int("END_FRAME", os.environ['END_FRAME'], min_val=0)
+          validate_repo_path("VO_FILE", os.environ['VO_FILE'], ".")
+          validate_repo_path("BED_FILE", os.environ['BED_FILE'], ".")
+          PY
+          START_S=$(echo "scale=3; $START_FRAME / $FPS" | bc)
+          DUR_S=$(echo "scale=3; ($END_FRAME - $START_FRAME + 1) / $FPS" | bc)
 
-          [ -f "${{ inputs.vo_file }}" ] || { echo "VO missing: ${{ inputs.vo_file }}"; exit 1; }
-          [ -f "${{ inputs.bed_file }}" ] || { echo "bed missing: ${{ inputs.bed_file }}"; exit 1; }
+          # P3: verify audio assets are real files, not LFS pointers
+          for f in "$VO_FILE" "$BED_FILE"; do
+            [ -f "$f" ] || { echo "audio missing: $f"; exit 1; }
+            if head -c 100 "$f" | grep -q "version https://git-lfs.github.com"; then
+              echo "FATAL: $f is an LFS pointer, not real audio"; exit 1
+            fi
+          done
 
           ffmpeg -y \
             -i /tmp/master_video.mp4 \
-            -ss $START_S -t $DUR_S -i "${{ inputs.vo_file }}" \
-            -ss $START_S -t $DUR_S -i "${{ inputs.bed_file }}" \
+            -ss $START_S -t $DUR_S -i "$VO_FILE" \
+            -ss $START_S -t $DUR_S -i "$BED_FILE" \
             -filter_complex "[1:a]volume=1.0[vo];[2:a]atrim=0:${DUR_S},volume=-18dB[bed];[vo][bed]amix=inputs=2:duration=shortest[aout]" \
             -map 0:v -map "[aout]" \
             -c:v copy -c:a aac -b:a 192k \
             -shortest \
             /tmp/master.mp4
-          echo "audio muxed: /tmp/master.mp4"
+          echo "audio muxed"
+        env:
+          START_FRAME: ${{ inputs.start_frame }}
+          END_FRAME: ${{ inputs.end_frame }}
+          VO_FILE: ${{ inputs.vo_file }}
+          BED_FILE: ${{ inputs.bed_file }}
 
       - name: Verify master (video + audio + pipeline)
         run: |
           set -euo pipefail
-          MASTER=/tmp/master.mp4
-          if [ "${{ inputs.with_audio }}" != "true" ]; then
+          # P5: classify output stage honestly.
+          # VO + music bed is an INTERMEDIATE — the curated SFX mix is a
+          # separate post-production step. Do not label it av_master.
+          # P3.6.2: WITH_AUDIO via env var (not raw interpolation).
+          if [ "$WITH_AUDIO" = "true" ]; then
+            MASTER=/tmp/master.mp4
+            STAGE="av_intermediate"
+          else
             MASTER=/tmp/master_video.mp4
             cp $MASTER /tmp/master.mp4
+            STAGE="video_only"
           fi
+          echo "Output stage: $STAGE"
 
-          echo "=== VIDEO ==="
           W=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1 $MASTER)
           H=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 $MASTER)
           FPS_R=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 $MASTER)
           FRAMES=$(ffprobe -v error -select_streams v:0 -show_entries stream=nb_frames -of default=noprint_wrappers=1:nokey=1 $MASTER)
           V_DUR=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $MASTER)
-          echo "video: ${W}x${H} @ ${FPS_R}fps, ${FRAMES} frames, ${V_DUR}s"
 
-          [ "$W" = "1920" ] && [ "$H" = "1080" ] || { echo "resolution FAIL: ${W}x${H}"; exit 1; }
+          [ "$W" = "1920" ] && [ "$H" = "1080" ] || { echo "resolution FAIL"; exit 1; }
           [ "$FPS_R" = "30/1" ] || { echo "fps FAIL: $FPS_R"; exit 1; }
-          EXPECTED_FRAMES=$(( ${{ inputs.end_frame }} - ${{ inputs.start_frame }} + 1 ))
-          [ "$FRAMES" = "$EXPECTED_FRAMES" ] || { echo "frame count FAIL: expected $EXPECTED_FRAMES got $FRAMES"; exit 1; }
-
+          # P3.6.2: use validated env vars, not raw interpolation
+          EXPECTED=$(( END_FRAME - START_FRAME + 1 ))
+          [ "$FRAMES" = "$EXPECTED" ] || { echo "frame count FAIL"; exit 1; }
           ffmpeg -v error -i $MASTER -f null - || { echo "decode FAIL"; exit 1; }
-          echo "video OK"
 
-          echo "=== AUDIO ==="
-          if [ "${{ inputs.with_audio }}" = "true" ]; then
+          if [ "$WITH_AUDIO" = "true" ]; then
             A_STREAMS=$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 $MASTER | wc -l)
             [ "$A_STREAMS" -ge 1 ] || { echo "audio stream MISSING"; exit 1; }
             A_DUR=$(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 $MASTER)
-            echo "audio: ${A_STREAMS} stream(s), ${A_DUR}s (video ${V_DUR}s)"
-            # audio duration must match video within 0.5s
             DIFF=$(echo "$V_DUR - $A_DUR" | bc | tr -d -)
-            echo "a/v duration diff: ${DIFF}s"
-            python3 -c "import sys; sys.exit(0 if abs(float('$DIFF')) < 0.5 else 1)" || { echo "a/v sync FAIL: diff ${DIFF}s"; exit 1; }
-            echo "audio OK"
-          else
-            echo "audio skipped (with_audio=false)"
+            python3 -c "import sys; sys.exit(0 if abs(float('$DIFF')) < 0.5 else 1)" \
+              || { echo "a/v sync FAIL"; exit 1; }
           fi
 
-          echo "=== PIPELINE ==="
-          # verify composition inputs exist
           [ -f "src/compiled_p3/beat_timeline.json" ] || { echo "beats missing"; exit 1; }
           [ -f "src/compiled_p3/events.json" ] || { echo "events missing"; exit 1; }
-          echo "pipeline inputs OK"
 
-          echo "MASTER VERIFIED: ${W}x${H}, ${FRAMES}f, audio=${{ inputs.with_audio }}"
+          # Record final stage + checksum in job manifest (P5)
+          MASTER_SHA=$(sha256sum /tmp/master.mp4 | cut -d' ' -f1)
+          python3 - <<PY
+          import json
+          with open('/tmp/job/job_manifest.json') as f:
+              m = json.load(f)
+          m['stage'] = "$STAGE"
+          m['final_output_sha256'] = "$MASTER_SHA"
+          from datetime import datetime, timezone
+          m['finished_at'] = datetime.now(timezone.utc).isoformat()
+          with open('/tmp/job/job_manifest.json', 'w') as f:
+              json.dump(m, f, indent=2)
+          print(f"Manifest finalized: stage={m['stage']}")
+          PY
+          echo "MASTER VERIFIED: ${W}x${H}, ${FRAMES}f, stage=$STAGE"
+        env:
+          WITH_AUDIO: ${{ inputs.with_audio }}
+          START_FRAME: ${{ inputs.start_frame }}
+          END_FRAME: ${{ inputs.end_frame }}
 
-      - name: Upload master
+      - name: Upload master + manifest
         uses: actions/upload-artifact@v4
         with:
-          name: master-${{ needs.plan.outputs.job_id }}
-          path: /tmp/master.mp4
+          name: master-${{ needs.plan.outputs.job_identity }}
+          path: |
+            /tmp/master.mp4
+            /tmp/job/job_manifest.json
           retention-days: 30
