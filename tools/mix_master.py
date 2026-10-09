@@ -7,7 +7,14 @@ Deterministic: same manifest -> same master, every time.
 import json, subprocess, os, sys, math
 import numpy as np
 
-ROOT = os.path.expanduser("~/workspace/crackit")
+# P3.6: ROOT is configurable via CRACKIT_ROOT env var for portability.
+# Defaults to the established workspace location. All audio design, timing,
+# gains, and SFX selections are unchanged — only the base path is configurable.
+ROOT = os.environ.get("CRACKIT_ROOT", os.path.expanduser("~/workspace/crackit"))
+if not os.path.isdir(ROOT):
+    print(f"FATAL: CRACKIT_ROOT not found: {ROOT}", file=sys.stderr)
+    print("Set CRACKIT_ROOT env var to the crackit workspace directory.", file=sys.stderr)
+    sys.exit(1)
 PRO = os.path.join(ROOT, "demo-video/public/audio/sfx/pro")
 SHAPED = os.path.join(PRO, "shaped")
 AUD = os.path.join(ROOT, "demo-video/public/audio")

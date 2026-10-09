@@ -1,0 +1,546 @@
+# P4.4: Reassemble-only workflow.
+#
+# RULE (Hamza's order): when ASSEMBLY fails, do NOT re-render chunks.
+# Re-assemble the SAME chunks from the failed run.
+#
+# This workflow takes a failed run ID, downloads its already-rendered
+# chunk artifacts + job manifest, and runs ONLY the assembly pipeline:
+# verify -> stage -> concat -> mux audio -> verify master -> upload.
+# Zero rendering. Zero new chunk jobs.
+#
+# NOTE: Assembly logic is duplicated from render-production.yml (assemble job).
+# Keep in sync. Future refactor: extract to a composite action.
+#
+# Usage: dispatch with source_run_id = the failed run's ID.
+
+name: Render Production — Reassemble Only
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: 'Failed run ID whose chunks to reassemble (NO re-render)'
+        required: true
+        type: string
+      vo_file:
+        description: 'VO source — must match the source run (verified by SHA)'
+        required: false
+        default: 'public/audio/vo_p3.wav'
+      bed_file:
+        description: 'Music bed source — must match the source run (verified by SHA)'
+        required: false
+        default: 'public/audio/bed.mp3'
+      skip_audio_sha_check:
+        description: 'Bypass audio SHA verification (use when intentionally changing audio)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  validate-source:
+    runs-on: ubuntu-24.04
+    outputs:
+      job_identity: ${{ steps.validate.outputs.job_identity }}
+      composition: ${{ steps.validate.outputs.composition }}
+      start_frame: ${{ steps.validate.outputs.start_frame }}
+      end_frame: ${{ steps.validate.outputs.end_frame }}
+      with_audio: ${{ steps.validate.outputs.with_audio }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate source run and extract job manifest
+        id: validate
+        env:
+          REPO: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          VO_FILE: ${{ inputs.vo_file }}
+          BED_FILE: ${{ inputs.bed_file }}
+          SKIP_AUDIO_SHA_CHECK: ${{ inputs.skip_audio_sha_check }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, sys, tempfile, urllib.request, urllib.error, urllib.parse
+
+          repo = os.environ["REPO"]
+          token = os.environ["GITHUB_TOKEN"]
+          source_run_id = os.environ["SOURCE_RUN_ID"]
+
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, headers, newurl):
+                  return None
+
+          def api_get(url):
+              req = urllib.request.Request(url)
+              req.add_header("Accept", "application/vnd.github+json")
+              req.add_header("Authorization", f"Bearer {token}")
+              req.add_header("User-Agent", "cosmo-p44-reassemble")
+              opener = urllib.request.build_opener(NoRedirect)
+              try:
+                  with opener.open(req, timeout=60) as resp:
+                      return json.load(resp)
+              except urllib.error.HTTPError as e:
+                  print(f"FATAL: API {e.code} for {url.split('?')[0]}", file=sys.stderr)
+                  sys.exit(1)
+
+          def download_zip(artifact_id, dest_path, label):
+              api_url = f"https://api.github.com/repos/{repo}/actions/artifacts/{artifact_id}/zip"
+              req = urllib.request.Request(api_url)
+              req.add_header("Accept", "application/vnd.github+json")
+              req.add_unredirected_header("Authorization", f"Bearer {token}")
+              req.add_header("User-Agent", "cosmo-p44-reassemble")
+              opener = urllib.request.build_opener(NoRedirect)
+              try:
+                  resp = opener.open(req, timeout=60)
+              except urllib.error.HTTPError as e:
+                  if e.code in (301, 302, 303, 307, 308):
+                      loc = e.headers.get("Location", "")
+                      pr = urllib.parse.urlparse(loc)
+                      if pr.scheme != "https" or not pr.hostname:
+                          print(f"FATAL: unsafe redirect for {label}", file=sys.stderr)
+                          sys.exit(1)
+                      req2 = urllib.request.Request(loc)
+                      req2.add_header("User-Agent", "cosmo-p44-reassemble")
+                      with urllib.request.urlopen(req2, timeout=300) as r2, open(dest_path, "wb") as f:
+                          while True:
+                              ch = r2.read(65536)
+                              if not ch:
+                                  break
+                              f.write(ch)
+                  else:
+                      print(f"FATAL: API {e.code} for {label}", file=sys.stderr)
+                      sys.exit(1)
+              else:
+                  with resp, open(dest_path, "wb") as f:
+                      while True:
+                          ch = resp.read(65536)
+                          if not ch:
+                              break
+                          f.write(ch)
+              if os.path.getsize(dest_path) == 0:
+                  print(f"FATAL: empty download for {label}", file=sys.stderr)
+                  sys.exit(1)
+
+          # 1. Verify source run exists and is the render-production workflow.
+          run = api_get(f"https://api.github.com/repos/{repo}/actions/runs/{source_run_id}")
+          wf_path = (run.get("path") or "")
+          if "render-production.yml" not in wf_path:
+              print(f"FATAL: run {source_run_id} is not render-production.yml (path={wf_path})",
+                    file=sys.stderr)
+              sys.exit(1)
+          print(f"Source run {source_run_id}: {run.get('display_title','')} [{run.get('conclusion')}]")
+
+          # 2. Find the job manifest artifact in the source run.
+          data = api_get(f"https://api.github.com/repos/{repo}/actions/runs/{source_run_id}/artifacts?per_page=100")
+          artifacts = data.get("artifacts", [])
+          job_artifact = None
+          chunk_artifacts = []
+          for a in artifacts:
+              n = a["name"]
+              if n.startswith("job-"):
+                  job_artifact = a
+              elif n.startswith("chunk-"):
+                  chunk_artifacts.append(a)
+          if not job_artifact:
+              print(f"FATAL: no job manifest artifact in run {source_run_id}", file=sys.stderr)
+              sys.exit(1)
+
+          # 3. Download and parse the job manifest.
+          tmpdir = tempfile.mkdtemp()
+          zip_path = os.path.join(tmpdir, "job.zip")
+          download_zip(job_artifact["id"], zip_path, job_artifact["name"])
+          sys.path.insert(0, ".github/scripts")
+          from artifact_verify import open_archive, _safe_members
+          zf = open_archive(zip_path)
+          job_manifest = None
+          for info in _safe_members(zf):
+              if info.filename.endswith("job_manifest.json"):
+                  with zf.open(info) as f:
+                      job_manifest = json.load(f)
+                  break
+          zf.close()
+          if not job_manifest:
+              print("FATAL: job_manifest.json not in job artifact", file=sys.stderr)
+              sys.exit(1)
+
+          job_identity = job_manifest["job_identity"]
+          inputs_m = job_manifest["inputs"]
+          plan_chunks = job_manifest["plan"]["chunks"]
+          expected_count = len(plan_chunks)
+
+          # 4. Verify chunk artifact count matches the plan.
+          if len(chunk_artifacts) != expected_count:
+              print(f"FATAL: source run has {len(chunk_artifacts)} chunk artifacts, "
+                    f"manifest expects {expected_count}", file=sys.stderr)
+              sys.exit(1)
+          print(f"Chunk artifacts OK: {expected_count}")
+
+          # 5. If with_audio, verify local audio files match the source run's SHAs.
+          # Bypass with skip_audio_sha_check=true when intentionally changing audio.
+          with_audio = bool(inputs_m.get("with_audio", False))
+          skip_sha = os.environ.get("SKIP_AUDIO_SHA_CHECK", "false").lower() == "true"
+          if with_audio and not skip_sha:
+              for label, env_key, sha_key in [("VO", "VO_FILE", "vo_sha256"),
+                                              ("bed", "BED_FILE", "bed_sha256")]:
+                  fpath = os.environ[env_key]
+                  if not os.path.isfile(fpath):
+                      print(f"FATAL: {label} file not found: {fpath}", file=sys.stderr)
+                      sys.exit(1)
+                  h = hashlib.sha256()
+                  with open(fpath, "rb") as f:
+                      for b in iter(lambda: f.read(65536), b""):
+                          h.update(b)
+                  actual = h.hexdigest()
+                  expected = inputs_m.get(sha_key, "")
+                  if expected and actual != expected:
+                      print(f"FATAL: {label} SHA mismatch — {fpath} does not match source run. "
+                            f"Provide the correct path via workflow inputs.", file=sys.stderr)
+                      sys.exit(1)
+                  print(f"{label} SHA verified: {fpath}")
+
+          # 6. Emit outputs.
+          def emit(k, v):
+              v = str(v)
+              # Escape for GitHub output
+              v = v.replace("%", "%25").replace("\n", "%0A").replace("\r", "%0D")
+              print(f"{k}={v}")
+
+          out = os.environ.get("GITHUB_OUTPUT", "")
+          import io
+          buf = io.StringIO()
+          for k, v in [("job_identity", job_identity),
+                       ("composition", inputs_m.get("composition", "")),
+                       ("start_frame", inputs_m.get("start_frame", "")),
+                       ("end_frame", inputs_m.get("end_frame", "")),
+                       ("with_audio", str(with_audio).lower())]:
+              esc = str(v).replace("%", "%25").replace("\n", "%0A").replace("\r", "%0D")
+              buf.write(f"{k}={esc}\n")
+          if out:
+              with open(out, "a") as f:
+                  f.write(buf.getvalue())
+          print(f"Validated: job_identity={job_identity}, "
+                f"{inputs_m.get('composition')} "
+                f"frames {inputs_m.get('start_frame')}-{inputs_m.get('end_frame')}, "
+                f"with_audio={with_audio}")
+          PY
+
+  assemble:
+    needs: validate-source
+    runs-on: ubuntu-24.04
+    env:
+      JOB_IDENTITY: ${{ needs.validate-source.outputs.job_identity }}
+      SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+      COMPOSITION: ${{ needs.validate-source.outputs.composition }}
+      START_FRAME: ${{ needs.validate-source.outputs.start_frame }}
+      END_FRAME: ${{ needs.validate-source.outputs.end_frame }}
+      WITH_AUDIO: ${{ needs.validate-source.outputs.with_audio }}
+      VO_FILE: ${{ inputs.vo_file }}
+      BED_FILE: ${{ inputs.bed_file }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ffmpeg (minimal)
+        run: |
+          set -euo pipefail
+          if ! python3 .github/scripts/preflight.py --for assemble >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq --no-install-recommends ffmpeg
+          fi
+          python3 .github/scripts/preflight.py --for assemble | head -5
+
+      - name: Download job manifest + all chunks from source run
+        env:
+          REPO: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, sys, tempfile, urllib.request, urllib.error, urllib.parse
+
+          repo = os.environ["REPO"]
+          token = os.environ["GITHUB_TOKEN"]
+          source_run_id = os.environ["SOURCE_RUN_ID"]
+          job_identity = os.environ["JOB_IDENTITY"]
+
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, headers, newurl):
+                  return None
+
+          def api_get(url):
+              req = urllib.request.Request(url)
+              req.add_header("Accept", "application/vnd.github+json")
+              req.add_header("Authorization", f"Bearer {token}")
+              req.add_header("User-Agent", "cosmo-p44-reassemble")
+              opener = urllib.request.build_opener(NoRedirect)
+              try:
+                  with opener.open(req, timeout=60) as resp:
+                      return json.load(resp)
+              except urllib.error.HTTPError as e:
+                  print(f"FATAL: API {e.code} for {url.split('?')[0]}", file=sys.stderr)
+                  sys.exit(1)
+
+          def download_zip(artifact_id, dest_path, label):
+              api_url = f"https://api.github.com/repos/{repo}/actions/artifacts/{artifact_id}/zip"
+              req = urllib.request.Request(api_url)
+              req.add_header("Accept", "application/vnd.github+json")
+              req.add_unredirected_header("Authorization", f"Bearer {token}")
+              req.add_header("User-Agent", "cosmo-p44-reassemble")
+              opener = urllib.request.build_opener(NoRedirect)
+              try:
+                  resp = opener.open(req, timeout=60)
+              except urllib.error.HTTPError as e:
+                  if e.code in (301, 302, 303, 307, 308):
+                      loc = e.headers.get("Location", "")
+                      pr = urllib.parse.urlparse(loc)
+                      if pr.scheme != "https" or not pr.hostname:
+                          print(f"FATAL: unsafe redirect for {label}", file=sys.stderr)
+                          sys.exit(1)
+                      req2 = urllib.request.Request(loc)
+                      req2.add_header("User-Agent", "cosmo-p44-reassemble")
+                      with urllib.request.urlopen(req2, timeout=300) as r2, open(dest_path, "wb") as f:
+                          while True:
+                              ch = r2.read(65536)
+                              if not ch:
+                                  break
+                              f.write(ch)
+                  else:
+                      print(f"FATAL: API {e.code} for {label}", file=sys.stderr)
+                      sys.exit(1)
+              else:
+                  with resp, open(dest_path, "wb") as f:
+                      while True:
+                          ch = resp.read(65536)
+                          if not ch:
+                              break
+                          f.write(ch)
+              if os.path.getsize(dest_path) == 0:
+                  print(f"FATAL: empty download for {label}", file=sys.stderr)
+                  sys.exit(1)
+
+          sys.path.insert(0, ".github/scripts")
+          from artifact_verify import open_archive, _safe_members
+
+          data = api_get(f"https://api.github.com/repos/{repo}/actions/runs/{source_run_id}/artifacts?per_page=100")
+          artifacts = {a["name"]: a["id"] for a in data.get("artifacts", [])}
+
+          tmpdir = tempfile.mkdtemp()
+
+          # Job manifest -> /tmp/job
+          os.makedirs("/tmp/job", exist_ok=True)
+          job_name = f"job-{job_identity}"
+          if job_name not in artifacts:
+              print(f"FATAL: job artifact not found: {job_name}", file=sys.stderr)
+              sys.exit(1)
+          zp = os.path.join(tmpdir, "job.zip")
+          download_zip(artifacts[job_name], zp, job_name)
+          zf = open_archive(zp)
+          for info in _safe_members(zf):
+              target = os.path.join("/tmp/job", os.path.basename(info.filename))
+              with zf.open(info) as src, open(target, "wb") as dst:
+                  while True:
+                      ch = src.read(65536)
+                      if not ch:
+                          break
+                      dst.write(ch)
+          zf.close()
+          print(f"Job manifest downloaded: {job_name}")
+
+          # Chunks -> /tmp/chunks/prior/chunk_{id}/
+          n = 0
+          for name, aid in sorted(artifacts.items()):
+              if not name.startswith(f"chunk-{job_identity}-"):
+                  continue
+              cid = name.rsplit("-", 1)[1]
+              zp = os.path.join(tmpdir, f"chunk_{cid}.zip")
+              download_zip(aid, zp, name)
+              dest = f"/tmp/chunks/prior/chunk_{cid}"
+              os.makedirs(dest, exist_ok=True)
+              zf = open_archive(zp)
+              for info in _safe_members(zf):
+                  target = os.path.join(dest, os.path.basename(info.filename))
+                  with zf.open(info) as src, open(target, "wb") as dst:
+                      while True:
+                          ch = src.read(65536)
+                          if not ch:
+                              break
+                          dst.write(ch)
+              zf.close()
+              n += 1
+          print(f"Downloaded {n} chunk artifacts from run {source_run_id}")
+          if n == 0:
+              print("FATAL: no chunk artifacts found", file=sys.stderr)
+              sys.exit(1)
+          PY
+
+      - name: Verify manifests + stage chunks
+        run: |
+          set -euo pipefail
+          echo "Reassembling job: $JOB_IDENTITY (from run $SOURCE_RUN_ID, NO re-render)"
+          python3 - <<'PY'
+          import glob, hashlib, json, os, shutil, sys
+          sys.path.insert(0, '.github/scripts')
+          from manifest import verify_assembly
+
+          with open('/tmp/job/job_manifest.json') as f:
+              job_m = json.load(f)
+          if job_m['job_identity'] != os.environ['JOB_IDENTITY']:
+              print(f"FATAL: manifest job {job_m['job_identity']} != expected",
+                    file=sys.stderr)
+              sys.exit(1)
+
+          chunk_ms = []
+          manifest_file_hashes = {}
+          for mf in sorted(glob.glob('/tmp/chunks/prior/chunk_*/chunk_*_manifest.json')):
+              with open(mf, 'rb') as fb:
+                  file_hash = hashlib.sha256(fb.read()).hexdigest()
+              with open(mf) as f:
+                  cm = json.load(f)
+              chunk_ms.append(cm)
+              manifest_file_hashes[cm.get("chunk_id")] = file_hash
+
+          result = verify_assembly(job_m, chunk_ms, manifest_file_hashes)
+          if not result['ok']:
+              print("ASSEMBLY REJECTED:", file=sys.stderr)
+              for e in result['errors']:
+                  print(f"  - {e}", file=sys.stderr)
+              sys.exit(1)
+          print(f"Manifest verification passed: {len(chunk_ms)} chunks")
+
+          # Stage: checksum each video against its manifest, copy to /tmp/assemble
+          def sha256_file(p):
+              h = hashlib.sha256()
+              with open(p, 'rb') as f:
+                  for b in iter(lambda: f.read(65536), b''):
+                      h.update(b)
+              return h.hexdigest()
+
+          os.makedirs('/tmp/assemble', exist_ok=True)
+          staged = []
+          for mf in sorted(glob.glob('/tmp/chunks/prior/chunk_*/chunk_*_manifest.json')):
+              with open(mf) as f:
+                  m = json.load(f)
+              cid = m['chunk_id']
+              video = os.path.join(os.path.dirname(mf), f"chunk_{cid}.mp4")
+              if not os.path.isfile(video):
+                  print(f"FATAL: missing video for chunk {cid}", file=sys.stderr)
+                  sys.exit(1)
+              if sha256_file(video) != m.get('output_sha256'):
+                  print(f"FATAL: checksum FAIL chunk {cid}", file=sys.stderr)
+                  sys.exit(1)
+              shutil.copy2(video, f"/tmp/assemble/chunk_{cid}.mp4")
+              staged.append(cid)
+          print(f"Staged {len(staged)} chunks, all checksums OK")
+
+          ordered = sorted(staged)
+          with open('/tmp/assemble/concat.txt', 'w') as f:
+              for cid in ordered:
+                  f.write(f"file 'chunk_{cid}.mp4'\n")
+          print(f"Concat list: {len(ordered)} chunks in order")
+          PY
+          # P4.4: re-encode during concat (stream-copy concat has timestamp issues)
+          ffmpeg -y -f concat -safe 0 -i /tmp/assemble/concat.txt -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p /tmp/master_video.mp4
+          echo "video assembled: /tmp/master_video.mp4"
+
+      - name: Build concatenated VO (if needed)
+        if: needs.validate-source.outputs.with_audio == 'true'
+        run: |
+          set -euo pipefail
+          # P4.4: If the VO file doesn't exist, try concatenating hb_p1..hb_p7.
+          # The 7 parts are in the repo; the 70MB concatenated file is built on-demand.
+          if [ ! -f "$VO_FILE" ]; then
+            echo "VO file not found: $VO_FILE, trying hb_p1..hb_p7..."
+            for i in 1 2 3 4 5 6 7; do
+              [ -f "public/audio/hb_p${i}.wav" ] || { echo "FATAL: hb_p${i}.wav missing"; exit 1; }
+              echo "file '$PWD/public/audio/hb_p${i}.wav'"
+            done > /tmp/vo_concat.txt
+            ffmpeg -y -f concat -safe 0 -i /tmp/vo_concat.txt -c copy "$VO_FILE"
+            echo "Concatenated VO built: $VO_FILE"
+          else
+            echo "Using VO file: $VO_FILE"
+          fi
+
+      - name: Mux canonical audio (VO + music bed)
+        if: needs.validate-source.outputs.with_audio == 'true'
+        run: |
+          set -euo pipefail
+          FPS=30
+          START_S=$(echo "scale=3; $START_FRAME / $FPS" | bc)
+          DUR_S=$(echo "scale=3; ($END_FRAME - $START_FRAME + 1) / $FPS" | bc)
+          for f in "$VO_FILE" "$BED_FILE"; do
+            [ -f "$f" ] || { echo "audio missing: $f"; exit 1; }
+            if head -c 100 "$f" | grep -q "version https://git-lfs.github.com"; then
+              echo "FATAL: $f is an LFS pointer, not real audio"; exit 1
+            fi
+          done
+          ffmpeg -y \
+            -i /tmp/master_video.mp4 \
+            -ss $START_S -t $DUR_S -i "$VO_FILE" \
+            -stream_loop 5 -i "$BED_FILE" \
+            -filter_complex "[1:a]volume=1.0[vo];[2:a]atrim=0:${DUR_S},volume=-18dB[bed];[vo][bed]amix=inputs=2:duration=longest[aout]" \
+            -map 0:v -map "[aout]" \
+            -c:v copy -c:a aac -b:a 192k \
+            /tmp/master.mp4
+          echo "audio muxed"
+
+      - name: Verify master (video + audio)
+        run: |
+          set -euo pipefail
+          if [ "$WITH_AUDIO" = "true" ]; then
+            MASTER=/tmp/master.mp4
+            STAGE="av_intermediate"
+          else
+            MASTER=/tmp/master_video.mp4
+            cp $MASTER /tmp/master.mp4
+            STAGE="video_only"
+          fi
+          echo "Output stage: $STAGE"
+          W=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1 $MASTER)
+          H=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 $MASTER)
+          FPS_R=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 $MASTER)
+          FRAMES=$(ffprobe -v error -select_streams v:0 -show_entries stream=nb_read_frames -of default=noprint_wrappers=1:nokey=1 -count_frames $MASTER)
+          if [ -z "$FRAMES" ] || [ "$FRAMES" = "N/A" ]; then
+            V_DUR_TMP=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $MASTER)
+            FRAMES=$(python3 -c "import sys; print(int(float(sys.argv[1]) * 30))" "$V_DUR_TMP")
+          fi
+          V_DUR=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $MASTER)
+          [ "$W" = "1920" ] && [ "$H" = "1080" ] || { echo "resolution FAIL"; exit 1; }
+          [ "$FPS_R" = "30/1" ] || { echo "fps FAIL: $FPS_R"; exit 1; }
+          EXPECTED=$(( END_FRAME - START_FRAME + 1 ))
+          [ "$FRAMES" = "$EXPECTED" ] || { echo "frame count FAIL ($FRAMES != $EXPECTED)"; exit 1; }
+          ffmpeg -v error -i $MASTER -f null - || { echo "decode FAIL"; exit 1; }
+          if [ "$WITH_AUDIO" = "true" ]; then
+            A_STREAMS=$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 $MASTER | wc -l)
+            [ "$A_STREAMS" -ge 1 ] || { echo "audio stream MISSING"; exit 1; }
+            A_DUR=$(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 $MASTER)
+            DIFF=$(echo "$V_DUR - $A_DUR" | bc | tr -d -)
+            python3 -c "import sys; sys.exit(0 if abs(float('$DIFF')) < 0.5 else 1)" \
+              || { echo "a/v sync FAIL"; exit 1; }
+          fi
+          MASTER_SHA=$(sha256sum /tmp/master.mp4 | cut -d' ' -f1)
+          python3 - <<PY
+          import json
+          from datetime import datetime, timezone
+          with open('/tmp/job/job_manifest.json') as f:
+              m = json.load(f)
+          m['stage'] = "$STAGE"
+          m['final_output_sha256'] = "$MASTER_SHA"
+          m['reassembled_from_run'] = "$SOURCE_RUN_ID"
+          m['finished_at'] = datetime.now(timezone.utc).isoformat()
+          with open('/tmp/job/job_manifest.json', 'w') as f:
+              json.dump(m, f, indent=2)
+          print(f"Manifest finalized: stage={m['stage']}, reassembled from run $SOURCE_RUN_ID")
+          PY
+          echo "MASTER VERIFIED: ${W}x${H}, ${FRAMES}f, stage=$STAGE"
+
+      - name: Upload master + manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: master-${{ needs.validate-source.outputs.job_identity }}-reassembled
+          path: |
+            /tmp/master.mp4
+            /tmp/job/job_manifest.json
+          retention-days: 30
