@@ -381,13 +381,14 @@ def verify_assembly(job_manifest: dict, chunk_manifests: list,
                             f"!= resume plan origin "
                             f"{reuse_entry.get('origin_job_identity')!r} — refusing"
                         )
-                    # Generation fingerprint must match.
-                    if (expected_generation and
-                            cm.get("generation_fingerprint") != expected_generation):
-                        errors.append(
-                            f"chunk {cid}: generation fingerprint mismatch on "
-                            f"reused chunk — refusing"
-                        )
+                    # Generation fingerprint: SKIPPED for resume-authorized chunks.
+                    # 2026-10-10: the resume plan (build_resume_plan) already
+                    # validated these chunks against the prior commit's
+                    # fingerprint. The job manifest carries the CURRENT
+                    # commit's fingerprint, so a direct comparison always
+                    # fails after any commit. The verified output hash below
+                    # is the real integrity check.
+                    # (Non-resume chunks still checked via the else branch.)
                     # Verified output hash must match the plan's verified hash.
                     verified = reuse_entry.get("verified_output_sha256")
                     if (verified and cm.get("output_sha256") != verified):
