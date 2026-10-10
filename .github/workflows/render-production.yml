@@ -207,6 +207,19 @@ jobs:
           fi
           VO_DUR=$(ffprobe -v error -show_entries format=duration \
             -of default=noprint_wrappers=1:nokey=1 "$VO_FILE")
+          # Fail closed if ffprobe did not return a valid numeric duration.
+          # (Exit 127 = ffprobe not found; empty = unreadable file.)
+          if [ -z "$VO_DUR" ]; then
+            echo "FATAL: ffprobe failed to read duration from $VO_FILE" >&2
+            echo "  file exists: $([ -f "$VO_FILE" ] && echo yes || echo no)" >&2
+            echo "  file size: $(stat -c%s "$VO_FILE" 2>/dev/null || echo unknown)" >&2
+            echo "  ffprobe available: $(command -v ffprobe >/dev/null && echo yes || echo no)" >&2
+            exit 1
+          fi
+          if ! python3 -c "float('$VO_DUR')" 2>/dev/null; then
+            echo "FATAL: ffprobe returned invalid duration '$VO_DUR' for $VO_FILE" >&2
+            exit 1
+          fi
           echo "VO duration: ${VO_DUR}s ($VO_FILE)"
           # Fail if VO is more than 30s shorter than video
           VIDEO_DUR="$VIDEO_DUR" VO_DUR="$VO_DUR" python3 -c "
