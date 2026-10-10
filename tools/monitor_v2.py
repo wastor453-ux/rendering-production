@@ -69,14 +69,18 @@ def classify(jobs):
     if plan_c == "success" and asm_c == "success":
         return "SUCCESS", "master produced"
     if plan_c == "skipped" and asm_c == "skipped":
-        # Test-mode dispatch (sfx_chain_test): only sfx-chain-test runs.
-        # Classify by the test job's own conclusion.
+        # Test-mode dispatch: classify by which test job ran.
         test = by_name.get("sfx-chain-test", {})
+        iv = by_name.get("install-verify", {})
         if test.get("conclusion") == "success":
             return "TEST_SUCCESS", "sfx-chain-test passed; production jobs skipped by design"
         if test.get("conclusion") == "failure":
             return "TEST_FAILURE", "sfx-chain-test failed"
-        return "UNKNOWN", f"test-mode run, sfx-chain-test={test.get('conclusion')}"
+        if iv.get("conclusion") == "success":
+            return "INSTALL_VERIFY_SUCCESS", "install-verify passed; production jobs skipped by design"
+        if iv.get("conclusion") == "failure":
+            return "INSTALL_VERIFY_FAILURE", "install-verify failed"
+        return "UNKNOWN", f"test-mode run, sfx-chain-test={test.get('conclusion')} install-verify={iv.get('conclusion')}"
     if asm_c == "skipped" and plan_c != "skipped":
         # Only alert on skipped assemble for production runs. In test mode
         # (sfx_chain_test), plan is also skipped and assemble is skipped by design.
@@ -122,7 +126,7 @@ def check_once(run_id=None):
         print(f"  URL: https://github.com/{REPO}/actions/runs/{rid}")
         
         # Alert on completion, except benign test-mode successes.
-        if (conclusion in ("failure", "success") and cls != "TEST_SUCCESS") or cls in ("ASSEMBLY_DEATH", "PLAN_FAILURE", "CHUNK_FAILURE", "ASSEMBLY_SKIPPED", "TEST_FAILURE"):
+        if (conclusion in ("failure", "success") and cls not in ("TEST_SUCCESS", "INSTALL_VERIFY_SUCCESS")) or cls in ("ASSEMBLY_DEATH", "PLAN_FAILURE", "CHUNK_FAILURE", "ASSEMBLY_SKIPPED", "TEST_FAILURE", "INSTALL_VERIFY_FAILURE"):
             print(f"ALERT: Run {rid} {cls}: {msg}")
         
         state[rid] = {"status": status, "conclusion": conclusion, "classification": cls}

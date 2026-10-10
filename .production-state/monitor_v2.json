@@ -1,22 +1,52 @@
 {
-  "37992005965": {
+  "38033977562": {
     "status": "completed",
     "conclusion": "success",
     "classification": "SUCCESS"
   },
-  "37986764678": {
+  "38035768452": {
     "status": "completed",
-    "conclusion": "failure",
-    "classification": "PLAN_FAILURE"
-  },
-  "38033077556": {
-    "status": "completed",
-    "conclusion": "failure",
-    "classification": "PLAN_FAILURE"
-  },
-  "38033466799": {
-    "status": "completed",
-    "conclusion": "failure",
+    "conclusion": "success",
     "classification": "SUCCESS"
+  },
+  "38038232648": {
+    "status": "completed",
+    "conclusion": "success",
+    "classification": "SUCCESS"
+  },
+  "38043130687": {
+    "status": "completed",
+    "conclusion": "success",
+    "classification": "SUCCESS"
+  },
+  "38044161893": {
+    "status": "completed",
+    "conclusion": "success",
+    "classification": "SUCCESS"
+  },
+  "38057551643": {
+    "status": "completed",
+    "conclusion": "success",
+    "classification": "SUCCESS"
+  },
+  "38063000311": {
+    "status": "in_progress",
+    "conclusion": null,
+    "classification": "ASSEMBLY_SKIPPED"
+  },
+  "38063206358": {
+    "status": "completed",
+    "conclusion": "success",
+    "classification": "ASSEMBLY_SKIPPED"
+  },
+  "38066659959": {
+    "status": "completed",
+    "conclusion": "success",
+    "classification": "TEST_SUCCESS"
+  },
+  "38067195302": {
+    "status": "completed",
+    "conclusion": "success",
+    "classification": "INSTALL_VERIFY_SUCCESS"
   }
 }
