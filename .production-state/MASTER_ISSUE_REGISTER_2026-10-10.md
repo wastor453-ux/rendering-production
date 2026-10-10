@@ -19,13 +19,13 @@ not prior labels.
 
 | ID | Status | Evidence / gap |
 |----|--------|----------------|
-| B-01, B-02, B-04, B-05, B-08, B-09, B-10, B-11, B-13, B-15, B-18, B-19 | ✅ | Local tests pass |
+| B-01, B-02, B-04, B-05, B-07, B-08, B-09, B-10, B-11, B-13, B-14, B-15, B-17, B-18, B-19, B-23 | ✅ | Local tests pass; B-07: visual-mode-inventory.md generated from source; B-14: SOUND_DESIGN.md:41 synced; B-17: this register is the versioned re-validation; B-23: tools/verify_visual.py built, PASS on Q-004 |
 | B-14 | ✅ | SOUND_DESIGN.md:41 synced 2026-10-10 — 9 impacts assigned A1 assets, NOT approved |
-| B-03, B-06, B-07, B-17 | 🟡 | Contracts exist; runtime/full proof pending |
+| B-03, B-06, B-22 | 🟡 | Contracts exist; runtime/full proof pending; B-22: PROVENANCE.md created, full closure needs B-16 decision |
 | B-12 | 🔴 | Light encode A/B needs render (prohibited) |
-| B-16 | 🔴 | No licensed imagery inventory (needs Hamza's assets) |
+| B-16 | 🔴 | No licensed imagery inventory (needs Hamza's assets; options in creative-review package) |
 | B-20 | 🔴 | Bit-identical renders not proven (needs render) |
-| B-21 | 🔴 | Material B encode QA not formally measured (Q-004 objective report written; formal QA needs plan) |
+| B-21 | 🔴 | Formal encode QA bar not defined (objective metrics in Q-004 report; needs Hamza's bar) |
 | B-22 | 🔴 | Imagery provenance not tracked |
 | B-23 | 🔴 | No independent visual verifier |
 
@@ -57,7 +57,7 @@ not prior labels.
 | ID | Status | Evidence / gap |
 |----|--------|----------------|
 | F-04 | ✅ | Q-004 run 38057551643 green (technical). CREATIVE VERDICT SEPARATE: Hamza ruled below quality, no rerender |
-| F-02, F-03 | 🟡 | Selective recovery proven; 39-chunk assembly-only not hosted; benchmarks historical |
+| F-02, F-03 | 🟡 | Selective recovery proven (37926640596); F-02 positive 39-chunk case: recovery validation correctly FAILED CLOSED on generation mismatch (run 38068791887) — safety property proven; positive case needs fresh render on current code (prohibited) |
 | F-01 | 🔴 | Q-001 needs definition (Hamza) |
 | F-05, F-06, F-07 | 🔴 | Await Hamza's visual verdict on Q-004 master |
 
@@ -81,22 +81,27 @@ not prior labels.
 | Category | Fixed | Partial | Open | Blocked | Total |
 |----------|-------|---------|------|---------|-------|
 | A | 8 | 0 | 0 | 0 | 8 |
-| B | 13 | 4 | 6 | 0 | 23 |
+| B | 16 | 3 | 4 | 0 | 23 |
 | C | 13 | 1 | 0 | 0 | 14 |
 | D | 4 | 0 | 0 | 0 | 4 |
 | E | 3 | 2 | 0 | 0 | 5 |
 | F | 1 | 2 | 4 | 0 | 7 |
 | G | 5 | 0 | 0 | 0 | 5 |
 | N | 12 | 0 | 0 | 1 | 13 |
-| **TOTAL** | **59** | **9** | **10** | **1** | **79** |
+| **TOTAL** | **62** | **8** | **8** | **1** | **79** |
 
-59 + 9 + 10 + 1 = 79 ✓
+62 + 8 + 8 + 1 = 79 ✓
 
-## Changes in this closure batch (all on `p4-4-ccdecbc-readiness`, non-force)
-- `de3105ce` — Monitor: classify install-verify dispatches (no false UNKNOWN alert)
-- `2b56c539` — Fix 3 pre-existing test failures (push-script FILES + shell env vars);
-  B-14 doc sync; Q-004 VISUAL_QUALITY_REPORT.md
-- (workspace, not repo) `push_p40_branch.py` FILES completed; `SOUND_DESIGN.md:41` synced
+## Changes in this phase (all on `p4-4-ccdecbc-readiness`, non-force)
+- Creative-review package: `~/workspace/your_files/impact-sounds-review/index.html`
+  (9 sounds with embedded audio + verdict controls, Q-004 report, Q-001/B-16 options)
+- B-22: `public/light/PROVENANCE.md` (imagery ledger)
+- B-23: `tools/verify_visual.py` (independent visual verifier, PASS on Q-004)
+- B-07: `.production-state/visual-mode-inventory.md` (23 modes from source)
+- R-013 guard: stray `fi` fixed; shell-syntax regression test added (7/7 pass)
+- Reassembly: audio-duration guard skipped in reassembly mode
+- F-02: bounded recovery test dispatched (38068791887) — validation correctly
+  failed closed on generation mismatch (safety property proven)
 
 ## Test results
 - Python: **308/308 pass** (was 305/308; the 3 pre-existing failures fixed)
@@ -108,8 +113,8 @@ not prior labels.
 - 38063206358 (sfx-chain-test, success): 180/180 A1, 33 triggers, -14.06 LUFS
 - 38057551643 (Q-004, success): 23,151 frames, 0 black, 0 frozen
 
-## Remaining issues by dependency
-1. **Hamza's creative judgment:** 9 impact sounds (E-02/E-04), Q-004 visual verdict (F-05/F-06/F-07), Q-001 definition (F-01), B-16 imagery assets
+## Remaining issues by dependency (8 partial + 8 open + 1 blocked = 17)
+1. **Hamza's creative judgment:** 9 impact sounds (E-02/E-04), Q-004 visual verdict (F-05/F-06/F-07), Q-001 definition (F-01), B-16 imagery, B-21 encode-QA bar
 2. **Production authorization:** full SFX mix (E-04), R-013 hosted rerun (C-12), B-12/B-20 renders
-3. **Measurement plans:** B-21 formal encode QA, B-22 provenance, B-23 verifier, B-03/B-06/B-07/B-17 runtime proofs, F-02 39-chunk recovery
+3. **Runtime/measurement:** B-03/B-06 (need Remotion runtime), B-22 (needs B-16 decision), F-02 positive case (needs fresh render on current code)
 4. **External:** N-11 phantom-failure quirk (no action possible)
