@@ -1,0 +1,37 @@
+# Cleanup old artifacts — keep only the 10 most recent.
+# Runs after each production render. When a new render creates the 11th artifact,
+# the oldest is deleted. Never deletes the 10 most recent.
+name: Cleanup Old Artifacts
+
+on:
+  workflow_run:
+    workflows: ["Render Production (Chunked Parallel)"]
+    types: [completed]
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Delete artifacts beyond the 10 most recent
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const KEEP = 10;
+            const artifacts = await github.paginate(
+              github.rest.actions.listArtifactsForRepo,
+              { owner: context.repo.owner, repo: context.repo.repo, per_page: 100 }
+            );
+            // Sort newest first by created_at
+            artifacts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            const toDelete = artifacts.slice(KEEP);
+            console.log(`Total: ${artifacts.length}, keeping ${KEEP}, deleting ${toDelete.length}`);
+            for (const a of toDelete) {
+              await github.rest.actions.deleteArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: a.id,
+              });
+              console.log(`Deleted: ${a.name} (${a.id})`);
+            }
