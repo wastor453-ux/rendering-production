@@ -35,7 +35,8 @@
   "transition",
   "close",
   "trend",
-  "comparison"
+  "comparison",
+  "allocation"
  ],
  "visual_verb_enum": [
   "build",
@@ -54,7 +55,8 @@
   "zoom",
   "track",
   "highlight",
-  "swap"
+  "swap",
+  "emphasize"
  ],
  "duration_class_enum": [
   "micro",

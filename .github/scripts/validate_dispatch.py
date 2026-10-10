@@ -379,7 +379,15 @@ def check_workflow_yaml(repo_root):
 
 
 def check_push_coverage(repo_root):
-    """Verify all workflows are in the push script (regression test)."""
+    """Verify all workflows are in the push script (regression test).
+
+    Workflows listed in NOT_DEPLOYED are deliberately excluded: they exist
+    in the tree as inactive proposals and must NOT be pushed to any branch.
+    """
+    # P4.4: cleanup-artifacts.yml is an inactive proposal (header-marked
+    # "not active"). It must never be deployed, so the coverage gate
+    # explicitly exempts it instead of demanding it in the push script.
+    NOT_DEPLOYED = {"cleanup-artifacts.yml"}
     errors = []
     wf_dir = os.path.join(repo_root, ".github", "workflows")
     push_script = os.path.expanduser("~/workspace/skills/github/bin/push_p40_branch.py")
@@ -393,6 +401,9 @@ def check_push_coverage(repo_root):
     
     workflows = [f for f in os.listdir(wf_dir) if f.endswith(".yml")]
     for wf in workflows:
+        if wf in NOT_DEPLOYED:
+            print(f"  Push coverage SKIP (deliberately not deployed): {wf}")
+            continue
         path = f".github/workflows/{wf}"
         if path not in script_content:
             errors.append(f"Push script missing workflow: {path} (will not be deployed!)")

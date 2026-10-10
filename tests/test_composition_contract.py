@@ -68,10 +68,10 @@ class TestBeatContractGate(unittest.TestCase):
         # arbitration record and is now clean.)
         check_beat_contract = self._beat_gate()
         p3 = check_beat_contract("P3Rehearsal", REPO_ROOT)
-        self.assertEqual(len(p3), 8, f"P3Rehearsal violations changed: {p3}")
-        self.assertTrue(all("music_intensity" in e or "allocation" in e
-                            or "emphasize" in e for e in p3),
-                        f"unexpected P3Rehearsal violation: {p3}")
+        # 2026-10-10: schema includes 'allocation'/'emphasize' and the 6
+        # music_intensity values are authored (Hamza's consolidation order).
+        # P3Rehearsal is fully schema-clean; the pin now guards against drift.
+        self.assertEqual(len(p3), 0, f"P3Rehearsal violations changed: {p3}")
 
     def test_fixed_timeline_composition_skips(self):
         check_beat_contract = self._beat_gate()
@@ -143,7 +143,7 @@ class TestBeatContractGate(unittest.TestCase):
             p3 = check_beat_contract("P3Rehearsal", REPO_ROOT)
         self.assertIn("Provenance: src/compiled_p3/beat_timeline.json "
                       "[checked-in]", buf.getvalue())
-        self.assertEqual(len(p3), 8, f"P3Rehearsal violations changed: {p3}")
+        self.assertEqual(len(p3), 0, f"P3Rehearsal violations changed: {p3}")
         self.assertEqual(p3.provenance["provenance"], "checked-in")
 
 
