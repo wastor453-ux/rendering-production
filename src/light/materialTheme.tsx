@@ -55,7 +55,7 @@ export const MATERIAL_B: MaterialTokens = {
   compositionScale: 1.0,
 };
 
-const Ctx = React.createContext<MaterialTokens>(MATERIAL_A);
+const Ctx = React.createContext<MaterialTokens>(MATERIAL_B);
 export const useMaterial = () => React.useContext(Ctx);
 export const MaterialProvider: React.FC<{ material: MaterialTokens; children?: React.ReactNode }> =
   ({ material, children }) => <Ctx.Provider value={material}>{children}</Ctx.Provider>;
