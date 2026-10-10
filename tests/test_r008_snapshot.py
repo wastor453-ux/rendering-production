@@ -175,3 +175,42 @@ class TestInstallVerifyJob(unittest.TestCase):
         self.assertEqual(inputs["with_sfx_mix"]["default"], False)
         self.assertEqual(inputs["install_verify"]["default"], False)
         self.assertEqual(inputs["sfx_chain_test"]["default"], False)
+
+
+class TestBrowserRepairPath(unittest.TestCase):
+    """R-008: the render-chunk browser-repair path must use the snapshot
+    installer and cannot fall back to rolling apt sources."""
+
+    def _repair_block(self):
+        with open(WORKFLOW) as f:
+            content = f.read()
+        start = content.index('elif [ "$OUTCOME" = "repairable" ]')
+        # Repair block ends at the next elif/fi at the same level
+        end = content.index('echo "Rechecking after repair..."', start)
+        return content[start:end].split("\n")
+
+    def test_repair_uses_snapshot_installer(self):
+        block = self._repair_block()
+        invocations = [l for l in block
+                       if "bash .github/scripts/install_snapshot.sh" in l
+                       and not l.strip().startswith("#")]
+        self.assertEqual(len(invocations), 1,
+                         "Repair path must invoke install_snapshot.sh exactly once")
+
+    def test_repair_has_no_rolling_fallback(self):
+        block = "\n".join(self._repair_block())
+        self.assertNotIn("apt-get install", block,
+                         "Repair path must not call apt-get install directly")
+        self.assertNotIn("archive.ubuntu.com", block,
+                         "Repair path must not reference the rolling archive")
+
+    def test_repair_uses_unified_package_set(self):
+        """Repair must install BROWSER_PACKAGES (R-021), not a separate list."""
+        block = "\n".join(self._repair_block())
+        self.assertIn("from preflight import BROWSER_PACKAGES", block)
+
+    def test_repair_is_gated_on_repairable(self):
+        """Repair only runs when the browser check says 'repairable'."""
+        with open(WORKFLOW) as f:
+            content = f.read()
+        self.assertIn('elif [ "$OUTCOME" = "repairable" ]', content)
