@@ -45,7 +45,9 @@ export const H4Debt: React.FC = () => {
         <div style={{ textAlign: ALIGN.heroNumber }}>
           <Kicker text="US NATIONAL DEBT" />
           <div style={{ fontFamily: T.font, fontWeight: 800, fontSize: 150, color: T.negative, letterSpacing: -4, ...num, marginTop: 16 }}>
-            ${debt.toFixed(1)}T
+            {/* Q004 defect 2026-10-10: toFixed(1) renders "$40.0T" at rest.
+                Show decimals only mid-count (tolerance for float error). */}
+            ${Math.abs(debt - Math.round(debt)) < 0.005 ? Math.round(debt).toFixed(0) : debt.toFixed(1)}T
           </div>
           <div style={{ fontFamily: T.font, fontWeight: 600, fontSize: 32, color: T.inkMuted, marginTop: 16 }}>
             $39T → $40T in under six months

@@ -10,10 +10,24 @@ import { resolveScale } from "./compositionScale";
 
 const expo = Easing.bezier(...EXPO);
 
-export const HeroTypography: React.FC<{ kicker: string; lines: string[]; accentLine?: number; align?: "left" | "center" }> = ({
-  kicker, lines, accentLine = -1, align = "left",
+export const HeroTypography: React.FC<{
+  kicker: string; lines: string[]; accentLine?: number; align?: "left" | "center";
+  supporting?: string; supportingDelay?: number;
+}> = ({
+  kicker, lines, accentLine = -1, align = "left", supporting, supportingDelay = 28,
 }) => {
   const frame = useCurrentFrame();
+  // Q004 defect 2026-10-10: 104px clips long headlines at the canvas edge
+  // ("Three forces hit at once" lost its "T"). Scale by longest line:
+  // >22 chars -> 80px, >18 -> 88px, else 104px. Conservative to guarantee
+  // PAGE.marginX clearance at 1920px wide.
+  const maxLen = Math.max(...lines.map((l) => l.length), 0);
+  const fontSize = maxLen > 22 ? 80 : maxLen > 18 ? 88 : 104;
+  // Supporting line fades in after the headline entrance settles, preventing
+  // mid-entrance overlap (Q004 defect 2026-10-10).
+  const sP = supporting
+    ? interpolate(frame, [supportingDelay, supportingDelay + 12], [0, 1], { ...CLAMP, easing: expo })
+    : 0;
   return (
     <div style={{ textAlign: align, padding: align === "center" ? "0 140px" : "0" }}>
       <div style={{ opacity: interpolate(frame, [0, 12], [0, 1], CLAMP), marginBottom: 26 }}>
@@ -26,13 +40,22 @@ export const HeroTypography: React.FC<{ kicker: string; lines: string[]; accentL
         return (
           <div key={ln} style={{
             opacity: p, transform: `translateY(${interpolate(p, [0, 1], [44, 0], CLAMP)}px)`,
-            fontFamily: T.font, fontWeight: 800, fontSize: 104, lineHeight: 1.12, letterSpacing: -2,
+            fontFamily: T.font, fontWeight: 800, fontSize, lineHeight: 1.12, letterSpacing: -2,
             color: isAccent ? T.primary : T.ink,
           }}>
             {ln}
           </div>
         );
       })}
+      {supporting && (
+        <div style={{
+          opacity: sP,
+          fontFamily: T.font, fontWeight: 600, fontSize: 34,
+          color: T.inkMuted, marginTop: 24, textAlign: align === "center" ? "center" : "left",
+        }}>
+          {supporting}
+        </div>
+      )}
     </div>
   );
 };

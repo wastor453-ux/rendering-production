@@ -91,11 +91,18 @@ export const H3Autopsy: React.FC = () => {
       <AbsoluteFill style={{ justifyContent: "center", paddingLeft: PAGE.marginX, paddingRight: PAGE.marginX, opacity: yOp * yOut }}>
         <div style={{ maxWidth: CARD_W.L, textAlign: ALIGN.hero, transform: `scale(${yPulse})` }}>
           <Sequence from={1200}>
-            <HeroTypography kicker="" lines={["30-year Treasury:", "5.5%"]} accentLine={1} align="left" />
+            {/* Q004 defect 2026-10-10: supporting line is now a HeroTypography
+                prop — renders in-flow below the headline, fading in after the
+                entrance settles. The standalone SupportingLine is removed. */}
+            <HeroTypography
+              kicker=""
+              lines={["30-year Treasury:", "5.5%"]}
+              accentLine={1}
+              align="left"
+              supporting="highest since 2004 · 10-year at 5.2%, highest since 2007"
+              supportingDelay={34}
+            />
           </Sequence>
-          <div style={{ fontFamily: T.font, fontWeight: 600, fontSize: 34, color: T.inkMuted, marginTop: 24, textAlign: ALIGN.supporting }}>
-            highest since 2004 · 10-year at 5.2%, highest since 2007
-          </div>
         </div>
       </AbsoluteFill>
 
