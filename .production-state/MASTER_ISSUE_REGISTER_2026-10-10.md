@@ -76,6 +76,15 @@ not prior labels.
 
 ---
 
+
+## CATEGORY H: New tracked items (2026-10-10, Hamza's order)
+
+| ID | Status | Evidence / gap |
+|----|--------|----------------|
+| H-01 | 🔴 | Creative approval criteria: Q004 visual direction REJECTED 2026-10-10. Measurable criteria not yet defined — must exist before any redesign proposal. |
+| H-02 | 🔴 | Demo lifecycle: demo video ordered 2026-10-10. Plan and acceptance checklist pending (Batch 4). No render dispatched. |
+| H-03 | ✅ | Unified pre-render enforcement checklist: `.production-state/PRE_RENDER_CHECKLIST.md` + `tools/pre_render_check.py` + `tests/test_pre_render.py` (11/11 pass). 8 checks, all mapped to canonical sources. |
+
 ## RECONCILED COUNTS
 
 | Category | Fixed | Partial | Open | Blocked | Total |
@@ -89,8 +98,10 @@ not prior labels.
 | G | 5 | 0 | 0 | 0 | 5 |
 | N | 12 | 0 | 0 | 1 | 13 |
 | **TOTAL** | **62** | **8** | **8** | **1** | **79** |
+| H (new) | 1 | 0 | 2 | 0 | 3 |
+| **GRAND TOTAL** | **63** | **8** | **10** | **1** | **82** |
 
-62 + 8 + 8 + 1 = 79 ✓
+63 + 8 + 10 + 1 = 82 ✓ (79 original + 3 new)
 
 ## Changes in this phase (all on `p4-4-ccdecbc-readiness`, non-force)
 - Creative-review package: `~/workspace/your_files/impact-sounds-review/index.html`
