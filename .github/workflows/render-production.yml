@@ -167,7 +167,9 @@ jobs:
         # This caused 5 Q-004 assembly failures (placeholder 83s VO vs 771s video).
         # The bed loops, so only the VO is strictly validated.
         # P3.6.2: inputs via env vars, not raw interpolation.
-        if: inputs.with_audio == true
+        # Skipped in reassembly mode: audio comes from the prior run's artifacts,
+        # not from the VO file input.
+        if: inputs.with_audio == true && inputs.reassemble_bypass_fingerprint != true
         env:
           START_FRAME: ${{ inputs.start_frame }}
           END_FRAME: ${{ inputs.end_frame }}
