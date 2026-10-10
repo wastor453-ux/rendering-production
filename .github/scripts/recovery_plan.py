@@ -321,8 +321,13 @@ if __name__ == "__main__":
 
     # 3. Gather prior chunk manifests from chunk artifacts.
     # P3.12.2: exact names tied to the validated job identity and chunk ID.
+    # Exclude the chunk ledger artifact (chunk-ledger-*) from chunk artifacts —
+    # it is a build_ledger.py aggregate, not a per-chunk output, and must not
+    # be subject to the per-chunk identity prefix check below.
     chunk_artifacts = [a for a in all_artifacts
-                       if a["name"].startswith("chunk-") and not a["expired"]]
+                       if a["name"].startswith("chunk-")
+                       and not a["name"].startswith("chunk-ledger-")
+                       and not a["expired"]]
     print(f"Found {len(chunk_artifacts)} prior chunk artifacts")
     prior_chunk_manifests = {}
     # P3.12.2: safe, real output verification per archive. Each archive is
