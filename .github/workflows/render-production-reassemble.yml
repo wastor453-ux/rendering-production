@@ -470,8 +470,26 @@ jobs:
                   f.write(f"file 'chunk_{cid}.mp4'\n")
           print(f"Concat list: {len(ordered)} chunks in order")
           PY
-          # P4.4: re-encode during concat (stream-copy concat has timestamp issues)
-          ffmpeg -y -f concat -safe 0 -i /tmp/assemble/concat.txt -c:v libx264 -crf 18 -preset veryfast -pix_fmt yuv420p /tmp/master_video.mp4
+          # ASSEMBLY CONTRACT (BATCH 1, 2026-10-10 — proven, do not "fix"):
+          # Both assemble paths MUST concat with `-c copy` (stream copy, NO
+          # re-encode). See .github/scripts/assembly_contract.py for the full
+          # contract (exact frame-count equality, encoding method, audio rule).
+          # PROVEN (run 37942159718): re-encode concat (`-c:v libx264`) made
+          # ffmpeg report `dup=14` -> master had 23,165 frames vs 23,151
+          # expected -> the frame-count gate failed and assembly died.
+          # Mechanism: Remotion chunk MP4s carry AAC audio with a 2048-sample
+          # priming edit list (2048/48000 = 0.042667s; the failing run's
+          # concat input showed `start: -0.042667`). The audio track's media
+          # duration exceeds the video track's, so the concat demuxer offsets
+          # each segment by the audio-driven format duration, opening PTS gaps
+          # at seams; with `-vsync cfr` the encoder duplicates frames to fill
+          # them. `-c copy` copies packets verbatim (no decode, no vsync), so
+          # sum(chunk frames) == master frames EXACTLY. The old "timestamp
+          # issues" justification for re-encoding was never demonstrated;
+          # re-encoding is what corrupted the count. Precondition (enforced by
+          # manifest.verify_assembly): every chunk's generation_fingerprint
+          # (codec+crf+remotion version) matches, so stream copy is safe.
+          ffmpeg -y -f concat -safe 0 -i /tmp/assemble/concat.txt -c copy /tmp/master_video.mp4
           echo "video assembled: /tmp/master_video.mp4"
 
       - name: Build concatenated VO (if needed)

@@ -6,7 +6,8 @@
 //
 // For each beat:
 //   1. builds SemanticEvidence from the compiled beat
-//   2. calls selectVisualMode() — records the decision (Test F)
+//   2. D2 authority: resolveVisualModeAuthority() — plan-authority + mandatory
+//      selector challenge; disagreement flagged disputed (log-only)
 //   3. resolves the component for the COMPILED visual_mode
 //   4. resolves the data payload via resolvePayload() (fail-closed)
 //   5. builds the VisualEventMilestone and passes it via legacy adapters
@@ -32,7 +33,10 @@ import {
   MetricGrid, Dashboard, PortfolioCardStack, RankedTable,
   GlassNotification, FeatureIconSystem,
 } from "./light/ui";
-import { selectVisualMode, SemanticEvidence } from "./light/select";
+import { resolveVisualModeAuthority, SemanticEvidence } from "./light/select";
+import { buildEvidence } from "./light/evidence";
+// Re-export: buildEvidence moved to ./light/evidence (R-3).
+export { buildEvidence };
 import { toLocalMilestone, legacyImpactProps, CompiledEvent, VisualEventMilestone } from "./light/milestone";
 import { useMaterial } from "./light/materialTheme";
 import { resolveScale } from "./light/compositionScale";
@@ -68,26 +72,22 @@ export type SelectorDecision = {
   compiled_mode: string;
   selected_mode: string;
   agree: boolean;
+  resolved_mode: string;
+  disputed: boolean;
   evidence: SemanticEvidence;
 };
 
 export const SELECTOR_DECISIONS: SelectorDecision[] = [];
 
-export function buildEvidence(b: any): SemanticEvidence {
-  return {
-    semantic_role: b.semantic_role,
-    claim: b.claim,
-    visual_verb: b.visual_verb,
-    focal_object: b.focal_object,
-    narrative_intensity: Math.round((b.intensity ?? 0.5) * 5),
-    information_density: b.data_presence ? 4 : 2,
-    comparison_state: b.comparison_state ?? "none",
-    comparison_kind: b.comparison_kind ?? undefined,
-    number_presence: b.data_type === "statistic",
-    trend_presence: b.semantic_role === "trend" ? "down" : "none",
-    causal_structure: b.visual_mode === "causal_diagram" ? "chain" : "none",
-  };
+/** D2 log-only disagreement report: beats where the selector's challenge
+ *  disagreed with the plan. Consumable (not write-only) — the authorized R-4
+ *  step will turn these into throws. */
+export function getDisputedDecisions(): SelectorDecision[] {
+  return SELECTOR_DECISIONS.filter((d) => d.disputed);
 }
+
+// R-3: buildEvidence lives in ./light/evidence (measured from data, never from
+// the mode being evaluated). Re-exported above for existing importers.
 
 // ------------------------------------------------------------------ registry
 export type BeatCtx = {
@@ -283,24 +283,23 @@ function renderBeat(b: any): React.ReactNode {
   const from = Math.floor(b.start_time * FPS);
   const dur = Math.ceil(b.end_time * FPS) - from;
 
-  // §8 — selector runs on compiled evidence; decision recorded.
-  const evidence = buildEvidence(b);
-  const selected = selectVisualMode(evidence);
-  SELECTOR_DECISIONS.push({
-    beat_id: b.beat_id, compiled_mode: b.visual_mode,
-    selected_mode: selected, agree: selected === b.visual_mode, evidence,
-  });
+  // §9 — data modes resolve real payloads; throws when missing.
+  const payload = b.data_presence ? resolvePayload(b.data_payload_ref) : null;
 
-  // Mode authority: the compiled (compiler-validated) mode.
-  const render = REGISTRY[b.visual_mode];
-  if (!render) throw new Error(`ProductionBeats: no renderer for mode '${b.visual_mode}' (no silent fallback)`);
+  // §8 — D2 authority: plan-authority + mandatory selector challenge.
+  // The selector's answer is recorded; on disagreement the beat is flagged
+  // disputed (log-only until the throw is separately authorized).
+  const evidence = buildEvidence(b, payload);
+  const authority = resolveVisualModeAuthority(b.beat_id, b.visual_mode, evidence);
+  SELECTOR_DECISIONS.push({ ...authority, evidence });
+
+  // Mode authority: the plan's compiled (compiler-validated) mode per D2.
+  const render = REGISTRY[authority.resolved_mode];
+  if (!render) throw new Error(`ProductionBeats: no renderer for mode '${authority.resolved_mode}' (no silent fallback)`);
 
   const evs = eventsByBeat[b.beat_id] ?? [];
   const ev0 = evs[0] ?? null;
   const milestone = ev0 ? toLocalMilestone(ev0, from) : null;
-
-  // §9 — data modes resolve real payloads; throws when missing.
-  const payload = b.data_presence ? resolvePayload(b.data_payload_ref) : null;
 
   const el = render({ beat: b, event: ev0, milestone, payload, pres: b.presentation ?? {} });
   return (

@@ -122,6 +122,47 @@ export function selectVisualMode(ev: SemanticEvidence): string {
   return (ev.information_density ?? 0) >= 3 ? "dashboard" : "hero_typography";
 }
 
+// ---------------------------------------------------------------------------
+// D2 AUTHORITY RESOLUTION (approved 2026-10-10; log-only stage 2026-10-10)
+//
+// D2: plan-authority + mandatory selector challenge + throw on disagreement.
+// The plan (compiled visual_mode) is authoritative: the selector is a
+// stateless keyword heuristic — it cannot see payloads or story arc, so it
+// must never silently override the plan. The selector MUST challenge every
+// beat; its answer is recorded on the decision.
+// On disagreement the approved D2 design throws (fail closed — neither mode
+// renders on disputed evidence). The throw is NOT active in this stage:
+// explicit order is log-only until separately authorized. The exact throw
+// site is marked below for that authorized step — do not activate it here.
+export type AuthorityResolution = {
+  beat_id: string;
+  compiled_mode: string; // the plan's answer (authoritative per D2)
+  selected_mode: string; // the selector's challenge answer
+  agree: boolean;
+  resolved_mode: string; // the mode actually rendered (D2: plan authority)
+  disputed: boolean; // true when the challenge disagreed (log-only for now)
+};
+
+export function resolveVisualModeAuthority(
+  beat_id: string,
+  compiled_mode: string,
+  evidence: SemanticEvidence
+): AuthorityResolution {
+  const selected_mode = selectVisualMode(evidence); // mandatory challenge
+  const agree = selected_mode === compiled_mode;
+  // R-4 THROW SITE (not authorized — do not activate without explicit order):
+  // if (!agree) throw new Error(
+  //   `D2 authority dispute on beat '${beat_id}': plan='${compiled_mode}' vs selector='${selected_mode}'`);
+  return {
+    beat_id,
+    compiled_mode,
+    selected_mode,
+    agree,
+    resolved_mode: compiled_mode,
+    disputed: !agree,
+  };
+}
+
 /** Legacy mode compatibility aliases (VISUAL_BRAIN §4). */
 export const LEGACY_MAP: Record<string, string> = {
   headline: "hero_typography",

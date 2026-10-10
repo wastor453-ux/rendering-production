@@ -983,10 +983,20 @@ jobs:
 
           # Assemble in chunk_id order.
           # P4.4 §6.5 FIX: Use -c copy (stream copy, NO re-encode).
-          # The old command used -c:v libx264 (re-encode) which duplicated
-          # 14 frames at chunk boundaries (23,165 vs 23,151 expected).
-          # All chunks are identically-encoded H.264, so stream copy is
-          # safe and preserves exact frame counts.
+          # PROVEN (BATCH 1, 2026-10-10; run 37942159718 assemble log): the old
+          # `-c:v libx264` re-encode made ffmpeg report `dup=14` -> master had
+          # 23,165 frames vs 23,151 expected -> the frame-count gate failed.
+          # Mechanism: Remotion chunk MP4s carry AAC audio with a 2048-sample
+          # priming edit list (2048/48000 = 0.042667s; the failing run showed
+          # `start: -0.042667`); the audio-driven format duration offsets each
+          # concat segment, opening PTS gaps at seams, and `-vsync cfr`
+          # duplicates frames to fill them. `-c copy` copies packets verbatim
+          # (no decode, no vsync): sum(chunk frames) == master frames EXACTLY.
+          # Precondition (enforced by manifest.verify_assembly): every chunk's
+          # generation_fingerprint (codec+crf+remotion version) matches, so all
+          # chunks are identically-encoded H.264 and stream copy is safe.
+          # Full contract: .github/scripts/assembly_contract.py (both assemble
+          # paths must obey it identically).
           ordered = sorted(staged.keys())
           with open('/tmp/assemble/concat.txt', 'w') as f:
               for cid in ordered:
@@ -1125,6 +1135,34 @@ jobs:
           WITH_AUDIO: ${{ inputs.with_audio }}
           START_FRAME: ${{ inputs.start_frame }}
           END_FRAME: ${{ inputs.end_frame }}
+
+      - name: D4 production QA (warn-only, advisory)
+        # D4: warn-only for production until ≥3 qualifying proofs.
+        # Advisory — audio checks reflect the retired trial mix model;
+        # visual stills render from this runner's codebase (the script shells
+        # to `npx remotion still` against the checked-out code, the same code
+        # that rendered the chunks).
+        # continue-on-error: this step NEVER fails the workflow; findings land
+        # in verify-report.json for review.
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          node scripts/verify-render.js --mode production \
+            --comp "$COMPOSITION" \
+            --manifest audio_manifest.json \
+            --report verify-report.json
+        env:
+          COMPOSITION: ${{ inputs.composition }}
+
+      - name: Upload verify-report (QA advisory)
+        # The script always writes verify-report.json; hashFiles keeps this a
+        # no-op (not a failure) if it did not. Warn-only either way.
+        if: ${{ always() && hashFiles('verify-report.json') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-report-${{ needs.plan.outputs.job_identity }}
+          path: verify-report.json
+          retention-days: 30
 
       - name: Upload master + manifest
         uses: actions/upload-artifact@v4

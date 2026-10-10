@@ -26,6 +26,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
 from manifest import build_job_manifest, build_asset_manifest, sha256_file
+from composition_contract import get_contract
 
 
 def fatal(msg: str, code: int = 1) -> None:
@@ -58,6 +59,13 @@ def validate_composition(value: str) -> str:
     if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", value):
         fatal(f"composition has invalid format: {value!r} "
               f"(must match [A-Za-z][A-Za-z0-9_]*)")
+    # R-2: the composition must be registered in the universal contract.
+    # An unregistered id previously passed this check and died later inside
+    # the render matrix; fail closed here instead.
+    contract = get_contract(value)
+    if contract is None:
+        fatal(f"composition {value!r} is not registered in the composition "
+              f"contract (.github/scripts/composition_contract.py)")
     return value
 
 

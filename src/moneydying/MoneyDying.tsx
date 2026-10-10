@@ -4,6 +4,7 @@ import { MD1Hook } from "./MD1Hook";
 import { MD2Math } from "./MD2Math";
 import { MD3Why } from "./MD3Why";
 import { MD4Takeaway } from "./MD4Takeaway";
+import { T } from "../light/tokens";
 
 export const FPS = 30;
 
@@ -28,7 +29,7 @@ export const MoneyDyingVideo: React.FC = () => {
   const d = seq(S4, "audio/md_s4.wav");
 
   return (
-    <AbsoluteFill style={{ background: "#F8FAFF" }}>
+    <AbsoluteFill style={{ background: T.canvas }}>
       {/* P4.4 migration: light canvas (#F8FAFF), was dark #0F0D24 */}
       <Sequence from={a.s} durationInFrames={a.dur}><MD1Hook /></Sequence>
       <Sequence from={b.s} durationInFrames={b.dur}><MD2Math /></Sequence>

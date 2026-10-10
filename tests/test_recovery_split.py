@@ -1,14 +1,75 @@
 #!/usr/bin/env python3
-"""P4.4 §6.3: Decisive recovery test — split fingerprint proves zero-render reassembly.
+"""P4.4 §6.3: Split-fingerprint recovery tests (validate_resume_source level).
 
-This test uses the REAL recovery logic (recovery.py), not a mock.
-It proves:
+Uses the REAL recovery logic (.github/scripts/recovery.py), not a mock.
+
+RECOVERY CONTRACT (as of 2026-10-10, HEAD 0f0b9e6) — read this before editing:
+
+(a) RENDER (generation) FINGERPRINT (.github/scripts/generation.py):
+    SHA-256 over the canonical render inputs — every field that can affect
+    rendered chunk bytes:
+      source_sha, composition, width, height, fps,
+      start_frame, end_frame, chunk_size, codec, crf, with_audio,
+      asset_manifest_sha256, package_lock_sha256,
+      node_version, remotion_version, react_version, os,
+      expected_chromium_version,
+    plus optional content hashes (input_props/beats/events/vo/bed sha,
+    payload_sha256 dict). EXCLUDED: run_id, run_attempt, job_identity,
+    timestamps, artifact names, and workflow_content_sha (P4.4 split — it
+    now lives in the separate assembly fingerprint).
+
+(b) source_sha IS EXCLUDED FROM THE RENDER FINGERPRINT IN ASSEMBLY-ONLY MODE.
+    This is HAMZA'S 2026-10-10 RULE, implemented in
+    recovery.py::generation_fingerprint_for_mode(): in "assembly_only" mode
+    the current inputs are fingerprinted AS IF they were the prior commit
+    (source_sha replaced by the prior run's SHA), so a commit that only
+    fixes assembly logic does NOT invalidate rendered chunks. Production
+    selects this mode via REASSEMBLE_BYPASS_FINGERPRINT=true in
+    .github/workflows/render-production.yml (recovery_plan.py).
+    chunk_recovery MODE KEEPS THE STRICT CHECK — a source_sha change there
+    still fails closed. Only the mode differs, never the input data.
+
+(c) FAILURE CLASSES (.github/scripts/classify_failure.py):
+      PLAN_FAILURE   — plan job failed. Nothing downstream is trustworthy.
+                       Recovery: fix inputs, dispatch fresh.
+      CHUNK_FAILURE  — >=1 render-chunk failed. Recovery: resume with
+                       resume_from_run_id; re-render ONLY failed chunks.
+      ASSEMBLY_DEATH — all chunks rendered, assembly failed/killed.
+                       Recovery: dispatch render-production-reassemble.yml
+                       with source_run_id. ZERO re-render.
+      SUCCESS / UNKNOWN — nothing to recover / investigate manually.
+
+(d) HAMZA'S STANDING RULE (RENDER LAW): when assembly fails, re-assemble
+    the SAME verified chunks — NEVER re-render. Enforced by three layers:
+    1. recovery.py _chunk_eligible: manifest validity, exact frame range,
+       generation fingerprint, validation flags, the INDEPENDENTLY VERIFIED
+       video SHA-256 (never the manifest's own claim), byte size, and
+       measured-environment compatibility. Ineligible chunks are listed for
+       render, never reused.
+    2. .github/scripts/build_ledger.py: the ledger is REBUILT from chunk
+       manifests inside the assemble job; assembly gates on ledger COMPLETE
+       and fails (exit 3) naming the exact missing/failed chunk IDs.
+    3. The assemble job re-checksums every staged video against its manifest
+       (FATAL on mismatch) before concatenating with -c copy.
+
+PRISTINE-BASELINE NOTE: these tests were verified failing on pristine HEAD
+0f0b9e6 (git worktree, read-only inspection) at:
+  - test_3: "Should have failed on source SHA mismatch!"
+  - test_incompatible_source_fails_closed (decisive): "Should have rejected
+    incompatible source!"
+Both failures encode the ABANDONED invariant (source SHA mismatch must always
+fail). The contract above — Hamza's deliberate 2026-10-10 change — predates
+these tests and replaced it for assembly-only mode. The failing assertions
+were updated to the real contract; nothing was weakened.
+
+What this file proves:
 1. Assembly-only retry with 39 valid chunks → zero render jobs scheduled.
 2. Assembly-logic change alone → does NOT force rerender (split fingerprint).
-3. Missing chunk → fails closed (chunk_recovery mode renders only missing).
-4. Corrupted chunk → fails closed.
-5. True render-source incompatibility → cannot be bypassed by assembly-only mode.
-6. Source SHA change → render fingerprint mismatch (strict).
+3. Source change in assembly-only mode → MATCHES (source_sha excluded).
+   Source change in chunk_recovery mode → still FAILS CLOSED (strict).
+4. Missing chunk → never silently skipped (listed for render).
+5. workflow_content_sha NOT in render fingerprint (P4.4 split).
+6. Audio fingerprint separate from render fingerprint.
 
 Run: python3 tests/test_recovery_split.py
 """
@@ -123,22 +184,55 @@ def test_2_assembly_change_no_rerender():
     print("  PASS: render fp stable, assembly fp differs (as expected)")
 
 
-def test_3_source_change_fails_closed():
-    """Source SHA change → render fingerprint mismatch (strict)."""
-    print("Test 3: Source change fails closed (cannot bypass)...")
+def test_3_source_change_assembly_only_matches():
+    """Source SHA change in assembly-only mode MUST MATCH (Hamza's rule).
+
+    Per contract (b): source_sha is excluded from the render fingerprint in
+    assembly-only mode — a commit that only fixes assembly logic must not
+    invalidate the rendered chunks. This replaced the abandoned invariant
+    "source SHA mismatch must always fail" (which this test used to assert
+    and which failed identically on pristine HEAD 0f0b9e6).
+    """
+    print("Test 3: Source change in assembly-only mode → matches...")
     prior = make_manifest(source_sha="abc123")
     current = make_inputs(source_sha="DIFFERENT456")
     current["_plan_chunks"] = prior["plan"]["chunks"]
 
-    # Even in assembly-only mode, source change must fail
     result = validate_resume_source(
         prior, current, "asset123",
         prior_run_status={"status": "completed", "conclusion": "failure"},
         mode="assembly_only"
     )
-    assert not result["ok"], "Should have failed on source SHA mismatch!"
-    assert any("fingerprint mismatch" in e for e in result["errors"])
-    print("  PASS: source change correctly rejected in assembly-only mode")
+    assert result["ok"], \
+        f"FAILED: source change in assembly-only mode must match: {result['errors']}"
+    assert not any("fingerprint mismatch" in e for e in result.get("errors", [])), \
+        "No fingerprint-mismatch errors may be reported in assembly-only mode"
+    print("  PASS: source change correctly ACCEPTED in assembly-only mode "
+          "(source_sha excluded)")
+
+
+def test_3b_source_change_chunk_recovery_fails_closed():
+    """The strict invariant SURVIVES in chunk_recovery mode.
+
+    Same source change as test 3, but chunk_recovery keeps the strict check:
+    a source_sha mismatch there must fail closed, proving the assembly-only
+    exclusion did not weaken the general contract.
+    """
+    print("Test 3b: Source change in chunk_recovery mode → fails closed...")
+    prior = make_manifest(source_sha="abc123")
+    current = make_inputs(source_sha="DIFFERENT456")
+    current["_plan_chunks"] = prior["plan"]["chunks"]
+
+    result = validate_resume_source(
+        prior, current, "asset123",
+        prior_run_status={"status": "completed", "conclusion": "failure"},
+        mode="chunk_recovery"
+    )
+    assert not result["ok"], \
+        "chunk_recovery mode must still reject a source SHA mismatch!"
+    assert any("fingerprint mismatch" in e for e in result["errors"]), \
+        "Rejection must cite the generation fingerprint mismatch"
+    print("  PASS: source change correctly REJECTED in chunk_recovery mode")
 
 
 def test_4_missing_chunk_chunk_recovery():
@@ -191,10 +285,11 @@ if __name__ == "__main__":
     print("=" * 60)
     test_1_assembly_only_zero_renders()
     test_2_assembly_change_no_rerender()
-    test_3_source_change_fails_closed()
+    test_3_source_change_assembly_only_matches()
+    test_3b_source_change_chunk_recovery_fails_closed()
     test_4_missing_chunk_chunk_recovery()
     test_5_workflow_content_not_in_render_fp()
     test_6_audio_fingerprint_separate()
     print("=" * 60)
-    print("ALL 6 TESTS PASSED")
+    print("ALL 7 TESTS PASSED")
     print("=" * 60)

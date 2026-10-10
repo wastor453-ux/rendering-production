@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "python3 -m unittest tests.test_visual_identity 2>&1 && python3 tests/test_recovery_split.py 2>&1 | tail -1 && python3 tests/test_recovery_decisive.py 2>&1 | tail -1 && python3 tests/test_frame_count.py 2>&1 | tail -1 && python3 tests/test_selector_integration.py 2>&1 | tail -1 && python3 tests/test_23_modes.py 2>&1 | tail -1 && python3 .github/scripts/visual_contracts.py 2>&1 | tail -1"
+    "test": "python3 -m unittest tests.test_visual_identity && python3 tests/test_recovery_split.py && python3 tests/test_recovery_decisive.py && python3 tests/test_frame_count.py && python3 tests/test_selector_integration.py && python3 tests/test_23_modes.py && python3 .github/scripts/visual_contracts.py && python3 -m unittest tests.test_composition_contract && node --test tests/test_evidence_independence.mjs && node_modules/.bin/esbuild tests/test_selector_authority.mjs --bundle --platform=node --format=esm --outfile=/tmp/selector_authority.bundle.mjs --external:node:test --external:node:assert --external:node:fs --external:node:path --external:node:url && node --test /tmp/selector_authority.bundle.mjs && python3 tests/test_token_sync.py"
   },
   "keywords": [],
   "author": "",

@@ -45,6 +45,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Validate composition is registered (R-2 contract)
+        # Test-only workflow, but the composition must still be a known
+        # registered id — unregistered ids fail closed before any rendering.
+        run: |
+          set -euo pipefail
+          python3 -c "
+          import os, sys
+          sys.path.insert(0, '.github/scripts')
+          from composition_contract import get_contract
+          cid = os.environ['COMPOSITION']
+          if get_contract(cid) is None:
+              print(f'FATAL: composition {cid!r} is not registered in the composition contract', file=sys.stderr)
+              sys.exit(1)
+          print(f'Composition {cid!r} is registered.')
+          "
+        env:
+          COMPOSITION: ${{ inputs.composition }}
+
+      - name: D4 blocking QA enforcement point
+        # D4 blocking enforcement point — active once the render+resume harness
+        # lands; skipped until then. The `render` step does not exist yet, so
+        # this condition is false today and the stub still reaches its
+        # deliberate failure unchanged. When the harness lands, `render` must
+        # expose `master_path` as an output; this step then audits the master
+        # and (no continue-on-error) FAILS the workflow on violation.
+        if: ${{ steps.render.outputs.master_path != '' }}
+        run: |
+          set -euo pipefail
+          node scripts/verify-render.js --mode production \
+            --comp "$COMPOSITION" \
+            --manifest audio_manifest.json \
+            --report verify-report.json
+        env:
+          COMPOSITION: ${{ inputs.composition }}
+
       - name: Validate test inputs via environment
         # P4.1: No raw ${{ inputs.* }} interpolation in shell. All inputs
         # pass through env vars with quoted expansions.

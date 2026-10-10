@@ -278,3 +278,279 @@ class TestAssemblyOnlyResumePlan(unittest.TestCase):
         self.assertEqual(rp["render_count"], 0,
                          f"expected zero render, got: {rp['render']}")
         self.assertEqual(rp["reused_count"], 3)
+
+
+class TestConcatParity(unittest.TestCase):
+    """BATCH 1: both assemble paths must concat identically — `-c copy`
+    (stream copy, NO re-encode). Proven by run 37942159718: re-encode
+    concat made ffmpeg report `dup=14` -> 23,165 frames vs 23,151 expected
+    -> the frame-count gate failed. See .github/scripts/assembly_contract.py.
+    """
+
+    def _concat_lines(self, wf_name):
+        wf = _read_workflow(wf_name)
+        return [l.strip() for l in wf.splitlines()
+                if "ffmpeg" in l and "-f concat" in l
+                and "concat.txt" in l and "vo_concat" not in l]
+
+    def test_main_workflow_concat_is_stream_copy(self):
+        lines = self._concat_lines("render-production.yml")
+        self.assertEqual(len(lines), 1, f"expected 1 video concat cmd, got {lines}")
+        self.assertIn("-c copy", lines[0])
+
+    def test_reassemble_workflow_concat_is_stream_copy(self):
+        lines = self._concat_lines("render-production-reassemble.yml")
+        self.assertEqual(len(lines), 1, f"expected 1 video concat cmd, got {lines}")
+        self.assertIn("-c copy", lines[0])
+
+    def test_neither_path_reencodes_during_concat(self):
+        from assembly_contract import FORBIDDEN_CONCAT_CODECS
+        for wf_name in ("render-production.yml",
+                        "render-production-reassemble.yml"):
+            for line in self._concat_lines(wf_name):
+                for codec in FORBIDDEN_CONCAT_CODECS:
+                    self.assertNotIn(codec, line,
+                                     f"{wf_name} concat re-encodes with {codec}: {line}")
+
+    def test_concat_commands_identical_across_paths(self):
+        main = self._concat_lines("render-production.yml")
+        reasm = self._concat_lines("render-production-reassemble.yml")
+        # Compare the ffmpeg invocation itself (strip YAML indentation).
+        norm = lambda s: " ".join(s.split())
+        self.assertEqual(norm(main[0]), norm(reasm[0]),
+                         "assemble-path concat commands diverged")
+
+    def test_contract_module_defines_canonical_spec(self):
+        from assembly_contract import (CONCAT_DEMUXER_FLAGS, CONCAT_VIDEO_CODEC,
+                                       FORBIDDEN_CONCAT_CODECS)
+        self.assertEqual(CONCAT_DEMUXER_FLAGS, ["-f", "concat", "-safe", "0"])
+        self.assertEqual(CONCAT_VIDEO_CODEC, ["-c", "copy"])
+        self.assertIn("libx264", FORBIDDEN_CONCAT_CODECS)
+
+
+class TestSeamContract(unittest.TestCase):
+    """Contract rule 1: chunk ranges must tile exactly; sum(chunk frames)
+    == master frames. Pure-python, ffmpeg-free (assembly_contract)."""
+
+    def setUp(self):
+        from assembly_contract import (check_frame_ranges,
+                                       check_master_frame_count)
+        self.check_ranges = check_frame_ranges
+        self.check_master = check_master_frame_count
+
+    def _chunks(self, ranges):
+        return [{"chunk_id": i, "start": s, "end": e}
+                for i, (s, e) in enumerate(ranges)]
+
+    def test_exact_tiling_passes(self):
+        chunks = self._chunks([(0, 599), (600, 1199), (1200, 1799)])
+        r = self.check_master(chunks, 1800)
+        self.assertTrue(r["ok"], r["errors"])
+        self.assertEqual(r["expected"], 1800)
+
+    def test_seam_gap_detected_as_missing_frames(self):
+        # Chunk 1 lost its last frame: 600..1198 instead of 600..1199,
+        # and chunk 2 still starts at 1200 -> frame 1199 is missing.
+        chunks = self._chunks([(0, 599), (600, 1198), (1200, 1799)])
+        r = self.check_ranges(chunks)
+        self.assertFalse(r["ok"])
+        self.assertTrue(any("gap" in e for e in r["errors"]),
+                        r["errors"])
+        m = self.check_master(chunks, 1800)
+        self.assertFalse(m["ok"])  # sum is 1799, not 1800
+
+    def test_seam_overlap_detected_as_duplicate_frames(self):
+        # Chunk boundary rendered twice: chunk 1 starts at 599, not 600.
+        chunks = self._chunks([(0, 599), (599, 1199), (1200, 1799)])
+        r = self.check_ranges(chunks)
+        self.assertFalse(r["ok"])
+        self.assertTrue(any("overlap" in e for e in r["errors"]),
+                        r["errors"])
+
+    def test_master_mismatch_detected(self):
+        # The historical failure mode: master 23,165 vs expected 23,151.
+        chunks = self._chunks([(i * 600, i * 600 + 599) for i in range(38)]
+                              + [(22800, 23150)])
+        r = self.check_master(chunks, 23165)
+        self.assertFalse(r["ok"])
+        self.assertIn("23151", str(r["errors"]))
+        self.assertIn("23165", str(r["errors"]))
+
+    def test_out_of_order_chunk_ids_tiled_by_id(self):
+        chunks = self._chunks([(600, 1199), (0, 599), (1200, 1799)])
+        # chunk_ids assigned 0,1,2 by position — reorder by id explicitly:
+        chunks[0]["chunk_id"], chunks[1]["chunk_id"] = 1, 0
+        r = self.check_master(chunks, 1800)
+        self.assertTrue(r["ok"], r["errors"])
+
+    def test_empty_plan_rejected(self):
+        r = self.check_master([], 0)
+        self.assertFalse(r["ok"])
+
+    def test_single_chunk(self):
+        r = self.check_master(self._chunks([(0, 23150)]), 23151)
+        self.assertTrue(r["ok"], r["errors"])
+
+
+class TestAudioContinuityContract(unittest.TestCase):
+    """Contract rule 3: chunk audio is dropped at mux; the master audio is
+    exclusively the canonical VO+bed mix. No audio-continuity requirement
+    exists across chunk seams — by design, not by omission."""
+
+    def _mux_block(self, wf_name):
+        wf = _read_workflow(wf_name)
+        idx = wf.find("Mux canonical audio")
+        self.assertNotEqual(idx, -1, f"{wf_name}: mux step not found")
+        return wf[idx:idx + 4000]
+
+    def test_both_paths_drop_chunk_audio_at_mux(self):
+        for wf_name in ("render-production.yml",
+                        "render-production-reassemble.yml"):
+            mux = self._mux_block(wf_name)
+            self.assertIn('-map 0:v', mux,
+                          f"{wf_name}: mux must map only concatenated video")
+            self.assertIn('-map "[aout]"', mux,
+                          f"{wf_name}: mux must map only the canonical mix")
+            self.assertNotIn("-map 0:a", mux,
+                             f"{wf_name}: chunk audio must not be mapped")
+
+    def test_both_paths_stream_copy_video_at_mux(self):
+        for wf_name in ("render-production.yml",
+                        "render-production-reassemble.yml"):
+            mux = self._mux_block(wf_name)
+            self.assertIn("-c:v copy", mux,
+                          f"{wf_name}: mux must not re-encode video")
+
+
+class TestVerificationDeterminism(unittest.TestCase):
+    """Same inputs -> same verdict; a tampered chunk changes the verdict."""
+
+    def setUp(self):
+        from assembly_contract import check_master_frame_count
+        from build_ledger import build_ledger
+        self.check_master = check_master_frame_count
+        self.build_ledger = build_ledger
+
+    def _chunks(self):
+        return [{"chunk_id": i, "start": i * 600, "end": i * 600 + 599}
+                for i in range(3)]
+
+    def test_same_inputs_same_verdict(self):
+        r1 = self.check_master(self._chunks(), 1800)
+        r2 = self.check_master(self._chunks(), 1800)
+        self.assertEqual(r1, r2)
+        self.assertTrue(r1["ok"])
+
+    def test_tampered_chunk_range_changes_verdict(self):
+        chunks = self._chunks()
+        ok_before = self.check_master(chunks, 1800)["ok"]
+        # Tamper: chunk 1 silently gains a duplicated frame at the seam.
+        chunks[1]["start"] = 599
+        verdict = self.check_master(chunks, 1800)
+        self.assertTrue(ok_before)
+        self.assertFalse(verdict["ok"], "tampered seam must fail")
+
+    def test_tampered_master_count_changes_verdict(self):
+        chunks = self._chunks()
+        self.assertTrue(self.check_master(chunks, 1800)["ok"])
+        # The dup=14 failure mode: master inflated by re-encode dups.
+        self.assertFalse(self.check_master(chunks, 1814)["ok"])
+
+    def test_ledger_verdict_deterministic(self):
+        job = {"job_identity": "det-job",
+               "plan": {"chunks": [{"chunk_id": i, "start": i * 600,
+                                    "end": i * 600 + 599}
+                                   for i in range(3)]}}
+
+        def chunk(cid):
+            return {"chunk_id": cid,
+                    "frame_range": {"start": cid * 600, "end": cid * 600 + 599},
+                    "output_sha256": "ab" * 32, "output_bytes": 999,
+                    "attempt": 1, "generation_fingerprint": "fp",
+                    "provenance": {"reused": False},
+                    "validation": {"output_exists": True,
+                                   "output_non_empty": True}}
+
+        l1 = self.build_ledger(job, {i: chunk(i) for i in range(3)})
+        l2 = self.build_ledger(job, {i: chunk(i) for i in range(3)})
+        self.assertEqual(l1, l2)
+        self.assertTrue(l1["complete"])
+
+
+class TestConcatFrameExactnessFfmpeg(unittest.TestCase):
+    """End-to-end (needs ffmpeg; skipped gracefully when absent): build
+    tiny Remotion-style chunks — H.264 with B-frames + AAC audio carrying
+    the 2048-sample priming edit list (`-itsoffset -42667us`, exactly as
+    Remotion's aac-priming.js does) — then concat with the workflow's
+    `-c copy` command and assert exact frame-count preservation."""
+
+    FFMPEG = "ffmpeg"
+    FFPROBE = "ffprobe"
+
+    @classmethod
+    def setUpClass(cls):
+        import shutil
+        if shutil.which(cls.FFMPEG) is None or shutil.which(cls.FFPROBE) is None:
+            raise unittest.SkipTest("ffmpeg/ffprobe not available")
+
+    def _run(self, *args):
+        import subprocess
+        p = subprocess.run(args, stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE)
+        self.assertEqual(p.returncode, 0,
+                         f"{args[0]} failed: {p.stderr.decode()[-500:]}")
+
+    def _count_frames(self, path):
+        import subprocess
+        p = subprocess.run(
+            [self.FFPROBE, "-v", "error", "-select_streams", "v:0",
+             "-show_entries", "stream=nb_read_frames",
+             "-of", "default=noprint_wrappers=1:nokey=1",
+             "-count_frames", path],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertEqual(p.returncode, 0)
+        return int(p.stdout.decode().strip())
+
+    def test_stream_copy_concat_preserves_exact_frame_count(self):
+        import os
+        import tempfile
+        work = tempfile.mkdtemp(prefix="concat-parity-")
+        n_chunks, frames_per_chunk = 3, 30  # tiny: fast, still exercises seams
+        chunk_files = []
+        for i in range(n_chunks):
+            v = os.path.join(work, f"v_{i}.mp4")
+            a = os.path.join(work, f"a_{i}.m4a")
+            c = os.path.join(work, f"chunk_{i}.mp4")
+            # Video: H.264 with B-frames (x264 defaults, like Remotion).
+            self._run(self.FFMPEG, "-y", "-v", "error",
+                      "-f", "lavfi",
+                      "-i", f"testsrc=size=64x64:rate=30:duration=1",
+                      "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p", v)
+            # Audio: AAC, then muxed with Remotion's priming shift so the
+            # chunk carries the 2048-sample edit list (the real-world hazard).
+            self._run(self.FFMPEG, "-y", "-v", "error",
+                      "-f", "lavfi", "-i", "sine=frequency=440:duration=1",
+                      "-c:a", "aac", "-b:a", "64k", a)
+            self._run(self.FFMPEG, "-y", "-v", "error",
+                      "-itsoffset", "-42667us", "-i", a, "-i", v,
+                      "-c", "copy", "-map", "0:a", "-map", "1:v", c)
+            chunk_files.append(c)
+
+        per_chunk = [self._count_frames(c) for c in chunk_files]
+        self.assertTrue(all(n == frames_per_chunk for n in per_chunk),
+                        f"chunk frame counts: {per_chunk}")
+
+        concat_list = os.path.join(work, "concat.txt")
+        with open(concat_list, "w") as f:
+            for c in chunk_files:
+                f.write(f"file '{c}'\n")
+        master = os.path.join(work, "master.mp4")
+        # The EXACT command from both workflows' assemble paths.
+        self._run(self.FFMPEG, "-y", "-v", "error",
+                  "-f", "concat", "-safe", "0", "-i", concat_list,
+                  "-c", "copy", master)
+        expected = sum(per_chunk)
+        actual = self._count_frames(master)
+        self.assertEqual(actual, expected,
+                         f"stream-copy concat changed frame count: "
+                         f"{actual} != sum(chunks)={expected}")

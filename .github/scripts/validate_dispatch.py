@@ -27,6 +27,14 @@ import re
 import subprocess
 import sys
 
+# R-2: composition contract lives next to this script; make it importable
+# regardless of the caller's working directory.
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if _SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPT_DIR)
+from composition_contract import (
+    validate_for_dispatch, check_registry_consistency, check_no_duplicate_ids)
+
 
 def check_frame_math(start, end, chunk_size):
     """Validate frame range arithmetic."""
@@ -114,6 +122,175 @@ def check_composition(composition, expected_frames, repo_root):
         print(f"  WARNING: Could not determine frame count from {comp_file}")
         print(f"  (Manual verification required)")
     
+    return errors
+
+
+# R-*: beat files consumed as checked-in JSON by beat-driven compositions.
+# The beat compiler is not in the pipeline; the dispatch gate below proves the
+# checked-in beats honor the canonical EDITORIAL_BEAT_SCHEMA contract instead.
+BEAT_FILES = {
+    "ProductionBeats": "src/compiled/beat_timeline.json",
+    "B6A": "src/compiled/beat_timeline.json",
+    "B6B": "src/compiled/beat_timeline.json",
+    "P3Rehearsal": "src/compiled_p3/beat_timeline.json",
+    "ChainTest": "src/chaintest/beat_timeline.json",
+}
+
+
+def beat_artifact_provenance(beat_path, repo_root):
+    """Classify where a beat artifact came from.
+
+    Returns {"file": <rel path>, "provenance": "checked-in" |
+    "compiler-generated" | "unknown", "generator": <note>}.
+
+    Provenance fact (verified 2026-10-10): beat_compiler.py is disconnected
+    — zero production callers — and every beat file this gate checks predates
+    it, so an artifact present in the checkout is hand-authored ("checked-in"),
+    not compiler-generated. Provenance is recorded from checkout state at
+    gate time; the file's content is not parsed for authorship.
+    """
+    rel = os.path.relpath(os.path.abspath(beat_path),
+                          os.path.abspath(repo_root))
+    if not os.path.exists(beat_path):
+        return {"file": rel, "provenance": "unknown",
+                "generator": "artifact not present in this checkout"}
+    return {"file": rel, "provenance": "checked-in",
+            "generator": "hand-authored; beat_compiler.py disconnected "
+                         "(no production caller)"}
+
+
+class BeatCheckResult(list):
+    """Error list from check_beat_contract carrying the beat artifact's
+    provenance record in .provenance, so callers and dispatch logs can
+    report which artifact was validated and where it came from. Still a
+    plain list of error strings, so existing call sites work unchanged."""
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.provenance = None
+
+
+def _resolve_beat_schema(repo_root):
+    """Locate the beat schema. Fail-closed: a missing schema is an error.
+
+    Resolution order:
+      1. Repo-vendored replica: <repo>/.github/schemas/EDITORIAL_BEAT_SCHEMA.json
+         (pinned copy; this is what GitHub runners read — the canonical file
+         lives outside the repo and is absent from runner checkouts).
+      2. Canonical source: <parent-of-repo>/EDITORIAL_BEAT_SCHEMA.json
+         (local-dev fallback).
+
+    Returns (schema_path_or_None, error_list).
+    """
+    vendored = os.path.join(repo_root, ".github", "schemas",
+                            "EDITORIAL_BEAT_SCHEMA.json")
+    canonical = os.path.join(os.path.dirname(os.path.abspath(repo_root)),
+                             "EDITORIAL_BEAT_SCHEMA.json")
+    for path in (vendored, canonical):
+        if os.path.exists(path):
+            return path, []
+    return None, [
+        "Beat schema gate fail-closed: EDITORIAL_BEAT_SCHEMA.json not found. "
+        f"Checked repo-vendored {vendored} and canonical {canonical}. "
+        "Beat-driven compositions cannot be validated without the schema; "
+        "dispatch is blocked."
+    ]
+
+
+def _load_beat_schema(schema_path):
+    """Parse the beat schema. Fail-closed: malformed JSON is an error, never
+    a crash that could be mistaken for a pass elsewhere in the chain.
+
+    Returns (schema_dict_or_None, error_list).
+    """
+    import json
+    try:
+        with open(schema_path) as f:
+            return json.load(f), []
+    except json.JSONDecodeError as e:
+        return None, [
+            f"Beat schema gate fail-closed: {schema_path} is not valid "
+            f"JSON: {e}"
+        ]
+    except OSError as e:
+        return None, [
+            f"Beat schema gate fail-closed: cannot read {schema_path}: {e}"
+        ]
+
+
+def check_beat_contract(composition, repo_root):
+    """Validate checked-in beats against the canonical beat schema.
+
+    Applies only to beat-driven compositions (timeline=compiled_beats).
+    Fixed-timeline compositions have no beat file and skip cleanly.
+
+    Schema source (single source of truth):
+      ~/workspace/crackit/EDITORIAL_BEAT_SCHEMA.json
+    Repo-vendored replica (pinned copy so GitHub runners can enforce the
+    gate — the canonical file lives outside the repo):
+      .github/schemas/EDITORIAL_BEAT_SCHEMA.json
+    A sync test (TestBeatSchemaSync) proves the replica is byte-identical
+    to the canonical source. The gate reads the replica first, then the
+    canonical path as a local-dev fallback.
+
+    FAIL-CLOSED: a missing schema, an unreadable schema, malformed schema
+    JSON, or a malformed beat file all produce errors — never a silent skip.
+    The artifact's provenance record is printed and attached to the returned
+    BeatCheckResult as .provenance.
+    """
+    errors = BeatCheckResult()
+    beat_rel = BEAT_FILES.get(composition)
+    if not beat_rel:
+        return errors
+    beat_path = os.path.join(repo_root, beat_rel)
+    prov = beat_artifact_provenance(beat_path, repo_root)
+    errors.provenance = prov
+    print(f"  Provenance: {prov['file']} [{prov['provenance']}]")
+    schema_path, schema_errs = _resolve_beat_schema(repo_root)
+    errors.extend(schema_errs)
+    schema = None
+    if schema_path is not None:
+        print(f"  Beat schema: "
+              f"{os.path.relpath(schema_path, os.path.abspath(repo_root))}")
+        schema, load_errs = _load_beat_schema(schema_path)
+        errors.extend(load_errs)
+    if not os.path.exists(beat_path):
+        errors.append(f"Beat file missing for '{composition}': {beat_rel}")
+        return errors
+    if schema is None:
+        # Fail-closed: the reason is already recorded above.
+        return errors
+    import json
+    try:
+        with open(beat_path) as f:
+            doc = json.load(f)
+    except (json.JSONDecodeError, OSError) as e:
+        errors.append(f"Beat file {beat_rel} unreadable: {e}")
+        return errors
+    beats = doc.get("beats", doc if isinstance(doc, list) else [])
+    if not isinstance(beats, list) or not beats:
+        errors.append(f"Beat file {beat_rel} contains no beats")
+        return errors
+    print(f"  Beat file: {beat_rel} ({len(beats)} beats)")
+    for b in beats:
+        bid = b.get("beat_id", "?")
+        for field in schema.get("required", []):
+            if field not in b or b[field] is None:
+                errors.append(f"Beat '{bid}': missing required field '{field}'")
+        for field, enum_key in (("semantic_role", "semantic_role_enum"),
+                                ("visual_verb", "visual_verb_enum"),
+                                ("visual_mode", "visual_mode_enum"),
+                                ("duration_class", "duration_class_enum"),
+                                ("sfx_policy", "sfx_policy_enum")):
+            if b.get(field) not in schema.get(enum_key, []):
+                errors.append(
+                    f"Beat '{bid}': {field}={b.get(field)!r} not in {enum_key}")
+        if b.get("data_presence") and not b.get("data_payload_ref"):
+            errors.append(
+                f"Beat '{bid}': data_presence=true but no data_payload_ref "
+                f"(payload values must never be invented)")
+    if not errors:
+        print(f"  Beat contract: {len(beats)} beats satisfy the canonical schema")
     return errors
 
 
@@ -266,7 +443,26 @@ def main():
     print("\n[5] Push script coverage...")
     errs = check_push_coverage(repo_root)
     all_errors.extend(errs)
-    
+
+    print("\n[6] Composition contract (R-2)...")
+    errs = check_registry_consistency(repo_root)
+    all_errors.extend(errs)
+    errs = check_no_duplicate_ids()
+    all_errors.extend(errs)
+    errs = validate_for_dispatch(args.composition, with_audio)
+    all_errors.extend(errs)
+    if not errs:
+        from composition_contract import get_contract
+        c = get_contract(args.composition)
+        print(f"  Contract: role={c['role']} brain={c['brain']} "
+              f"timeline={c['timeline']} audio={c['audio']} qa={c['qa']}")
+        if c.get("exemption"):
+            print(f"  Exemption: {c['exemption']}")
+
+    print("\n[7] Beat contract (canonical schema)...")
+    errs = check_beat_contract(args.composition, repo_root)
+    all_errors.extend(errs)
+
     print("\n" + "=" * 60)
     if all_errors:
         print(f"FAILED: {len(all_errors)} problem(s) found:")

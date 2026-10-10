@@ -97,7 +97,7 @@
    "text": "Banks profit when you do not notice.",
    "semantic_role": "cause",
    "visual_verb": "reveal",
-   "visual_mode": null,
+   "visual_mode": "causal_diagram",
    "preferred_visual_mode": null,
    "visual_intent": "show the mechanism of hidden fees flowing from customers to banks",
    "mode_source": "selector",
