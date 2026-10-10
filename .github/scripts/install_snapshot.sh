@@ -28,12 +28,14 @@ SNAP_URL="https://snapshot.ubuntu.com/ubuntu/${UBUNTU_SNAPSHOT}"
 # Backup original sources (best effort)
 sudo cp /etc/apt/sources.list.d/ubuntu.sources /tmp/ubuntu.sources.bak 2>/dev/null || true
 
-# Configure snapshot source (noble + noble-updates, main only)
+# Configure snapshot source (noble + noble-updates, main + universe).
+# R-008: universe is required — ffmpeg and other media packages live there,
+# not in main. Without it, snapshot installs hard-fail.
 sudo tee /etc/apt/sources.list.d/ubuntu-snapshot.sources > /dev/null <<EOF
 Types: deb
 URIs: $SNAP_URL
 Suites: noble noble-updates
-Components: main
+Components: main universe
 Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 EOF
 
