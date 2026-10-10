@@ -634,7 +634,6 @@ jobs:
   # --- Job 3: Assemble + verify + publish master ---
   assemble:
     needs: [plan, render-chunk]
-    if: ${{ inputs.sfx_chain_test != true }}
     # P3.12.1: assembly runs when the plan succeeded. The plan is the source
     # of truth: zero_render=true means all chunks validated reusable;
     # zero_render=false means render-chunk ran (its result is checked below).
@@ -642,7 +641,8 @@ jobs:
     # matrix), GitHub skips dependents unless the condition uses always().
     # Do NOT reference needs.render-chunk.result here; the guard step below
     # verifies render success when zero_render is false.
-    if: ${{ always() && needs.plan.result == 'success' }}
+    # SFX chain test mode: skip (dedicated test job runs instead).
+    if: ${{ always() && needs.plan.result == 'success' && inputs.sfx_chain_test != true }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
