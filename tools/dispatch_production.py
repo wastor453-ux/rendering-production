@@ -29,7 +29,7 @@ import urllib.error
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = "wastor453-ux/rendering-production"
-BRANCH = "p4-4-complete-preproduction-closure"
+BRANCH = "p4-4-ccdecbc-readiness"
 WORKFLOW = "render-production.yml"
 STATE_DIR = os.path.expanduser("~/workspace/crackit/demo-video/.production-state")
 
@@ -75,16 +75,23 @@ def run_validator(args):
 
 
 def check_branch_pushed():
-    """Local HEAD must match the remote branch — the runner uses GitHub's copy."""
-    local = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT,
-                           capture_output=True, text=True).stdout.strip()
+    """Remote branch must carry the same tree as local HEAD — the runner uses GitHub's copy.
+
+    Compares tree SHAs, not commit SHAs: pushes made via the Git Data API
+    create new commit objects (new SHAs) for the same tree, so a strict
+    commit-SHA check would fail forever after an API push.
+    """
+    local_tree = subprocess.run(["git", "rev-parse", "HEAD^{tree}"], cwd=REPO_ROOT,
+                                capture_output=True, text=True).stdout.strip()
     ref = gh_api("GET", f"/repos/{REPO}/git/ref/heads/{BRANCH}")
     remote = ref["object"]["sha"]
-    if local != remote:
-        print(f"FATAL: branch not pushed (local {local[:8]} != remote {remote[:8]}). "
+    remote_commit = gh_api("GET", f"/repos/{REPO}/git/commits/{remote}")
+    remote_tree = remote_commit["tree"]["sha"]
+    if local_tree != remote_tree:
+        print(f"FATAL: branch not pushed (local tree {local_tree[:8]} != remote tree {remote_tree[:8]}). "
               f"Push first.", file=sys.stderr)
         return False
-    print(f"Branch pushed: {BRANCH} @ {local[:8]}")
+    print(f"Branch pushed: {BRANCH} @ {remote[:8]} (tree {local_tree[:8]})")
     return True
 
 

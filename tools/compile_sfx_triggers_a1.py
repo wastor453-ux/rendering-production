@@ -106,6 +106,7 @@ def build_triggers(events, assets_by_name, asset_map, fps=30):
             "phrase": e["phrase"],
             "asset": asset,
             "asset_id": a.get("asset_id"),
+            "approved_role": e.get("approved_role"),
             "visual_impact_frame": impact_f,
             "impact_time_s": peak_s,
             "peak_time_s": peak,

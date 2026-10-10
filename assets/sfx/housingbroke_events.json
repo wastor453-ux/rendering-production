@@ -1,0 +1,269 @@
+{
+ "events": [
+  {
+   "event_id": "H1_01",
+   "beat_id": "H1",
+   "phrase": "Headline enters",
+   "sfx": "ui-swipe-45.wav",
+   "visual_impact_frame": 10,
+   "approved_role": "soft whoosh"
+  },
+  {
+   "event_id": "H1_02",
+   "beat_id": "H1",
+   "phrase": "Fork card entry",
+   "sfx": "ui-pop-41.wav",
+   "visual_impact_frame": 156,
+   "approved_role": "low thud"
+  },
+  {
+   "event_id": "H1_03",
+   "beat_id": "H1",
+   "phrase": "Fork card pulse peak",
+   "sfx": "sfxmint-make-sound-for-graph-down-2.wav",
+   "visual_impact_frame": 906,
+   "approved_role": "deep boom"
+  },
+  {
+   "event_id": "H2_04",
+   "beat_id": "H2",
+   "phrase": "7.45% slam (scale pulse 2427-2449)",
+   "sfx": "ui-pop-44.wav",
+   "visual_impact_frame": 2427,
+   "approved_role": "impact hit"
+  },
+  {
+   "event_id": "H2_05",
+   "beat_id": "H2",
+   "phrase": "Payment card entry",
+   "sfx": "ui-swipe-41.wav",
+   "visual_impact_frame": 2827,
+   "approved_role": "soft whoosh"
+  },
+  {
+   "event_id": "H2_06",
+   "beat_id": "H2",
+   "phrase": "+$380/month card",
+   "sfx": "ready-coin-05.wav",
+   "visual_impact_frame": 2837,
+   "approved_role": "money tick"
+  },
+  {
+   "event_id": "H3_07",
+   "beat_id": "H3",
+   "phrase": "Seesaw card entry",
+   "sfx": "ui-swipe-39.wav",
+   "visual_impact_frame": 3783,
+   "approved_role": "soft whoosh"
+  },
+  {
+   "event_id": "H3_08",
+   "beat_id": "H3",
+   "phrase": "Seesaw completes ($80 / 6.25%)",
+   "sfx": "sfxmint-make-sound-for-graph-down-3.wav",
+   "visual_impact_frame": 4653,
+   "approved_role": "deep hit"
+  },
+  {
+   "event_id": "H3_09",
+   "beat_id": "H3",
+   "phrase": "30yr 5.5% headline",
+   "sfx": "ui-pop-47.wav",
+   "visual_impact_frame": 4953,
+   "approved_role": "impact hit"
+  },
+  {
+   "event_id": "H3_10",
+   "beat_id": "H3",
+   "phrase": "\"Three forces\" headline",
+   "sfx": "ui-click-30.wav",
+   "visual_impact_frame": 6253,
+   "approved_role": "UI click"
+  },
+  {
+   "event_id": "H3_11",
+   "beat_id": "H3",
+   "phrase": "Toast 1",
+   "sfx": "ready-click-05.wav",
+   "visual_impact_frame": 6353,
+   "approved_role": "UI click"
+  },
+  {
+   "event_id": "H3_12",
+   "beat_id": "H3",
+   "phrase": "Toast 2",
+   "sfx": "ui-click-32.wav",
+   "visual_impact_frame": 6903,
+   "approved_role": "UI click"
+  },
+  {
+   "event_id": "H3_13",
+   "beat_id": "H3",
+   "phrase": "Toast 3",
+   "sfx": "ui-click-33.wav",
+   "visual_impact_frame": 7453,
+   "approved_role": "UI click"
+  },
+  {
+   "event_id": "H3_14",
+   "beat_id": "H3",
+   "phrase": "Regime-change headline",
+   "sfx": "ui-swipe-31.wav",
+   "visual_impact_frame": 8103,
+   "approved_role": "soft whoosh"
+  },
+  {
+   "event_id": "H4_15",
+   "beat_id": "H4",
+   "phrase": "$40T counter completes",
+   "sfx": "sfxmint-make-sound-for-graph-down-4.wav",
+   "visual_impact_frame": 9901,
+   "approved_role": "deep hit"
+  },
+  {
+   "event_id": "H4_16",
+   "beat_id": "H4",
+   "phrase": "$3B/day headline",
+   "sfx": "ui-pop-58.wav",
+   "visual_impact_frame": 10251,
+   "approved_role": "impact hit"
+  },
+  {
+   "event_id": "H4_17",
+   "beat_id": "H4",
+   "phrase": "+$320B/yr card",
+   "sfx": "ready-coin-04.wav",
+   "visual_impact_frame": 11251,
+   "approved_role": "money sound"
+  },
+  {
+   "event_id": "H4_18",
+   "beat_id": "H4",
+   "phrase": "Spiral close",
+   "sfx": "sfxmint-make-sound-for-graph-down-1.wav",
+   "visual_impact_frame": 12251,
+   "approved_role": "low boom"
+  },
+  {
+   "event_id": "H5_19",
+   "beat_id": "H5",
+   "phrase": "\"Sales fall first\" headline",
+   "sfx": "ui-swipe-40.wav",
+   "visual_impact_frame": 12814,
+   "approved_role": "soft whoosh"
+  },
+  {
+   "event_id": "H5_20",
+   "beat_id": "H5",
+   "phrase": "Seller-surplus card entry",
+   "sfx": "ready-click-06.wav",
+   "visual_impact_frame": 13604,
+   "approved_role": "UI click"
+  },
+  {
+   "event_id": "H5_21",
+   "beat_id": "H5",
+   "phrase": "Bar fill completes",
+   "sfx": "ui-tick-09.wav",
+   "visual_impact_frame": 14104,
+   "approved_role": "data tick"
+  },
+  {
+   "event_id": "H5_22",
+   "beat_id": "H5",
+   "phrase": "-14% / -$62K card",
+   "sfx": "retro-game-coin-34.wav",
+   "visual_impact_frame": 14554,
+   "approved_role": "money sound"
+  },
+  {
+   "event_id": "H5_23",
+   "beat_id": "H5",
+   "phrase": "Golden cage beat",
+   "sfx": "ui-swipe-37.wav",
+   "visual_impact_frame": 15554,
+   "approved_role": "soft whoosh"
+  },
+  {
+   "event_id": "H6_24",
+   "beat_id": "H6",
+   "phrase": "Audience card 1",
+   "sfx": "ready-click-07.wav",
+   "visual_impact_frame": 16482,
+   "approved_role": "UI click"
+  },
+  {
+   "event_id": "H6_25",
+   "beat_id": "H6",
+   "phrase": "Audience card 2",
+   "sfx": "ui-click-34.wav",
+   "visual_impact_frame": 17182,
+   "approved_role": "UI click"
+  },
+  {
+   "event_id": "H6_26",
+   "beat_id": "H6",
+   "phrase": "Audience card 3",
+   "sfx": "ui-click-37.wav",
+   "visual_impact_frame": 17882,
+   "approved_role": "UI click"
+  },
+  {
+   "event_id": "H6_27",
+   "beat_id": "H6",
+   "phrase": "Audience card 4",
+   "sfx": "ui-click-38.wav",
+   "visual_impact_frame": 18582,
+   "approved_role": "UI click"
+  },
+  {
+   "event_id": "H6_28",
+   "beat_id": "H6",
+   "phrase": "$26K vs $24K card",
+   "sfx": "ready-coin-05.wav",
+   "visual_impact_frame": 19122,
+   "approved_role": "money sound"
+  },
+  {
+   "event_id": "H6_29",
+   "beat_id": "H6",
+   "phrase": "Bull/bear cards",
+   "sfx": "ui-click-41.wav",
+   "visual_impact_frame": 20422,
+   "approved_role": "UI click"
+  },
+  {
+   "event_id": "H6_30",
+   "beat_id": "H6",
+   "phrase": "Dashboard close",
+   "sfx": "ui-swipe-46.wav",
+   "visual_impact_frame": 21522,
+   "approved_role": "soft whoosh"
+  },
+  {
+   "event_id": "H7_31",
+   "beat_id": "H7",
+   "phrase": "Close headline",
+   "sfx": "ui-swipe-25.wav",
+   "visual_impact_frame": 22006,
+   "approved_role": "soft whoosh"
+  },
+  {
+   "event_id": "H7_32",
+   "beat_id": "H7",
+   "phrase": "Tagline card",
+   "sfx": "feedback-confirm-36.wav",
+   "visual_impact_frame": 22496,
+   "approved_role": "warm hit"
+  },
+  {
+   "event_id": "H7_33",
+   "beat_id": "H7",
+   "phrase": "End frame",
+   "sfx": "ready-hover-02.wav",
+   "visual_impact_frame": 22946,
+   "approved_role": "soft final tick"
+  }
+ ],
+ "provenance": "derived from P4_4_SFX_STAGED_MANIFEST.json (33 events, creative approval GRANTED 2026-10-10)"
+}

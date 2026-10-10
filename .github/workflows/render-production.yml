@@ -52,6 +52,11 @@ on:
         required: false
         type: boolean
         default: false
+      with_sfx_mix:
+        description: 'SFX mix stage (A1-only, LOCAL build 2026-10-10). Runs AFTER assemble: mixes the 33 staged A1 SFX triggers under the VO+bed intermediate per SOUND_DESIGN.md (VO never ducked, SFX -4dB under VO, 12f click breathing room, -14 LUFS / -1 dBTP). DEFAULT FALSE = completely inert; existing runs are unaffected.'
+        required: false
+        type: boolean
+        default: false
       # NOTE (P3.12): the old unsafe resume_from was removed in P3.5.2.
       # resume_from_run_id is its safe replacement: explicit prior-run
       # selection with generation-fingerprint validation, not filename
@@ -88,6 +93,7 @@ jobs:
       job_identity: ${{ steps.identity.outputs.job_identity }}
       generation_fingerprint: ${{ steps.manifest.outputs.generation_fingerprint }}
       zero_render: ${{ steps.set.outputs.zero_render }}
+      expected_frames: ${{ steps.frames.outputs.expected_frames }}
     steps:
       - uses: actions/checkout@v4
 
@@ -292,6 +298,11 @@ jobs:
               f.write(f"matrix={json.dumps({'chunk': chunks})}\n")
               f.write(f"zero_render={'true' if zero_render else 'false'}\n")
           PY
+
+      - id: frames
+        name: Compute expected frame count
+        run: |
+          echo "expected_frames=$(( ${{ inputs.end_frame }} - ${{ inputs.start_frame }} + 1 ))" >> "$GITHUB_OUTPUT"
 
       - name: Upload job manifest
         uses: actions/upload-artifact@v4
@@ -1159,22 +1170,43 @@ jobs:
         # visual stills render from this runner's codebase (the script shells
         # to `npx remotion still` against the checked-out code, the same code
         # that rendered the chunks).
+        # P4.4: delete any pre-existing report first — a stale file from the
+        # checkout must never be uploaded as this run's verification.
         # continue-on-error: this step NEVER fails the workflow; findings land
         # in verify-report.json for review.
         continue-on-error: true
         run: |
           set -euo pipefail
+          rm -f verify-report.json
           node scripts/verify-render.js --mode production \
             --comp "$COMPOSITION" \
             --manifest audio_manifest.json \
             --report verify-report.json
+          # Bind the report to this run's master identity (fail-closed below).
+          python3 .github/scripts/validate_verify_report.py stamp \
+            --report verify-report.json \
+            --run-id "${{ github.run_id }}" \
+            --master /tmp/master.mp4 || true
         env:
           COMPOSITION: ${{ inputs.composition }}
 
-      - name: Upload verify-report (QA advisory)
-        # The script always writes verify-report.json; hashFiles keeps this a
-        # no-op (not a failure) if it did not. Warn-only either way.
+      - name: Validate verify-report binding (fail closed)
+        # P4.4: refuse to upload a stale or mismatched report. The Q-004 run
+        # uploaded a 2026-10-06 report describing a 180s master — this gate
+        # fails the step (not the workflow) so no misleading artifact ships.
         if: ${{ always() && hashFiles('verify-report.json') != '' }}
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/validate_verify_report.py validate \
+            --report verify-report.json \
+            --run-id "${{ github.run_id }}" \
+            --master /tmp/master.mp4 \
+            --expected-frames "${{ needs.plan.outputs.expected_frames }}"
+
+      - name: Upload verify-report (QA advisory)
+        # Upload only if the binding validation above succeeded. A stale or
+        # mismatched report fails the validation step, so this never ships one.
+        if: ${{ always() && hashFiles('verify-report.json') != '' && needs.assemble.result != 'failure' }}
         uses: actions/upload-artifact@v4
         with:
           name: verify-report-${{ needs.plan.outputs.job_identity }}
@@ -1188,4 +1220,72 @@ jobs:
           path: |
             /tmp/master.mp4
             /tmp/job/job_manifest.json
+          retention-days: 30
+
+  sfx-mix:
+    # SFX MIX STAGE (A1-only). INERT BY DEFAULT: runs only when the
+    # with_sfx_mix input is true. When false (default), this job is skipped
+    # and no existing job's behavior changes.
+    needs: [plan, assemble]
+    if: ${{ always() && inputs.with_sfx_mix == true && needs.assemble.result == 'success' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ffmpeg (minimal)
+        run: |
+          set -euo pipefail
+          if ! python3 .github/scripts/preflight.py --for assemble >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq --no-install-recommends ffmpeg
+          fi
+          ffmpeg -hide_banner -version | head -1
+
+      - name: Download master (VO+bed intermediate)
+        uses: actions/download-artifact@v4
+        with:
+          name: master-${{ needs.plan.outputs.job_identity }}
+          path: /tmp/sfx
+
+      - name: Compile SFX triggers (A1, peak timing)
+        run: |
+          set -euo pipefail
+          # tools/compile_sfx_triggers_a1.py: fail-closed on missing assets,
+          # bad timing, or unknown A1 entries. Exits 2 on any violation.
+          python3 tools/compile_sfx_triggers_a1.py \
+            --events assets/sfx/housingbroke_events.json \
+            --manifest assets/a1/MANIFEST.json \
+            --asset-map assets/sfx/housingbroke_assetmap.json \
+            --out /tmp/sfx/sfx_triggers.json
+
+      - name: Mix SFX under VO+bed (A1-only, fail-closed)
+        run: |
+          set -euo pipefail
+          # tools/mix_sfx.py: VO never ducked; SFX -4dB under active VO;
+          # priority VO>Impact>Whoosh>Pop>Click>Data>Ambient; 12f click
+          # breathing room; bed 16dB below VO RMS; -14 LUFS / -1 dBTP.
+          # Exits 2 on any missing asset, schema, or timing violation.
+          python3 tools/mix_sfx.py \
+            --triggers /tmp/sfx/sfx_triggers.json \
+            --a1-manifest assets/a1/MANIFEST.json \
+            --a1-dir assets/a1 \
+            --vo "${{ inputs.vo_file }}" \
+            --bed "${{ inputs.bed_file }}" \
+            --video /tmp/sfx/master.mp4 \
+            --out /tmp/sfx/av_master.mp4
+
+      - name: Verify SFX master
+        run: |
+          set -euo pipefail
+          FRAMES=$(ffprobe -v error -count_frames -select_streams v:0 \
+            -show_entries stream=nb_read_frames -of csv=p=0 /tmp/sfx/av_master.mp4)
+          echo "av_master frames: $FRAMES"
+          ffprobe -v error -select_streams a:0 \
+            -show_entries stream=codec_name -of csv=p=0 /tmp/sfx/av_master.mp4
+
+      - name: Upload SFX master
+        uses: actions/upload-artifact@v4
+        with:
+          name: sfx-master-${{ needs.plan.outputs.job_identity }}
+          path: /tmp/sfx/av_master.mp4
           retention-days: 30
