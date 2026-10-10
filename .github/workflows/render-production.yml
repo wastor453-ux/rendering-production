@@ -110,16 +110,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: R-013 stale-rerun guard
+        # Logic lives in .github/scripts/rerun_guard.sh (regression-tested).
+        # The workflow only binds github.run_attempt -> argument.
         run: |
-          set -euo pipefail
-          ATTEMPT="${{ github.run_attempt }}"
-          if [ "$ATTEMPT" -gt 1 ]; then
-            echo "FATAL: R-013 - This is run attempt $ATTEMPT (a rerun)." >&2
-            echo "Stale reruns may execute incompatible workflow logic." >&2
-            echo "Use fresh workflow_dispatch for a new source revision." >&2
-            echo "The canonical job identity includes the attempt number," >&2
-            echo "so this run cannot silently reuse prior artifacts." >&2
-            exit 1
+          bash .github/scripts/rerun_guard.sh "${{ github.run_attempt }}"
           fi
           echo "R-013 guard passed: fresh dispatch (attempt 1)"
 
