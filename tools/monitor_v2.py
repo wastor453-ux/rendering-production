@@ -16,7 +16,7 @@ from dynamic_credentials import add_surrogate_to_request
 import urllib.request, urllib.error
 
 REPO = "wastor453-ux/rendering-production"
-BRANCH = "p4-4-complete-preproduction-closure"
+BRANCH = "p4-4-ccdecbc-readiness"
 WORKFLOW = "render-production.yml"
 STATE_FILE = os.path.expanduser("~/workspace/crackit/demo-video/.production-state/monitor_v2.json")
 

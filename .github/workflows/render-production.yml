@@ -357,42 +357,9 @@ jobs:
         if: steps.preflight.outputs.skip_apt == 'false'
         run: |
           set -euo pipefail
-          # P4.3 R-008: Try Ubuntu snapshot for reproducible packages.
-          # Falls back to regular archive if snapshot unavailable.
-          if [ -n "${UBUNTU_SNAPSHOT:-}" ]; then
-            echo "Configuring Ubuntu snapshot: $UBUNTU_SNAPSHOT"
-            SNAP_URL="https://snapshot.ubuntu.com/ubuntu/${UBUNTU_SNAPSHOT}"
-            # Backup original sources
-            sudo cp /etc/apt/sources.list.d/ubuntu.sources /tmp/ubuntu.sources.bak 2>/dev/null || true
-            # Create snapshot source (noble + noble-updates, main only)
-            sudo tee /etc/apt/sources.list.d/ubuntu-snapshot.sources > /dev/null <<EOF
-          Types: deb
-          URIs: $SNAP_URL
-          Suites: noble noble-updates
-          Components: main
-          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
-          EOF
-            # Disable original sources to avoid mixing
-            sudo mv /etc/apt/sources.list.d/ubuntu.sources /tmp/ 2>/dev/null || true
-            # P4.4 R-008: FAIL CLOSED - no silent fallback to rolling archive.
-            # If snapshot fails, stop before rendering with exact error.
-            if sudo apt-get update -qq 2>/tmp/apt-snapshot.err; then
-              echo "Snapshot configured successfully: $UBUNTU_SNAPSHOT"
-            else
-              echo "FATAL: Ubuntu snapshot failed: $UBUNTU_SNAPSHOT" >&2
-              echo "Exact error:" >&2
-              cat /tmp/apt-snapshot.err | head -10 >&2
-              echo "Correct UBUNTU_SNAPSHOT or clear it to use rolling archive explicitly." >&2
-              exit 1
-            fi
-          else
-            sudo apt-get update -qq
-          fi
-          # Note: ffmpeg NOT installed on render jobs (only needed for assembly)
-          # R-021 (P3.8): ONE unified package set from preflight.py::BROWSER_PACKAGES.
+          # R-008: ALL installs go through the pinned snapshot. No fallback.
           PKGS=$(python3 -c "import sys; sys.path.insert(0, '.github/scripts'); from preflight import BROWSER_PACKAGES; print(' '.join(BROWSER_PACKAGES))")
-          echo "Installing: $PKGS"
-          sudo apt-get install -y -qq --no-install-recommends $PKGS
+          bash .github/scripts/install_snapshot.sh $PKGS
           # Re-verify after install
           python3 .github/scripts/preflight.py "${{ env.NODE_VERSION }}" --for render
 
@@ -468,12 +435,10 @@ jobs:
             exit 1
           elif [ "$OUTCOME" = "repairable" ]; then
             echo "Missing dependencies detected; attempting repair..."
-            sudo apt-get update -qq
-            # R-021 (P3.8): ONE unified package set from preflight.py::BROWSER_PACKAGES.
-            # Do not define a separate list here.
+            # R-008: repair installs also go through the pinned snapshot.
+            # (install_snapshot.sh runs apt-get update internally.)
             PKGS=$(python3 -c "import sys; sys.path.insert(0, '.github/scripts'); from preflight import BROWSER_PACKAGES; print(' '.join(BROWSER_PACKAGES))")
-            echo "Installing: $PKGS"
-            sudo apt-get install -y $PKGS
+            bash .github/scripts/install_snapshot.sh $PKGS
             echo "Rechecking after repair..."
             python3 - <<'PY2'
           import json, os, sys
@@ -668,9 +633,9 @@ jobs:
       - name: Install ffmpeg (minimal)
         run: |
           set -euo pipefail
+          # R-008: ffmpeg install goes through the pinned snapshot.
           if ! python3 .github/scripts/preflight.py --for assemble >/dev/null 2>&1; then
-            sudo apt-get update -qq
-            sudo apt-get install -y -qq --no-install-recommends ffmpeg
+            bash .github/scripts/install_snapshot.sh ffmpeg
           fi
           python3 .github/scripts/preflight.py --for assemble | head -5
 
@@ -1244,9 +1209,9 @@ jobs:
       - name: Install ffmpeg (minimal)
         run: |
           set -euo pipefail
+          # R-008: ffmpeg install goes through the pinned snapshot.
           if ! python3 .github/scripts/preflight.py --for assemble >/dev/null 2>&1; then
-            sudo apt-get update -qq
-            sudo apt-get install -y -qq --no-install-recommends ffmpeg
+            bash .github/scripts/install_snapshot.sh ffmpeg
           fi
           ffmpeg -hide_banner -version | head -1
 
@@ -1330,7 +1295,8 @@ jobs:
       - name: Build synthetic VO + bed inputs
         run: |
           set -euo pipefail
-          sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg
+          # R-008: ffmpeg install goes through the pinned snapshot.
+          bash .github/scripts/install_snapshot.sh ffmpeg
           ffmpeg -v error -y -f lavfi -i "sine=frequency=220:duration=10" \
             -af "volume='if(between(t,1,3)+between(t,5,7),1,0.02)':eval=frame" \
             -ar 48000 -ac 1 /tmp/vo_synth.wav
