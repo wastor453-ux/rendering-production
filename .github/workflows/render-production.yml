@@ -1364,7 +1364,9 @@ jobs:
           echo "duration=$DUR sample_rate=$SR"
           python3 -c "d=float('$DUR'); assert abs(d-10.0) < 0.05, d"
           [ "$SR" = "48000" ] || { echo "FAIL: sample rate $SR"; exit 1; }
-          ffmpeg -v error -i /tmp/sfx_test_10s.wav -af loudnorm=print_format=json -f null - 2> /tmp/loud.json || true
+          # Note: no -v error here — loudnorm prints its JSON stats at info
+          # level, and -v error would suppress them (empty loud.json).
+          ffmpeg -hide_banner -i /tmp/sfx_test_10s.wav -af loudnorm=print_format=json -f null - 2> /tmp/loud.json || true
           python3 - <<'PY'
           import json, re
           raw = open('/tmp/loud.json').read()
