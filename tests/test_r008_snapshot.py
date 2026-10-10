@@ -37,13 +37,49 @@ class TestR008NoBypass(unittest.TestCase):
                 self.fail(f"Line {i}: bare apt-get update bypasses R-008: {stripped[:80]}")
 
     def test_all_jobs_use_snapshot_script(self):
-        """Each job that needs packages references install_snapshot.sh."""
+        """Each job that needs packages references install_snapshot.sh.
+
+        Job map (5 install sites):
+          render-chunk  — Install system deps (BROWSER_PACKAGES) + browser repair
+          assemble      — Install ffmpeg (minimal)
+          sfx-mix       — Install ffmpeg (minimal)
+          sfx-chain-test— Build synthetic VO + bed inputs (ffmpeg)
+        """
         with open(WORKFLOW) as f:
             content = f.read()
-        # Count usages — should cover render, assemble, sfx-mix, sfx-chain-test
-        uses = content.count("install_snapshot.sh")
-        self.assertGreaterEqual(uses, 4,
-                                f"Expected >=4 install_snapshot.sh usages, found {uses}")
+        lines = content.split("\n")
+        # Actual invocations only (exclude comments mentioning the script)
+        invocations = [
+            i for i, line in enumerate(lines, 1)
+            if "bash .github/scripts/install_snapshot.sh" in line
+            and not line.strip().startswith("#")
+        ]
+        # 5 production sites + 3 install-verify sites
+        self.assertEqual(len(invocations), 8,
+                         f"Expected exactly 8 install sites, found {len(invocations)}")
+
+        # Map each invocation to its workflow job
+        job_headers = [(i, line.strip().rstrip(":"))
+                       for i, line in enumerate(lines, 1)
+                       if line.startswith("  ") and line.strip().endswith(":")
+                       and not line.strip().startswith(("if", "with", "run", "env", "steps", "outputs"))]
+        expected = {
+            "render-chunk": 2,   # main install + browser repair
+            "assemble": 1,       # ffmpeg
+            "sfx-mix": 1,        # ffmpeg
+            "sfx-chain-test": 1, # ffmpeg
+            "install-verify": 3, # render-chunk path + assemble path + sfx-mix path
+        }
+        found = {job: 0 for job in expected}
+        for lineno in invocations:
+            job = "unknown"
+            for hline, hname in job_headers:
+                if hline < lineno and hname in expected:
+                    job = hname
+            if job in found:
+                found[job] += 1
+        self.assertEqual(found, expected,
+                         f"Per-job install-site map mismatch: {found}")
 
     def test_snapshot_script_exists_and_executable(self):
         self.assertTrue(os.path.isfile(SCRIPT), f"Missing {SCRIPT}")
@@ -89,3 +125,53 @@ class TestR008FailClosed(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class TestInstallVerifyJob(unittest.TestCase):
+    """R-008: the install-verify job must exist and be the ONLY job that runs
+    in install_verify mode. All production jobs must be gated off."""
+
+    def _jobs(self):
+        import yaml
+        with open(WORKFLOW) as f:
+            return yaml.safe_load(f)["jobs"]
+
+    def test_install_verify_job_exists(self):
+        jobs = self._jobs()
+        self.assertIn("install-verify", jobs)
+        iv = jobs["install-verify"]
+        self.assertIn("inputs.install_verify == true", iv.get("if", ""))
+        step_names = [s.get("name", "") for s in iv["steps"]]
+        self.assertIn("R-008 render-chunk install path (BROWSER_PACKAGES)", step_names)
+        self.assertIn("R-008 assemble install path (ffmpeg)", step_names)
+        self.assertIn("R-008 sfx-mix install path (ffmpeg)", step_names)
+
+    def test_all_other_jobs_gated_off(self):
+        jobs = self._jobs()
+        for name, job in jobs.items():
+            if name == "install-verify":
+                continue
+            cond = str(job.get("if", ""))
+            self.assertIn("install_verify != true", cond,
+                          f"Job {name} is NOT gated off install_verify mode: {cond}")
+
+    def test_install_verify_steps_use_snapshot_script(self):
+        """Every install-verify step must route through install_snapshot.sh."""
+        import yaml
+        with open(WORKFLOW) as f:
+            jobs = yaml.safe_load(f)["jobs"]
+        for step in jobs["install-verify"]["steps"]:
+            run = step.get("run", "")
+            if "apt" in run.lower() or "install" in run.lower():
+                self.assertIn("install_snapshot.sh", run,
+                              f"Step '{step.get('name')}' bypasses install_snapshot.sh")
+
+    def test_with_sfx_mix_still_default_false(self):
+        """Guardrail: with_sfx_mix must remain default false (no full mix)."""
+        import yaml
+        with open(WORKFLOW) as f:
+            # YAML 1.1 parses `on:` as boolean True
+            inputs = yaml.safe_load(f)[True]["workflow_dispatch"]["inputs"]
+        self.assertEqual(inputs["with_sfx_mix"]["default"], False)
+        self.assertEqual(inputs["install_verify"]["default"], False)
+        self.assertEqual(inputs["sfx_chain_test"]["default"], False)

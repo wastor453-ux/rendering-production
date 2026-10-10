@@ -62,6 +62,11 @@ on:
         required: false
         type: boolean
         default: false
+      install_verify:
+        description: 'INSTALL VERIFY ONLY (2026-10-10, R-008). Runs the R-008 install path for each remaining job site WITHOUT rendering or mixing: render-chunk BROWSER_PACKAGES, assemble ffmpeg, sfx-mix ffmpeg. Each install goes through install_snapshot.sh (fail-closed, logs snapshot/sources/versions). Skips ALL render/assemble/mix jobs. DEFAULT FALSE = completely inert.'
+        required: false
+        type: boolean
+        default: false
       # NOTE (P3.12): the old unsafe resume_from was removed in P3.5.2.
       # resume_from_run_id is its safe replacement: explicit prior-run
       # selection with generation-fingerprint validation, not filename
@@ -90,7 +95,7 @@ jobs:
   # --- Job 1: Generate canonical identity + chunk plan + job manifest ---
   plan:
     # SFX chain test mode: skip all production jobs.
-    if: ${{ inputs.sfx_chain_test != true }}
+    if: ${{ inputs.sfx_chain_test != true && inputs.install_verify != true }}
     runs-on: ubuntu-24.04
     # P4.4 R-013: Fail-fast on stale reruns. GitHub may permit reruns against
     # an older workflow revision. Fresh dispatch is the required path.
@@ -324,7 +329,7 @@ jobs:
   # --- Job 2: Render chunks in parallel (matrix) ---
   render-chunk:
     needs: plan
-    if: ${{ inputs.sfx_chain_test != true }}
+    if: ${{ inputs.sfx_chain_test != true && inputs.install_verify != true }}
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -607,7 +612,7 @@ jobs:
     # Do NOT reference needs.render-chunk.result here; the guard step below
     # verifies render success when zero_render is false.
     # SFX chain test mode: skip (dedicated test job runs instead).
-    if: ${{ always() && needs.plan.result == 'success' && inputs.sfx_chain_test != true }}
+    if: ${{ always() && needs.plan.result == 'success' && inputs.sfx_chain_test != true && inputs.install_verify != true }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -1201,7 +1206,7 @@ jobs:
     # with_sfx_mix input is true. When false (default), this job is skipped
     # and no existing job's behavior changes.
     needs: [plan, assemble]
-    if: ${{ always() && inputs.with_sfx_mix == true && inputs.sfx_chain_test != true && needs.assemble.result == 'success' }}
+    if: ${{ always() && inputs.with_sfx_mix == true && inputs.sfx_chain_test != true && inputs.install_verify != true && needs.assemble.result == 'success' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -1269,7 +1274,7 @@ jobs:
     # All production jobs (plan/render/assemble/sfx-mix) are skipped in this
     # mode. Proves the runner sees the 180 A1 assets and can execute the
     # full VO+bed+SFX chain. Does NOT render video or produce a full mix.
-    if: ${{ inputs.sfx_chain_test == true }}
+    if: ${{ inputs.sfx_chain_test == true && inputs.install_verify != true }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -1353,3 +1358,31 @@ jobs:
             /tmp/dryrun.log
             /tmp/loud.json
           retention-days: 30
+
+  install-verify:
+    # R-008 install-path verification: exercises the package-install step of
+    # each remaining job WITHOUT rendering, assembling, or mixing anything.
+    # Only apt installs run. All other jobs are gated off by install_verify.
+    if: ${{ inputs.install_verify == true }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: R-008 render-chunk install path (BROWSER_PACKAGES)
+        run: |
+          set -euo pipefail
+          PKGS=$(python3 -c "import sys; sys.path.insert(0, '.github/scripts'); from preflight import BROWSER_PACKAGES; print(' '.join(BROWSER_PACKAGES))")
+          bash .github/scripts/install_snapshot.sh $PKGS
+          python3 .github/scripts/preflight.py "${{ env.NODE_VERSION }}" --for render | head -3
+
+      - name: R-008 assemble install path (ffmpeg)
+        run: |
+          set -euo pipefail
+          bash .github/scripts/install_snapshot.sh ffmpeg
+          ffmpeg -hide_banner -version | head -1
+
+      - name: R-008 sfx-mix install path (ffmpeg)
+        run: |
+          set -euo pipefail
+          bash .github/scripts/install_snapshot.sh ffmpeg
+          ffmpeg -hide_banner -version | head -1
