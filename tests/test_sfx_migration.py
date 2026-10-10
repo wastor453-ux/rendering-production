@@ -142,3 +142,32 @@ class TestLegacyRetired(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
+
+
+class TestVendoredManifestSync(unittest.TestCase):
+    """The repo's assets/a1/MANIFEST.json is a vendored mirror of the
+    canonical ~/workspace/crackit/A1_sfx/MANIFEST.json. Assets must stay
+    byte-identical; only metadata may differ."""
+
+    CANONICAL = "/home/hatch/workspace/crackit/A1_sfx/MANIFEST.json"
+    VENDORED = os.path.join(os.path.dirname(__file__), "..", "assets",
+                            "a1", "MANIFEST.json")
+
+    def test_assets_in_sync(self):
+        with open(self.CANONICAL) as f:
+            canon = json.load(f)["assets"]
+        with open(self.VENDORED) as f:
+            vend = json.load(f)["assets"]
+        self.assertEqual(len(canon), len(vend), "asset count diverged")
+        c_map = {a["filename"]: a for a in canon}
+        v_map = {a["filename"]: a for a in vend}
+        self.assertEqual(set(c_map), set(v_map), "asset filenames diverged")
+        for fn in c_map:
+            self.assertEqual(c_map[fn], v_map[fn],
+                             f"asset {fn} diverged from canonical")
+
+    def test_vendored_marked_as_mirror(self):
+        with open(self.VENDORED) as f:
+            m = json.load(f)
+        self.assertIn("canonical_manifest", m)
+        self.assertIn("VENDORED", m.get("status", ""))

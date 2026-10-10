@@ -85,15 +85,19 @@ def load_a1_assets(manifest):
 
 
 def build_triggers(events, assets_by_name, asset_map, fps=30):
-    """Core pipeline (no I/O). Returns the triggers list."""
+    """Core pipeline (no I/O). Returns the triggers list.
+
+    The asset_map is the source of truth for which events get SFX:
+    an event in the map gets a trigger; an event not in the map is silent
+    (whether by sfx_policy=none/manual or by selector silence-by-law).
+    The legacy 'sfx' flag is honored if present but not required.
+    """
     triggers = []
     for e in events:
         eid = e["event_id"]
-        if not e.get("sfx"):
-            continue  # no SFX for this event (default-silence)
         asset = asset_map.get(eid)
         if not asset:
-            raise Fail(f"{eid}: no asset in asset map (SFX selection must assign one)")
+            continue  # silent by law or by policy — not an error
         a = assets_by_name.get(asset)
         if a is None:
             raise Fail(f"{eid}: asset '{asset}' not in A1 manifest")
