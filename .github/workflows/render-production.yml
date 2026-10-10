@@ -230,9 +230,11 @@ jobs:
         # recovery step below is skipped when resume_from_run_id is empty,
         # so the assembly_only guard never engages). Fail closed here.
         if: inputs.reassemble_bypass_fingerprint == true
+        env:
+          RESUME_FROM_RUN_ID: ${{ inputs.resume_from_run_id }}
         run: |
           set -euo pipefail
-          if [ -z "${{ inputs.resume_from_run_id }}" ]; then
+          if [ -z "$RESUME_FROM_RUN_ID" ]; then
             echo "FATAL: reassemble_bypass_fingerprint=true requires " \
                  "resume_from_run_id to be set." >&2
             echo "Without a resume source this flag would silently trigger " \
@@ -307,8 +309,11 @@ jobs:
 
       - id: frames
         name: Compute expected frame count
+        env:
+          START_FRAME: ${{ inputs.start_frame }}
+          END_FRAME: ${{ inputs.end_frame }}
         run: |
-          echo "expected_frames=$(( ${{ inputs.end_frame }} - ${{ inputs.start_frame }} + 1 ))" >> "$GITHUB_OUTPUT"
+          echo "expected_frames=$(( END_FRAME - START_FRAME + 1 ))" >> "$GITHUB_OUTPUT"
 
       - name: Upload job manifest
         uses: actions/upload-artifact@v4
@@ -1232,6 +1237,9 @@ jobs:
             --out /tmp/sfx/sfx_triggers.json
 
       - name: Mix SFX under VO+bed (A1-only, fail-closed)
+        env:
+          VO_FILE: ${{ inputs.vo_file }}
+          BED_FILE: ${{ inputs.bed_file }}
         run: |
           set -euo pipefail
           # tools/mix_sfx.py: VO never ducked; SFX -4dB under active VO;
@@ -1242,8 +1250,8 @@ jobs:
             --triggers /tmp/sfx/sfx_triggers.json \
             --a1-manifest assets/a1/MANIFEST.json \
             --a1-dir assets/a1 \
-            --vo "${{ inputs.vo_file }}" \
-            --bed "${{ inputs.bed_file }}" \
+            --vo "$VO_FILE" \
+            --bed "$BED_FILE" \
             --video /tmp/sfx/master.mp4 \
             --out /tmp/sfx/av_master.mp4
 
