@@ -212,6 +212,23 @@ jobs:
               print(f'VO duration OK: {vo_dur:.1f}s >= video {video_dur:.1f}s')
           "
 
+      - name: Validate reassembly inputs
+        # P4.4: reassemble_bypass_fingerprint=true without a resume source
+        # would silently fall through to a FULL production render (the
+        # recovery step below is skipped when resume_from_run_id is empty,
+        # so the assembly_only guard never engages). Fail closed here.
+        if: inputs.reassemble_bypass_fingerprint == true
+        run: |
+          set -euo pipefail
+          if [ -z "${{ inputs.resume_from_run_id }}" ]; then
+            echo "FATAL: reassemble_bypass_fingerprint=true requires " \
+                 "resume_from_run_id to be set." >&2
+            echo "Without a resume source this flag would silently trigger " \
+                 "a full render instead of assembly-only recovery." >&2
+            exit 1
+          fi
+          echo "Reassembly inputs OK: bypass=true with resume_from_run_id set"
+
       - id: recovery
         name: Plan recovery from prior run (if requested)
         if: inputs.resume_from_run_id != ''

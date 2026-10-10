@@ -312,7 +312,19 @@ function renderBeat(b: any): React.ReactNode {
 
 export const PRODUCTION_BEATS = (beatDoc as any).beats as any[];
 
-export const ProductionBeats: React.FC = () => <>{PRODUCTION_BEATS.map(renderBeat)}</>;
+export const ProductionBeats: React.FC = () => {
+  const els = PRODUCTION_BEATS.map(renderBeat);
+  // D2: surface selector disagreements in render logs (log-only until R-4).
+  // getDisputedDecisions() was write-only; this makes disputes visible.
+  const disputed = getDisputedDecisions();
+  if (disputed.length > 0) {
+    console.warn(
+      `[D2] ${disputed.length} disputed selector decision(s): ` +
+      disputed.map((d) => `${d.beat_id} (plan=${d.compiled_mode}, selector=${d.selected_mode})`).join("; ")
+    );
+  }
+  return <>{els}</>;
+};
 
 export const PRODUCTION_TOTAL = Math.ceil(
   Math.max(...PRODUCTION_BEATS.map((b: any) => b.end_time)) * FPS,

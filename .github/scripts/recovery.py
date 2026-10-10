@@ -496,4 +496,18 @@ def build_resume_plan(prior_manifest: dict, prior_chunk_manifests: dict,
     if resume_plan["render_count"] == len(current_plan):
         resume_plan["note"] = ("no chunks eligible for reuse; full render "
                                "required")
+    # P4.4: assembly_only is fail-closed on render jobs. If any chunk
+    # requires rendering, the plan fails here — before any render matrix is
+    # emitted — never silently scheduling a render. (Hamza's RENDER LAW:
+    # assembly failure reassembles the SAME verified chunks, never re-renders.)
+    if mode == "assembly_only" and resume_plan["render_count"] > 0:
+        bad = ", ".join(
+            f"chunk {r['chunk_id']} ({r.get('reason', 'unknown')})"
+            for r in resume_plan["render"])
+        return {"ok": False, "resume_plan": None,
+                "errors": [
+                    f"assembly_only mode requires zero render jobs, but "
+                    f"{resume_plan['render_count']} chunk(s) need rendering: "
+                    f"{bad}. Refusing to silently re-render; fix the source "
+                    f"chunks or use chunk_recovery mode explicitly."]}
     return {"ok": True, "resume_plan": resume_plan}

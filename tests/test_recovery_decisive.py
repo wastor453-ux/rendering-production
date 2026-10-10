@@ -296,14 +296,16 @@ def test_4b_source_change_chunk_recovery_rejected():
 
 
 def test_5_corrupt_chunk_manifest_never_reused_assembly_only():
-    """NEGATIVE (a): a corrupted chunk manifest must fail the plan's reuse.
+    """NEGATIVE (a): a corrupted chunk manifest must FAIL the plan in
+    assembly-only mode — never silently schedule a render.
 
     In assembly-only mode a checksum-tampered chunk manifest (recorded SHA !=
-    independently verified video bytes) must NEVER be reused silently. The
-    honest outcomes are: the bad chunk is explicitly listed for render (so
-    the zero-render guarantee is visibly void), or the plan is rejected.
+    independently verified video bytes) must NEVER be reused silently AND must
+    NEVER be silently queued for render. The only honest outcome is plan
+    rejection (fail-closed per Hamza's RENDER LAW). The caller (workflow)
+    sees a nonzero exit and neither rendering nor assembly proceeds.
     """
-    print("Test 5: Corrupt chunk manifest in assembly-only mode → never reused...")
+    print("Test 5: Corrupt chunk manifest in assembly-only mode → plan REJECTED...")
     prior = make_prior_manifest()
     current = make_inputs()
     plan = make_plan()
@@ -316,17 +318,69 @@ def test_5_corrupt_chunk_manifest_never_reused_assembly_only():
         mode="assembly_only",
     )
 
-    assert result["ok"], f"Plan failed unexpectedly: {result.get('errors')}"
-    rp = result["resume_plan"]
-    reuse_ids = [r["chunk_id"] for r in rp["reuse"]]
-    render_ids = [r["chunk_id"] for r in rp["render"]]
-    assert 17 not in reuse_ids, \
-        "Corrupt chunk 17 must NEVER appear in the reuse list!"
-    assert render_ids == [17], \
-        f"Corrupt chunk 17 must be explicitly listed for render, got {render_ids}"
-    assert rp["render_count"] == 1 and rp["reused_count"] == 38, \
-        f"Expected 38 reused / 1 render, got {rp['reused_count']} / {rp['render_count']}"
-    print("  ✅ PASS: Corrupt chunk refused reuse, explicitly listed for render")
+    assert not result["ok"], \
+        "assembly_only with a corrupt chunk must FAIL CLOSED, not schedule a render!"
+    assert result["resume_plan"] is None, \
+        "No resume plan may be emitted on failure"
+    errs = " ".join(result.get("errors", []))
+    assert "assembly_only" in errs and "zero render" in errs, \
+        f"Error must name the violated contract, got: {errs}"
+    assert "17" in errs, f"Error must identify chunk 17, got: {errs}"
+    print("  ✅ PASS: Plan rejected fail-closed; no render scheduled, no silent reuse")
+
+
+def test_5b_missing_chunk_assembly_only_fails_closed():
+    """NEGATIVE (a2): a missing chunk in assembly-only mode → plan REJECTED.
+
+    No silent re-render of the missing chunk. Fail-closed per RENDER LAW.
+    """
+    print("Test 5b: Missing chunk in assembly-only mode → plan REJECTED...")
+    prior = make_prior_manifest()
+    current = make_inputs()
+    plan = make_plan()
+    chunk_manifests, shas, sizes, mshas = make_chunk_manifests(missing_ids={5})
+
+    result = build_resume_plan(
+        prior, chunk_manifests, current, plan, "asset123",
+        artifact_shas=shas, artifact_sizes=sizes, manifest_shas=mshas,
+        prior_run_status={"status": "completed", "conclusion": "failure"},
+        mode="assembly_only",
+    )
+
+    assert not result["ok"], \
+        "assembly_only with a missing chunk must FAIL CLOSED, not schedule a render!"
+    assert result["resume_plan"] is None, \
+        "No resume plan may be emitted on failure"
+    errs = " ".join(result.get("errors", []))
+    assert "5" in errs, f"Error must identify chunk 5, got: {errs}"
+    print("  ✅ PASS: Plan rejected fail-closed; missing chunk not silently re-rendered")
+
+
+def test_5c_assembly_only_failure_emits_no_matrix():
+    """NEGATIVE (a3): on assembly_only failure, no render matrix can exist.
+
+    The CLI (recovery_plan.py) exits nonzero before writing render_matrix.json,
+    so the workflow's render-chunk job can never receive a matrix. This test
+    proves the library returns no plan object to persist.
+    """
+    print("Test 5c: assembly_only failure → no plan object to emit...")
+    prior = make_prior_manifest()
+    current = make_inputs()
+    plan = make_plan()
+    chunk_manifests, shas, sizes, mshas = make_chunk_manifests(corrupt_ids={0})
+
+    result = build_resume_plan(
+        prior, chunk_manifests, current, plan, "asset123",
+        artifact_shas=shas, artifact_sizes=sizes, manifest_shas=mshas,
+        prior_run_status={"status": "completed", "conclusion": "failure"},
+        mode="assembly_only",
+    )
+
+    assert not result["ok"]
+    assert result["resume_plan"] is None
+    # The workflow gates on result["ok"]: a False here means sys.exit(1)
+    # before render_matrix.json is written (recovery_plan.py §6 never runs).
+    print("  ✅ PASS: No plan object; downstream matrix emission impossible")
 
 
 def test_6_genuine_render_change_rejected():
@@ -450,10 +504,14 @@ if __name__ == "__main__":
     print()
     test_5_corrupt_chunk_manifest_never_reused_assembly_only()
     print()
+    test_5b_missing_chunk_assembly_only_fails_closed()
+    print()
+    test_5c_assembly_only_failure_emits_no_matrix()
+    print()
     test_6_genuine_render_change_rejected()
     print()
     test_7_tampered_ledger_rejected()
     print("=" * 70)
-    print("ALL 8 DECISIVE TESTS PASSED")
+    print("ALL 10 DECISIVE TESTS PASSED")
     print("Assembly-only recovery law: PROVEN with actual job counts")
     print("=" * 70)
