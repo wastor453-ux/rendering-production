@@ -59,5 +59,28 @@ class TestRerunGuard(unittest.TestCase):
         self.assertNotIn("remotion", before.lower())
 
 
+
+    def test_guard_step_shell_syntax_valid(self):
+        """The guard step's shell block must parse (no stray fi/done)."""
+        import re
+        import tempfile
+        with open(WORKFLOW) as f:
+            content = f.read()
+        # Extract the run block for the guard step
+        m = re.search(
+            r'- name: R-013 stale-rerun guard\n(?:.*\n)*?        run: \|\n((?:          .*\n)+)',
+            content)
+        self.assertIsNotNone(m, "Guard step run block not found")
+        block = m.group(1)
+        # Dedent and syntax-check with bash -n
+        lines = [l[10:] if l.startswith(" " * 10) else l for l in block.split("\n")]
+        with tempfile.NamedTemporaryFile("w", suffix=".sh", delete=False) as tf:
+            tf.write("\n".join(lines))
+            tf.flush()
+            r = subprocess.run(["bash", "-n", tf.name],
+                               capture_output=True, text=True, timeout=10)
+        self.assertEqual(r.returncode, 0,
+                         f"Guard step has shell syntax errors: {r.stderr}")
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

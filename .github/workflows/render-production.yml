@@ -114,7 +114,6 @@ jobs:
         # The workflow only binds github.run_attempt -> argument.
         run: |
           bash .github/scripts/rerun_guard.sh "${{ github.run_attempt }}"
-          fi
           echo "R-013 guard passed: fresh dispatch (attempt 1)"
 
       - name: Setup Node (for manifest version measurement)
