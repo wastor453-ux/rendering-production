@@ -15,6 +15,7 @@ import { FinanceProof, PROOF_TOTAL } from "./FinanceProof";
 import { ProductionBeats, PRODUCTION_TOTAL } from "./ProductionBeats";
 import { P3Rehearsal, P3_TOTAL } from "./P3Rehearsal";
 import { B6A, B6B, B6A_TOTAL } from "./B6Arbitration";
+import { CalibrationV0, CalibrationV1, CalibrationV2, CalibrationV3 } from "./test/VisualCalibration";
 import { ChainTest, CHAINTEST_TOTAL } from "./ChainTest";
 import { MaterialA, MaterialB, MATERIAL_AB_TOTAL } from "./MaterialAB";
 import { CompositionA, CompositionB, COMP_AB_TOTAL } from "./CompositionAB";
@@ -90,6 +91,11 @@ export const RemotionRoot: React.FC = () => {
         width={1920}
         height={1080}
       />
+      {/* ISOLATED VISUAL CALIBRATION - Phase 1B, temporary */}
+      <Composition id="CalibrationV0" component={CalibrationV0} durationInFrames={300} fps={30} width={1920} height={1080} />
+      <Composition id="CalibrationV1" component={CalibrationV1} durationInFrames={300} fps={30} width={1920} height={1080} />
+      <Composition id="CalibrationV2" component={CalibrationV2} durationInFrames={300} fps={30} width={1920} height={1080} />
+      <Composition id="CalibrationV3" component={CalibrationV3} durationInFrames={300} fps={30} width={1920} height={1080} />
       <Composition
         id="FinanceProof"
         component={FinanceProof}
