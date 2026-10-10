@@ -1,8 +1,7 @@
 import React from "react";
 import { Composition } from "remotion";
-import { DemoVideo, TOTAL_FRAMES, FPS } from "./DemoVideo";
-import { StyleRefs } from "./stylerefs/StyleRefs";
-import { InflationRef } from "./stylerefs/InflationRef";
+// DARK BRAIN REMOVED 2026-10-10: DemoVideo, StyleRefs, InflationRef retired (used src/theme.ts dark neon system)
+// See _retired/dark-brain/ for archived files.
 import { TrialVideo, TRIAL_TOTAL } from "./trial/TrialVideo";
 import { StressTest, STRESS_TOTAL } from "./stress/StressTest";
 import { PipeTestVideo, PIPETEST_TOTAL } from "./pipetest/PipeTest";
@@ -24,30 +23,7 @@ import { ModeRegression, MODE_REGRESSION_TOTAL } from "./ModeRegression";
 export const RemotionRoot: React.FC = () => {
   return (
     <>
-      <Composition
-        id="DemoVideo"
-        component={DemoVideo}
-        durationInFrames={TOTAL_FRAMES}
-        fps={FPS}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="StyleRefs"
-        component={StyleRefs}
-        durationInFrames={30}
-        fps={30}
-        width={5760}
-        height={1080}
-      />
-      <Composition
-        id="InflationRef"
-        component={InflationRef}
-        durationInFrames={30}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
+      {/* DARK BRAIN REMOVED: DemoVideo, StyleRefs, InflationRef retired 2026-10-10 */}
       <Composition
         id="TrialVideo"
         component={TrialVideo}

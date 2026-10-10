@@ -3,13 +3,15 @@ import { AbsoluteFill, Easing, interpolate, Sequence, useCurrentFrame } from "re
 import { LightCanvas, GlassCard } from "../light/primitives";
 import { HeroTypography } from "../light/editorial";
 import { T } from "../light/tokens";
+import { CARD_W, PAGE, ALIGN } from "../light/layout";
 
 const CLAMP = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const expo = Easing.bezier(0.16, 1, 0.3, 1);
 
 /**
  * H7 — Close (1155f / 37.5s). "Buy the math." + tagline.
- * MIGRATED 2026-10-09: Light Premium Fintech (was dark premium/theme).
+ * LAYOUT: closing thesis stays centered per layout law (ALIGN.closing);
+ * tagline card at CARD_W.M tier.
  */
 export const H7Close: React.FC = () => {
   const frame = useCurrentFrame();
@@ -19,19 +21,20 @@ export const H7Close: React.FC = () => {
 
   return (
     <LightCanvas>
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", flexDirection: "column", gap: 48 }}>
-        <div style={{ textAlign: "center" }}>
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", flexDirection: "column", gap: PAGE.gapSection }}>
+        <div style={{ textAlign: ALIGN.closing }}>
           <Sequence from={10}>
             <HeroTypography
               kicker=""
               lines={["Don't buy the panic.", "Don't buy the dip.", "Buy the math."]}
               accentLine={2}
+              align="center"
             />
           </Sequence>
         </div>
         <div style={{ opacity: cardOp, transform: `translateY(${cardY}px) scale(${finalPulse})` }}>
-          <GlassCard width={900}>
-            <div style={{ textAlign: "center", fontFamily: T.font }}>
+          <GlassCard width={CARD_W.M}>
+            <div style={{ textAlign: ALIGN.closing, fontFamily: T.font }}>
               <div style={{ fontWeight: 800, fontSize: 54, color: T.ink, letterSpacing: -1 }}>
                 Wealth is a legacy.
               </div>

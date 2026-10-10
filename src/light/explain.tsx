@@ -18,10 +18,10 @@ export const BeforeAfter: React.FC<{ before: { label: string; value: string }; a
   );
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 40, opacity: interpolate(frame, [0, 12], [0, 1], CLAMP) }}>
-      {card(before, T.negativeTint, "#B44A4A", morph < 0.5)}
+      {card(before, T.negativeTint, T.negativeDeep, morph < 0.5)}
       <div style={{ fontFamily: T.font, fontWeight: 800, fontSize: 54, color: T.primary,
         transform: `translateX(${interpolate(morph, [0, 1], [-10, 10], CLAMP)}px)` }}>→</div>
-      {card(after, T.successTint, "#1E7F5C", morph >= 0.5)}
+      {card(after, T.successTint, T.successDeep, morph >= 0.5)}
     </div>
   );
 };
@@ -59,7 +59,7 @@ export const TwoSidedComparison: React.FC<{
   return (
     <div style={{ display: "flex", gap: 36, alignItems: "flex-start" }}>
       {side(left, lp, -1, T.primaryDeep, false)}
-      {side(right, rp, 1, "#1E7F5C", true)}
+      {side(right, rp, 1, T.successDeep, true)}
     </div>
   );
 };

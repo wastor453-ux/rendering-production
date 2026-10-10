@@ -3,6 +3,7 @@ import { AbsoluteFill, Easing, interpolate, Sequence, useCurrentFrame } from "re
 import { LightCanvas, GlassCard, Kicker } from "../light/primitives";
 import { HeroTypography } from "../light/editorial";
 import { T } from "../light/tokens";
+import { CARD_W, PAGE, ALIGN } from "../light/layout";
 
 const CLAMP = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const expo = Easing.bezier(0.16, 1, 0.3, 1);
@@ -18,7 +19,9 @@ const CARDS = [
  * H6 — The Escape (5574f / 184.8s).
  * Beats: 4 audience cards (0–90s) → landlord math (90–130s) →
  * bull/bear scenarios (130–165s) → dashboard close (165–184s).
- * MIGRATED 2026-10-09: Light Premium Fintech (was dark premium/theme).
+ * LAYOUT: left-aligned flow (VISUAL_BRAIN §10/§11); audience/scenario cards at
+ * CARD_W.S tier; landlord math and scenarios stay symmetric comparisons
+ * (ALIGN.comparison) inside left-placed cards.
  */
 export const H6Escape: React.FC = () => {
   const frame = useCurrentFrame();
@@ -36,8 +39,8 @@ export const H6Escape: React.FC = () => {
     <LightCanvas>
 
       {/* BEAT 1: audience cards */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28 }}>
+      <AbsoluteFill style={{ justifyContent: "center", paddingLeft: PAGE.marginX, paddingRight: PAGE.marginX }}>
+        <div style={{ maxWidth: CARD_W.L, display: "grid", gridTemplateColumns: "1fr 1fr", gap: PAGE.gapCard }}>
           {CARDS.map((c, i) => {
             const d = 60 + i * 700;
             const p = interpolate(frame, [d, d + 24], [0, 1], { ...CLAMP, easing: expo });
@@ -45,7 +48,7 @@ export const H6Escape: React.FC = () => {
             const out = interpolate(frame, [2400, 2450], [1, 0], CLAMP);
             return (
               <div key={c.who} style={{ opacity: p * out, transform: `translateY(${y}px)` }}>
-                <GlassCard width={560}>
+                <GlassCard width={CARD_W.S}>
                   <div style={{ fontFamily: T.font, padding: "16px 24px" }}>
                     <div style={{ fontWeight: 800, fontSize: 26, letterSpacing: 6, color: T.primary }}>{c.who}</div>
                     <div style={{ fontWeight: 800, fontSize: 38, color: T.ink, marginTop: 8 }}>{c.what}</div>
@@ -58,12 +61,12 @@ export const H6Escape: React.FC = () => {
         </div>
       </AbsoluteFill>
 
-      {/* BEAT 2: landlord math */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: mOp * mOut }}>
-        <div style={{ transform: `scale(${mPulse})` }}>
-          <GlassCard width={1150}>
+      {/* BEAT 2: landlord math — symmetric comparison, centered inside left-placed card */}
+      <AbsoluteFill style={{ justifyContent: "center", paddingLeft: PAGE.marginX, paddingRight: PAGE.marginX, opacity: mOp * mOut }}>
+        <div style={{ maxWidth: CARD_W.L, transform: `scale(${mPulse})` }}>
+          <GlassCard width={CARD_W.L}>
             <div style={{ fontFamily: T.font, padding: "16px 28px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", textAlign: "center" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", textAlign: ALIGN.comparison }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 800, fontSize: 64, color: T.success }}>$26K</div>
                   <div style={{ fontWeight: 600, fontSize: 26, color: T.inkMuted }}>Treasuries · guaranteed<br />no tenants, no toilets</div>
@@ -79,19 +82,19 @@ export const H6Escape: React.FC = () => {
         </div>
       </AbsoluteFill>
 
-      {/* BEAT 3: scenarios */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: sOp * sOut }}>
-        <div style={{ display: "flex", gap: 32 }}>
-          <GlassCard width={560}>
-            <div style={{ fontFamily: T.font, padding: "16px 28px", textAlign: "center" }}>
+      {/* BEAT 3: scenarios — symmetric comparison pair, centered inside left-placed cards */}
+      <AbsoluteFill style={{ justifyContent: "center", paddingLeft: PAGE.marginX, paddingRight: PAGE.marginX, opacity: sOp * sOut }}>
+        <div style={{ display: "flex", gap: PAGE.gapCard }}>
+          <GlassCard width={CARD_W.S}>
+            <div style={{ fontFamily: T.font, padding: "16px 28px", textAlign: ALIGN.comparison }}>
               <div style={{ fontWeight: 800, fontSize: 40, color: T.success }}>BULL CASE</div>
               <div style={{ fontWeight: 600, fontSize: 28, color: T.ink, marginTop: 12 }}>
                 Oil under $80 · inflation cools<br />Fed holds · ice thaws slowly
               </div>
             </div>
           </GlassCard>
-          <GlassCard width={560}>
-            <div style={{ fontFamily: T.font, padding: "16px 28px", textAlign: "center" }}>
+          <GlassCard width={CARD_W.S}>
+            <div style={{ fontFamily: T.font, padding: "16px 28px", textAlign: ALIGN.comparison }}>
               <div style={{ fontWeight: 800, fontSize: 40, color: T.negative }}>BEAR CASE</div>
               <div style={{ fontWeight: 600, fontSize: 28, color: T.ink, marginTop: 12 }}>
                 Oil above $100 · Fed hikes again<br />mortgages touch 8%
@@ -102,12 +105,13 @@ export const H6Escape: React.FC = () => {
       </AbsoluteFill>
 
       {/* BEAT 4: dashboard */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: dOp }}>
-        <div style={{ textAlign: "center" }}>
+      <AbsoluteFill style={{ justifyContent: "center", paddingLeft: PAGE.marginX, paddingRight: PAGE.marginX, opacity: dOp }}>
+        <div style={{ maxWidth: CARD_W.L, textAlign: ALIGN.hero }}>
           <Sequence from={5100}>
             <HeroTypography
               kicker=""
               lines={["Watch Brent crude", "and the 10-year yield.", "That's your dashboard."]}
+              align="left"
             />
           </Sequence>
         </div>

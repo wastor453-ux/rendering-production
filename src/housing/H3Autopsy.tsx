@@ -3,6 +3,7 @@ import { AbsoluteFill, Easing, interpolate, Sequence, useCurrentFrame } from "re
 import { LightCanvas, GlassCard, Label } from "../light/primitives";
 import { HeroTypography } from "../light/editorial";
 import { T } from "../light/tokens";
+import { CARD_W, PAGE, ALIGN } from "../light/layout";
 
 const CLAMP = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const expo = Easing.bezier(0.16, 1, 0.3, 1);
@@ -15,12 +16,12 @@ const LightToast: React.FC<{ delay: number; children: React.ReactNode }> = ({ de
     <div style={{
       opacity: p,
       transform: `translateY(${interpolate(p, [0, 1], [30, 0], CLAMP)}px)`,
-      background: T.warningTint,
-      border: `2px solid ${T.warning}`,
-      borderRadius: T.radiusM,
+      background: T.glassFill,
+      border: `1px solid ${T.glassBorder}`,
+      borderRadius: T.radiusL,
       padding: "20px 40px",
       fontFamily: T.font, fontWeight: 700, fontSize: 36, color: T.ink,
-      maxWidth: 900, textAlign: "center",
+      maxWidth: CARD_W.M, textAlign: ALIGN.supporting,
     }}>
       {children}
     </div>
@@ -31,7 +32,8 @@ const LightToast: React.FC<{ delay: number; children: React.ReactNode }> = ({ de
  * H3 — The Autopsy (5448f / 180.6s).
  * Beats: $100-bond seesaw (0–40s) → 30yr 5.5% since 2004 (40–70s) →
  * three forces toasts (70–140s) → foreign demand + regime change (140–180s).
- * MIGRATED 2026-10-09: Light Premium Fintech (was dark premium/theme).
+ * LAYOUT: left-aligned flow (VISUAL_BRAIN §10/§11); seesaw stays a symmetric
+ * comparison (ALIGN.comparison). Toasts at CARD_W.M tier.
  */
 export const H3Autopsy: React.FC = () => {
   const frame = useCurrentFrame();
@@ -61,9 +63,10 @@ export const H3Autopsy: React.FC = () => {
     <LightCanvas>
 
       {/* BEAT 1: bond seesaw */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: seesawOp * seesawOut }}>
-        <GlassCard width={1200}>
-          <div style={{ marginBottom: 24, textAlign: "center" }}>
+      <AbsoluteFill style={{ justifyContent: "center", paddingLeft: PAGE.marginX, paddingRight: PAGE.marginX, opacity: seesawOp * seesawOut }}>
+        <div style={{ maxWidth: CARD_W.L }}>
+        <GlassCard width={CARD_W.L}>
+          <div style={{ marginBottom: 24, textAlign: ALIGN.hero }}>
             <Label text="The $100 bond · price vs yield" />
           </div>
           <div style={{ display: "flex", justifyContent: "space-around", fontFamily: T.font }}>
@@ -77,43 +80,47 @@ export const H3Autopsy: React.FC = () => {
               <div style={{ fontWeight: 800, fontSize: 88, color: T.negative, ...num }}>{yld.toFixed(2)}%</div>
             </div>
           </div>
-          <div style={{ fontFamily: T.font, fontWeight: 600, fontSize: 28, color: T.inkMuted, textAlign: "center", marginTop: 24 }}>
+          <div style={{ fontFamily: T.font, fontWeight: 600, fontSize: 28, color: T.inkMuted, textAlign: ALIGN.supporting, marginTop: 24 }}>
             Price falls → yield jumps. Nothing about the bond changed.
           </div>
         </GlassCard>
+        </div>
       </AbsoluteFill>
 
       {/* BEAT 2: 30yr yield */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: yOp * yOut }}>
-        <div style={{ textAlign: "center", transform: `scale(${yPulse})` }}>
+      <AbsoluteFill style={{ justifyContent: "center", paddingLeft: PAGE.marginX, paddingRight: PAGE.marginX, opacity: yOp * yOut }}>
+        <div style={{ maxWidth: CARD_W.L, textAlign: ALIGN.hero, transform: `scale(${yPulse})` }}>
           <Sequence from={1200}>
-            <HeroTypography kicker="" lines={["30-year Treasury:", "5.5%"]} accentLine={1} />
+            <HeroTypography kicker="" lines={["30-year Treasury:", "5.5%"]} accentLine={1} align="left" />
           </Sequence>
-          <div style={{ fontFamily: T.font, fontWeight: 600, fontSize: 34, color: T.inkMuted, marginTop: 24 }}>
+          <div style={{ fontFamily: T.font, fontWeight: 600, fontSize: 34, color: T.inkMuted, marginTop: 24, textAlign: ALIGN.supporting }}>
             highest since 2004 · 10-year at 5.2%, highest since 2007
           </div>
         </div>
       </AbsoluteFill>
 
       {/* BEAT 3: three forces */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", flexDirection: "column", gap: 28, opacity: fOut }}>
+      <AbsoluteFill style={{ justifyContent: "center", paddingLeft: PAGE.marginX, paddingRight: PAGE.marginX, opacity: fOut }}>
+        <div style={{ maxWidth: CARD_W.L, display: "flex", flexDirection: "column", gap: PAGE.gapCard }}>
         <div style={{ marginBottom: 8, opacity: interpolate(frame, [2500, 2540], [0, 1], CLAMP) }}>
           <Sequence from={2500}>
-            <HeroTypography kicker="" lines={["Three forces hit at once"]} />
+            <HeroTypography kicker="" lines={["Three forces hit at once"]} align="left" />
           </Sequence>
         </div>
         <LightToast delay={2600}>Inflation: 65 months above 2%</LightToast>
         <LightToast delay={3150}>Oil: $107 a barrel, +22% in a month</LightToast>
         <LightToast delay={3700}>Fed: hiked to 3.75–4.00%</LightToast>
+        </div>
       </AbsoluteFill>
 
       {/* BEAT 4: regime change */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: rOp }}>
-        <div style={{ textAlign: "center", transform: `translateY(${rY}px)` }}>
+      <AbsoluteFill style={{ justifyContent: "center", paddingLeft: PAGE.marginX, paddingRight: PAGE.marginX, opacity: rOp }}>
+        <div style={{ maxWidth: CARD_W.L, textAlign: ALIGN.hero, transform: `translateY(${rY}px)` }}>
           <Sequence from={4350}>
             <HeroTypography
               kicker=""
               lines={["Foreign buyers are fading.", "This isn't a reaction —", "it's a regime change."]}
+              align="left"
             />
           </Sequence>
         </div>

@@ -1,0 +1,12 @@
+{
+  "run_id": 37990979375,
+  "url": "https://github.com/wastor453-ux/rendering-production/actions/runs/37990979375",
+  "composition": "HousingBroke",
+  "dispatched_at": "2026-10-10T02:03:00",
+  "last_status": "completed",
+  "last_conclusion": "failure",
+  "recovery_attempts": 9,
+  "done": false,
+  "alerted": true,
+  "note": "Reassembly retry 9 of 37985185686 (lifetime fix at c190a040, e2e verified)."
+}

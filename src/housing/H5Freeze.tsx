@@ -4,6 +4,7 @@ import { LightCanvas, GlassCard, Label } from "../light/primitives";
 import { HeroTypography } from "../light/editorial";
 import { BarChart } from "../light/charts";
 import { T } from "../light/tokens";
+import { CARD_W, PAGE, ALIGN } from "../light/layout";
 
 const CLAMP = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const expo = Easing.bezier(0.16, 1, 0.3, 1);
@@ -16,12 +17,12 @@ const LightToast: React.FC<{ delay: number; children: React.ReactNode }> = ({ de
     <div style={{
       opacity: p,
       transform: `translateY(${interpolate(p, [0, 1], [30, 0], CLAMP)}px)`,
-      background: T.blueTint,
-      border: `2px solid ${T.primary}`,
-      borderRadius: T.radiusM,
+      background: T.glassFill,
+      border: `1px solid ${T.glassBorder}`,
+      borderRadius: T.radiusL,
       padding: "20px 40px",
       fontFamily: T.font, fontWeight: 700, fontSize: 36, color: T.ink,
-      maxWidth: 900, textAlign: "center",
+      maxWidth: CARD_W.M, textAlign: ALIGN.supporting,
     }}>
       {children}
     </div>
@@ -32,7 +33,8 @@ const LightToast: React.FC<{ delay: number; children: React.ReactNode }> = ({ de
  * H5 — The Freeze (3618f / 119.6s).
  * Beats: "sales fall first" (0–25s) → 58% seller surplus (25–55s) →
  * −14% / −$62K card (55–85s) → golden cage close (85–119s).
- * MIGRATED 2026-10-09: Light Premium Fintech (was dark premium/theme).
+ * LAYOUT: left-aligned flow (VISUAL_BRAIN §10/§11), chart card at CARD_W.L,
+ * affordability card at CARD_W.M.
  */
 export const H5Freeze: React.FC = () => {
   const frame = useCurrentFrame();
@@ -57,23 +59,25 @@ export const H5Freeze: React.FC = () => {
     <LightCanvas>
 
       {/* BEAT 1: sequencing */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: sOp * sOut }}>
-        <div style={{ textAlign: "center" }}>
+      <AbsoluteFill style={{ justifyContent: "center", paddingLeft: PAGE.marginX, paddingRight: PAGE.marginX, opacity: sOp * sOut }}>
+        <div style={{ maxWidth: CARD_W.L, textAlign: ALIGN.hero }}>
           <Sequence from={10}>
             <HeroTypography
               kicker=""
               lines={["When rates rise fast,", "sales fall first.", "Not prices."]}
               accentLine={1}
+              align="left"
             />
           </Sequence>
         </div>
       </AbsoluteFill>
 
       {/* BEAT 2: seller surplus */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: bOp * bOut }}>
-        <GlassCard width={1200}>
+      <AbsoluteFill style={{ justifyContent: "center", paddingLeft: PAGE.marginX, paddingRight: PAGE.marginX, opacity: bOp * bOut }}>
+        <div style={{ maxWidth: CARD_W.L }}>
+        <GlassCard width={CARD_W.L}>
           <div style={{ fontFamily: T.font, padding: "12px 20px" }}>
-            <div style={{ marginBottom: 20, textAlign: "center" }}>
+            <div style={{ marginBottom: 20, textAlign: ALIGN.hero }}>
               <Label text="Sellers vs buyers · Redfin" />
             </div>
             <BarChart
@@ -84,18 +88,19 @@ export const H5Freeze: React.FC = () => {
               color={T.negative}
               highlight={0}
             />
-            <div style={{ fontWeight: 800, fontSize: 44, color: T.negative, textAlign: "center", marginTop: 24 }}>
+            <div style={{ fontWeight: 800, fontSize: 44, color: T.negative, textAlign: ALIGN.hero, marginTop: 24 }}>
               +58% more sellers — strongest buyer's market ever recorded
             </div>
           </div>
         </GlassCard>
+        </div>
       </AbsoluteFill>
 
       {/* BEAT 3: affordability gap */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: cOp * cOut }}>
-        <div style={{ transform: `scale(${cPulse})` }}>
-          <GlassCard width={1050}>
-            <div style={{ fontFamily: T.font, textAlign: "center", padding: "12px 20px" }}>
+      <AbsoluteFill style={{ justifyContent: "center", paddingLeft: PAGE.marginX, paddingRight: PAGE.marginX, opacity: cOp * cOut }}>
+        <div style={{ maxWidth: CARD_W.M, transform: `scale(${cPulse})` }}>
+          <GlassCard width={CARD_W.M}>
+            <div style={{ fontFamily: T.font, textAlign: ALIGN.hero, padding: "12px 20px" }}>
               <div style={{ fontWeight: 800, fontSize: 84, color: T.negative }}>−14%</div>
               <div style={{ fontWeight: 700, fontSize: 36, color: T.ink, marginTop: 8 }}>
                 ≈ $62,000 off the median home
@@ -109,16 +114,19 @@ export const H5Freeze: React.FC = () => {
       </AbsoluteFill>
 
       {/* BEAT 4: golden cage */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", flexDirection: "column", gap: 32, opacity: gOp }}>
+      <AbsoluteFill style={{ justifyContent: "center", paddingLeft: PAGE.marginX, paddingRight: PAGE.marginX, opacity: gOp }}>
+        <div style={{ maxWidth: CARD_W.L, display: "flex", flexDirection: "column", gap: PAGE.gapCard }}>
         <LightToast delay={2760}>Record equity · 3% fixed mortgage</LightToast>
-        <div style={{ textAlign: "center" }}>
+        <div style={{ textAlign: ALIGN.hero }}>
           <Sequence from={2890}>
             <HeroTypography
               kicker=""
               lines={["The golden cage:", "they can't afford to sell."]}
               accentLine={0}
+              align="left"
             />
           </Sequence>
+        </div>
         </div>
       </AbsoluteFill>
     </LightCanvas>

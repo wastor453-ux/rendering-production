@@ -1,0 +1,22 @@
+{
+  "37992005965": {
+    "status": "completed",
+    "conclusion": "success",
+    "classification": "SUCCESS"
+  },
+  "37986764678": {
+    "status": "completed",
+    "conclusion": "failure",
+    "classification": "PLAN_FAILURE"
+  },
+  "38033077556": {
+    "status": "completed",
+    "conclusion": "failure",
+    "classification": "PLAN_FAILURE"
+  },
+  "38033466799": {
+    "status": "completed",
+    "conclusion": "failure",
+    "classification": "SUCCESS"
+  }
+}

@@ -3,6 +3,7 @@ import { AbsoluteFill, Easing, interpolate, Sequence, useCurrentFrame } from "re
 import { LightCanvas, GlassCard, Kicker } from "../light/primitives";
 import { HeroTypography } from "../light/editorial";
 import { T } from "../light/tokens";
+import { CARD_W, PAGE, ALIGN } from "../light/layout";
 
 const CLAMP = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const expo = Easing.bezier(0.16, 1, 0.3, 1);
@@ -11,7 +12,8 @@ const expo = Easing.bezier(0.16, 1, 0.3, 1);
  * H4 — The Debt Spiral (3603f / 119.1s).
  * Beats: $40T counter (0–30s) → $3B/day interest (30–60s) →
  * $320B per point (60–90s) → spiral loop close (90–119s).
- * MIGRATED 2026-10-09: Light Premium Fintech (was dark premium/theme).
+ * LAYOUT: left-aligned flow (VISUAL_BRAIN §10/§11); BEAT 1 $40T stays centered
+ * as a single hero number (ALIGN.heroNumber).
  */
 export const H4Debt: React.FC = () => {
   const frame = useCurrentFrame();
@@ -38,9 +40,9 @@ export const H4Debt: React.FC = () => {
   return (
     <LightCanvas>
 
-      {/* BEAT 1: debt counter */}
+      {/* BEAT 1: debt counter — single hero number, centered per layout law */}
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: dOut }}>
-        <div style={{ textAlign: "center" }}>
+        <div style={{ textAlign: ALIGN.heroNumber }}>
           <Kicker text="US NATIONAL DEBT" />
           <div style={{ fontFamily: T.font, fontWeight: 800, fontSize: 150, color: T.negative, letterSpacing: -4, ...num, marginTop: 16 }}>
             ${debt.toFixed(1)}T
@@ -52,21 +54,22 @@ export const H4Debt: React.FC = () => {
       </AbsoluteFill>
 
       {/* BEAT 2: interest per day */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: iOp * iOut }}>
-        <div style={{ textAlign: "center", transform: `scale(${iPulse})` }}>
+      <AbsoluteFill style={{ justifyContent: "center", paddingLeft: PAGE.marginX, paddingRight: PAGE.marginX, opacity: iOp * iOut }}>
+        <div style={{ maxWidth: CARD_W.L, textAlign: ALIGN.hero, transform: `scale(${iPulse})` }}>
           <Sequence from={1050}>
-            <HeroTypography kicker="" lines={["Interest alone:", "$3 billion. Per day."]} accentLine={1} />
+            <HeroTypography kicker="" lines={["Interest alone:", "$3 billion. Per day."]} accentLine={1} align="left" />
           </Sequence>
-          <div style={{ fontFamily: T.font, fontWeight: 600, fontSize: 32, color: T.inkMuted, marginTop: 24 }}>
+          <div style={{ fontFamily: T.font, fontWeight: 600, fontSize: 32, color: T.inkMuted, marginTop: 24, textAlign: ALIGN.supporting }}>
             more than Medicare · more than the military · up 12% this year
           </div>
         </div>
       </AbsoluteFill>
 
       {/* BEAT 3: per-point cost */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: pOp * pOut }}>
-        <GlassCard width={1150}>
-          <div style={{ fontFamily: T.font, textAlign: "center", padding: "12px 20px" }}>
+      <AbsoluteFill style={{ justifyContent: "center", paddingLeft: PAGE.marginX, paddingRight: PAGE.marginX, opacity: pOp * pOut }}>
+        <div style={{ maxWidth: CARD_W.L }}>
+        <GlassCard width={CARD_W.L}>
+          <div style={{ fontFamily: T.font, textAlign: ALIGN.hero, padding: "12px 20px" }}>
             <div style={{ fontWeight: 800, fontSize: 72, color: T.ink, ...num }}>
               +1% yield = +$320B<span style={{ fontSize: 36, color: T.inkMuted }}>/year</span>
             </div>
@@ -75,11 +78,12 @@ export const H4Debt: React.FC = () => {
             </div>
           </div>
         </GlassCard>
+        </div>
       </AbsoluteFill>
 
       {/* BEAT 4: spiral */}
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: sOp }}>
-        <div style={{ textAlign: "center" }}>
+      <AbsoluteFill style={{ justifyContent: "center", paddingLeft: PAGE.marginX, paddingRight: PAGE.marginX, opacity: sOp }}>
+        <div style={{ maxWidth: CARD_W.L, textAlign: ALIGN.hero }}>
           <div style={{
             fontFamily: T.font, fontWeight: 800, fontSize: 90, color: T.negative,
             display: "inline-block", transform: `rotate(${spin}deg)`,
@@ -90,9 +94,10 @@ export const H4Debt: React.FC = () => {
             <HeroTypography
               kicker=""
               lines={["Higher rates → bigger deficit →", "more bonds → higher rates."]}
+              align="left"
             />
           </Sequence>
-          <div style={{ fontFamily: T.font, fontWeight: 700, fontSize: 34, color: T.warning, marginTop: 24 }}>
+          <div style={{ fontFamily: T.font, fontWeight: 700, fontSize: 34, color: T.warning, marginTop: 24, textAlign: ALIGN.supporting }}>
             The spiral has no exit.
           </div>
         </div>

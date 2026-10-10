@@ -3,6 +3,7 @@ import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import { LightCanvas, GlassCard, Label } from "../light/primitives";
 import { LineChart } from "../light/charts";
 import { T } from "../light/tokens";
+import { CARD_W, PAGE, ALIGN } from "../light/layout";
 
 const CLAMP = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const expo = Easing.bezier(0.16, 1, 0.3, 1);
@@ -12,7 +13,7 @@ const rates = [5.99, 6.15, 6.3, 6.5, 6.77, 6.95, 7.12, 7.3, 7.45];
 
 /**
  * H2 — The Spike (1626f / 53.2s). Rate chart 5.99 → 7.45 + payment shock card.
- * MIGRATED 2026-10-09: Light Premium Fintech (was dark premium/theme).
+ * LAYOUT: left-aligned flow (VISUAL_BRAIN §10/§11), CARD_W.L chart card, CARD_W.M callout.
  */
 export const H2Spike: React.FC = () => {
   const frame = useCurrentFrame();
@@ -26,8 +27,9 @@ export const H2Spike: React.FC = () => {
 
   return (
     <LightCanvas>
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", flexDirection: "column", gap: 32 }}>
-        <GlassCard width={1360}>
+      <AbsoluteFill style={{ justifyContent: "center", paddingLeft: PAGE.marginX, paddingRight: PAGE.marginX }}>
+        <div style={{ maxWidth: CARD_W.L, display: "flex", flexDirection: "column", gap: PAGE.gapCard }}>
+        <GlassCard width={CARD_W.L}>
           <div style={{ marginBottom: 8 }}>
             <Label text="30-year fixed mortgage · Feb → Sep 2026" />
           </div>
@@ -41,14 +43,14 @@ export const H2Spike: React.FC = () => {
                 +19 bps in a single day
               </div>
             </div>
-            <div style={{ fontFamily: T.font, fontWeight: 600, fontSize: 28, color: T.inkMuted, opacity: heroOp, textAlign: "right" }}>
+            <div style={{ fontFamily: T.font, fontWeight: 600, fontSize: 28, color: T.inkMuted, opacity: heroOp, textAlign: ALIGN.hero }}>
               5.99% in February.<br />7.45% by September.
             </div>
           </div>
         </GlassCard>
         <div style={{ opacity: cardOp, transform: `translateY(${cardY}px)` }}>
-          <GlassCard width={1100}>
-            <div style={{ fontFamily: T.font, textAlign: "center", padding: "8px 16px" }}>
+          <GlassCard width={CARD_W.M}>
+            <div style={{ fontFamily: T.font, textAlign: ALIGN.hero, padding: "8px 16px" }}>
               <div style={{ fontWeight: 800, fontSize: 52, color: T.ink }}>
                 +$380<span style={{ fontSize: 32, color: T.inkMuted }}>/month</span>
               </div>
@@ -57,6 +59,7 @@ export const H2Spike: React.FC = () => {
               </div>
             </div>
           </GlassCard>
+        </div>
         </div>
       </AbsoluteFill>
     </LightCanvas>

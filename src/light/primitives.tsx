@@ -12,8 +12,6 @@ export const entry = (local: number, delay = 0, span = 18) => {
 };
 
 /** Light canvas: bright base + soft blurred atmosphere blobs (background only). */
-import { AbsoluteFill } from "remotion";
-import { T } from "./tokens";
 import { useMaterial } from "./materialTheme";
 
 /** Light canvas with atmospheric background blobs. Material-aware (A/B test). */
@@ -84,7 +82,7 @@ export const CountUp: React.FC<{
 export const Delta: React.FC<{ value: number; suffix?: string }> = ({ value, suffix = "%" }) => {
   const up = value >= 0;
   const bg = up ? T.successTint : T.negativeTint;
-  const fg = up ? "#1E7F5C" : "#B44A4A";
+  const fg = up ? T.successDeep : T.negativeDeep;
   return (
     <span style={{
       display: "inline-block", fontFamily: T.font, fontWeight: 700, fontSize: 26,

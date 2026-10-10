@@ -142,7 +142,7 @@ export const GlassNotification: React.FC<{ title: string; body: string }> = ({ t
       <GlassCard width={620} padding={30}>
         <div style={{ display: "flex", gap: 22, alignItems: "center" }}>
           <div style={{ width: 64, height: 64, borderRadius: "50%", background: T.successTint, display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 30, color: "#1E7F5C", fontWeight: 800 }}>✓</div>
+            fontSize: 30, color: T.successDeep, fontWeight: 800 }}>✓</div>
           <div style={{ flex: 1 }}>
             <div style={{ fontFamily: T.font, fontWeight: 800, fontSize: 30, color: T.ink }}>{title}</div>
             <div style={{ fontFamily: T.font, fontWeight: 500, fontSize: 24, color: T.inkMuted, marginTop: 4 }}>{body}</div>

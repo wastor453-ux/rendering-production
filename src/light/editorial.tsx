@@ -10,12 +10,12 @@ import { resolveScale } from "./compositionScale";
 
 const expo = Easing.bezier(...EXPO);
 
-export const HeroTypography: React.FC<{ kicker: string; lines: string[]; accentLine?: number }> = ({
-  kicker, lines, accentLine = -1,
+export const HeroTypography: React.FC<{ kicker: string; lines: string[]; accentLine?: number; align?: "left" | "center" }> = ({
+  kicker, lines, accentLine = -1, align = "left",
 }) => {
   const frame = useCurrentFrame();
   return (
-    <div style={{ textAlign: "center", padding: "0 140px" }}>
+    <div style={{ textAlign: align, padding: align === "center" ? "0 140px" : "0" }}>
       <div style={{ opacity: interpolate(frame, [0, 12], [0, 1], CLAMP), marginBottom: 26 }}>
         <Kicker text={kicker} />
       </div>

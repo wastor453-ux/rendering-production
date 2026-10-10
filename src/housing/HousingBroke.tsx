@@ -7,6 +7,7 @@ import { H4Debt } from "./H4Debt";
 import { H5Freeze } from "./H5Freeze";
 import { H6Escape } from "./H6Escape";
 import { H7Close } from "./H7Close";
+import { T } from "../light/tokens";
 
 export const FPS = 30;
 
@@ -40,7 +41,7 @@ export const HousingBrokeVideo: React.FC = () => {
   const Comps = [H1Hook, H2Spike, H3Autopsy, H4Debt, H5Freeze, H6Escape, H7Close];
 
   return (
-    <AbsoluteFill style={{ background: "#F8FAFF" }}>
+    <AbsoluteFill style={{ background: T.canvas }}>
       {/* P4.4 migration: light canvas (#F8FAFF), was dark #0F0D24 */}
       {parts.map((p, i) => {
         const Comp = Comps[i];
