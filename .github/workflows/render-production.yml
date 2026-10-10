@@ -57,6 +57,11 @@ on:
         required: false
         type: boolean
         default: false
+      sfx_chain_test:
+        description: 'SFX CHAIN TEST ONLY (2026-10-10). Runs a bounded 10s SFX integration test on the runner: verifies 180 A1 assets, compiles triggers, dry-runs and renders a 10s test mix, checks duration/rate/loudness/provenance. Skips ALL render/assemble jobs. DEFAULT FALSE = completely inert.'
+        required: false
+        type: boolean
+        default: false
       # NOTE (P3.12): the old unsafe resume_from was removed in P3.5.2.
       # resume_from_run_id is its safe replacement: explicit prior-run
       # selection with generation-fingerprint validation, not filename
@@ -84,6 +89,8 @@ permissions:
 jobs:
   # --- Job 1: Generate canonical identity + chunk plan + job manifest ---
   plan:
+    # SFX chain test mode: skip all production jobs.
+    if: ${{ inputs.sfx_chain_test != true }}
     runs-on: ubuntu-24.04
     # P4.4 R-013: Fail-fast on stale reruns. GitHub may permit reruns against
     # an older workflow revision. Fresh dispatch is the required path.
@@ -317,6 +324,7 @@ jobs:
   # --- Job 2: Render chunks in parallel (matrix) ---
   render-chunk:
     needs: plan
+    if: ${{ inputs.sfx_chain_test != true }}
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -626,6 +634,7 @@ jobs:
   # --- Job 3: Assemble + verify + publish master ---
   assemble:
     needs: [plan, render-chunk]
+    if: ${{ inputs.sfx_chain_test != true }}
     # P3.12.1: assembly runs when the plan succeeded. The plan is the source
     # of truth: zero_render=true means all chunks validated reusable;
     # zero_render=false means render-chunk ran (its result is checked below).
@@ -1227,7 +1236,7 @@ jobs:
     # with_sfx_mix input is true. When false (default), this job is skipped
     # and no existing job's behavior changes.
     needs: [plan, assemble]
-    if: ${{ always() && inputs.with_sfx_mix == true && needs.assemble.result == 'success' }}
+    if: ${{ always() && inputs.with_sfx_mix == true && inputs.sfx_chain_test != true && needs.assemble.result == 'success' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -1288,4 +1297,91 @@ jobs:
         with:
           name: sfx-master-${{ needs.plan.outputs.job_identity }}
           path: /tmp/sfx/av_master.mp4
+          retention-days: 30
+
+  sfx-chain-test:
+    # BOUNDED SFX INTEGRATION TEST. Runs ONLY when sfx_chain_test=true.
+    # All production jobs (plan/render/assemble/sfx-mix) are skipped in this
+    # mode. Proves the runner sees the 180 A1 assets and can execute the
+    # full VO+bed+SFX chain. Does NOT render video or produce a full mix.
+    if: ${{ inputs.sfx_chain_test == true }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify A1 library (180 WAVs)
+        run: |
+          set -euo pipefail
+          COUNT=$(find assets/a1 -name '*.wav' | wc -l)
+          echo "A1 WAVs on runner: $COUNT"
+          [ "$COUNT" -eq 180 ] || { echo "FAIL: expected 180, got $COUNT"; exit 1; }
+          python3 -c "import json; m=json.load(open('assets/a1/MANIFEST.json')); assert len(m['assets'])==180; print('manifest OK: 180 assets')"
+
+      - name: Compile triggers
+        run: |
+          set -euo pipefail
+          python3 tools/compile_sfx_triggers_a1.py \
+            --events assets/sfx/housingbroke_events.json \
+            --manifest assets/a1/MANIFEST.json \
+            --asset-map assets/sfx/housingbroke_assetmap.json \
+            --out /tmp/sfx_triggers.json --fps 30
+          python3 -c "import json; t=json.load(open('/tmp/sfx_triggers.json')); print('triggers:', len(t['triggers']))"
+
+      - name: Build synthetic VO + bed inputs
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg
+          ffmpeg -v error -y -f lavfi -i "sine=frequency=220:duration=10" \
+            -af "volume='if(between(t,1,3)+between(t,5,7),1,0.02)':eval=frame" \
+            -ar 48000 -ac 1 /tmp/vo_synth.wav
+          ffmpeg -v error -y -i public/audio/bed.mp3 -t 10 -ar 48000 -ac 1 /tmp/bed_10s.wav
+
+      - name: Dry-run (timing, ducking, bed, filter graph)
+        run: |
+          set -euo pipefail
+          python3 tools/mix_sfx.py --dry-run \
+            --triggers /tmp/sfx_triggers.json \
+            --vo /tmp/vo_synth.wav \
+            --bed /tmp/bed_10s.wav \
+            --a1-dir assets/a1 2>&1 | tee /tmp/dryrun.log
+          grep -q "FILTER GRAPH" /tmp/dryrun.log
+
+      - name: Bounded 10s test render
+        run: |
+          set -euo pipefail
+          python3 tools/mix_sfx.py --test-seconds 10 \
+            --triggers /tmp/sfx_triggers.json \
+            --vo /tmp/vo_synth.wav \
+            --bed /tmp/bed_10s.wav \
+            --a1-dir assets/a1 \
+            --out /tmp/sfx_test_10s.wav
+
+      - name: Verify output (duration, rate, loudness, provenance)
+        run: |
+          set -euo pipefail
+          DUR=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 /tmp/sfx_test_10s.wav)
+          SR=$(ffprobe -v error -select_streams a:0 -show_entries stream=sample_rate -of default=noprint_wrappers=1:nokey=1 /tmp/sfx_test_10s.wav)
+          echo "duration=$DUR sample_rate=$SR"
+          python3 -c "d=float('$DUR'); assert abs(d-10.0) < 0.05, d"
+          [ "$SR" = "48000" ] || { echo "FAIL: sample rate $SR"; exit 1; }
+          ffmpeg -v error -i /tmp/sfx_test_10s.wav -af loudnorm=print_format=json -f null - 2> /tmp/loud.json || true
+          python3 - <<'PY'
+          import json, re
+          raw = open('/tmp/loud.json').read()
+          stats = json.loads(re.search(r'\{.*\}', raw, re.S).group(0))
+          print("integrated LUFS:", stats['input_i'], "| true peak:", stats['input_tp'])
+          assert abs(float(stats['input_i']) - (-14)) < 1.5, stats['input_i']
+          assert float(stats['input_tp']) <= -0.5, stats['input_tp']
+          print("loudness OK")
+          PY
+
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sfx-chain-test-${{ github.run_id }}
+          path: |
+            /tmp/sfx_test_10s.wav
+            /tmp/dryrun.log
+            /tmp/loud.json
           retention-days: 30
