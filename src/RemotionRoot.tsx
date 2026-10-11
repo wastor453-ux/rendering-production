@@ -2,8 +2,6 @@ import React from "react";
 import { Composition } from "remotion";
 // DARK BRAIN REMOVED 2026-10-10: DemoVideo, StyleRefs, InflationRef retired (used src/theme.ts dark neon system)
 // See _retired/dark-brain/ for archived files.
-import { HysaTest, HYSA_TOTAL } from "./hysa/HysaTest";
-import { RecutVideo, RECUT_TOTAL, FPS as RECUT_FPS } from "./recut/RecutVideo";
 import { MoneyDyingVideo, MD_TOTAL, FPS as MD_FPS } from "./moneydying/MoneyDying";
 import { VisualShowcase, SHOWCASE_TOTAL } from "./light/Showcase";
 import { FinanceProof, PROOF_TOTAL } from "./FinanceProof";
@@ -16,23 +14,7 @@ export const RemotionRoot: React.FC = () => {
   return (
     <>
       {/* DARK BRAIN REMOVED: DemoVideo, StyleRefs, InflationRef retired 2026-10-10 */}
-<Composition
-        id="HysaTest"
-        component={HysaTest}
-        durationInFrames={HYSA_TOTAL}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-<Composition
-        id="RecutVideo"
-        component={RecutVideo}
-        durationInFrames={RECUT_TOTAL}
-        fps={RECUT_FPS}
-        width={1920}
-        height={1080}
-      />
-      {/* P4.4: PremiumTest retired 2026-10-09 — old dark brain */}
+{/* P4.4: PremiumTest retired 2026-10-09 — old dark brain */}
       {/* P4.4: TestNewBrain retired 2026-10-09 — used old dark brain, beat compiler does not exist */}
       <Composition
         id="MoneyDying"
