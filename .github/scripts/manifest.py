@@ -69,6 +69,7 @@ def build_job_manifest(
     label: str = "",
     vo_sha: str = None,
     bed_sha: str = None,
+    vo_offset_seconds: float = 0.0,
     expected_chromium_version: str = None,
     resume: dict = None,
 ) -> dict:
@@ -126,6 +127,7 @@ def build_job_manifest(
         "codec": codec,
         "crf": crf,
         "with_audio": with_audio,
+        "vo_offset_seconds": vo_offset_seconds,
         "input_props_sha256": input_props_sha,
         "beats_sha256": beats_sha,
         "events_sha256": events_sha,

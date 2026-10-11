@@ -26,7 +26,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
 from manifest import build_job_manifest, build_asset_manifest, sha256_file
-from composition_contract import get_contract
+from composition_contract import get_contract, get_total_frames
 
 
 def fatal(msg: str, code: int = 1) -> None:
@@ -85,6 +85,40 @@ def validate_audio_mode(value: str) -> bool:
     fatal(f"WITH_AUDIO must be 'true' or 'false', got {value!r}")
 
 
+def validate_bool_flag(name: str, value: str) -> bool:
+    """Strictly validate a boolean workflow flag (Q2).
+
+    Same semantics as validate_audio_mode but with the flag's name in
+    the error message. Used for WITH_SFX_MIX, SFX_CHAIN_TEST,
+    INSTALL_VERIFY, REASSEMBLE_BYPASS_FINGERPRINT.
+    """
+    normalized = value.strip().lower()
+    if normalized == "true":
+        return True
+    if normalized == "false":
+        return False
+    fatal(f"{name} must be 'true' or 'false', got {value!r}")
+
+
+def validate_vo_offset(value: str) -> float:
+    """Q3 (2026-10-11): validate vo_offset_seconds.
+
+    Must be a finite, non-negative number. Returns the float value.
+    The offset is the position in vo_file where the rendered range's
+    audio begins; the muxer seeks to it (not to start_frame/30).
+    """
+    import math
+    try:
+        offset = float(value)
+    except (TypeError, ValueError):
+        fatal(f"VO_OFFSET_SECONDS must be a number, got {value!r}")
+    if not math.isfinite(offset):
+        fatal(f"VO_OFFSET_SECONDS must be finite, got {value!r}")
+    if offset < 0:
+        fatal(f"VO_OFFSET_SECONDS must be >= 0, got {offset}")
+    return offset
+
+
 def validate_crf(value: str) -> str:
     try:
         n = int(value)
@@ -93,6 +127,61 @@ def validate_crf(value: str) -> str:
     if not 0 <= n <= 51:
         fatal(f"crf must be 0-51 (H.264 valid range), got {n}")
     return str(n)
+
+
+def validate_frame_range(composition: str, start: int, end: int) -> int:
+    """Q1 (2026-10-11): fail early on out-of-range frames.
+
+    Resolves the composition's authoritative total frame count from the
+    contract registry (verified against canonical TSX sources by
+    tests/test_composition_frames.py). Frames are 0-indexed: valid range
+    is [0, total_frames).
+
+    Returns total_frames on success. Calls fatal() (exits non-zero) when:
+      - the composition has no valid total_frames (fail closed)
+      - start or end is outside [0, total_frames)
+      - end < start
+    """
+    total_frames = get_total_frames(composition)
+    if total_frames is None:
+        fatal(f"composition {composition!r} has no valid total_frames in the "
+              f"contract registry; cannot validate frame range")
+    if end < start:
+        fatal(f"END_FRAME ({end}) < START_FRAME ({start})")
+    if start >= total_frames:
+        fatal(f"START_FRAME ({start}) is outside composition {composition!r} "
+              f"(valid range 0-{total_frames - 1}, total {total_frames} frames)")
+    if end >= total_frames:
+        fatal(f"END_FRAME ({end}) is outside composition {composition!r} "
+              f"(valid range 0-{total_frames - 1}, total {total_frames} frames)")
+    return total_frames
+
+
+def validate_flag_combinations(with_sfx_mix: bool, sfx_chain_test: bool,
+                               install_verify: bool,
+                               reassemble_bypass: bool) -> None:
+    """Q2 (2026-10-11): reject unsafe workflow flag combinations.
+
+    Fail-closed rules for incompatible inputs. Each rule documents WHY the
+    combination is unsafe. Calls fatal() (exits non-zero) on violation.
+
+    Rules:
+      1. reassemble_bypass + with_sfx_mix: REJECTED. Reassembly mode
+         recovers a master from existing chunks with the generation
+         fingerprint check bypassed. Running sfx-mix on top would produce
+         a master whose SFX layer was mixed against an unverified
+         generation — the mix inputs (timing, chunk boundaries) cannot be
+         trusted. If a recovered master needs SFX, re-run the full
+         pipeline with with_sfx_mix=true and without the bypass.
+    """
+    if reassemble_bypass and with_sfx_mix:
+        fatal("reassemble_bypass_fingerprint=true cannot be combined with "
+              "with_sfx_mix=true: sfx-mix on a reassembled master with "
+              "bypassed fingerprint verification would mix against an "
+              "unverified generation. Re-run the full pipeline instead.")
+    # NOTE: sfx_chain_test and install_verify are mutually exclusive by
+    # workflow job conditions (install-verify wins deterministically);
+    # not rejected here because neither path renders or publishes.
 
 
 def validate_repo_path(name: str, value: str, repo_root: str) -> str:
@@ -154,8 +243,27 @@ def main() -> int:
     if any(ord(c) < 32 for c in label):
         fatal("LABEL contains control characters")
 
-    if end < start:
-        fatal(f"END_FRAME ({end}) < START_FRAME ({start})")
+    # Q2: workflow mode flags (all optional, default false).
+    with_sfx_mix = validate_bool_flag("WITH_SFX_MIX",
+                                      os.environ.get("WITH_SFX_MIX", "false"))
+    sfx_chain_test = validate_bool_flag("SFX_CHAIN_TEST",
+                                        os.environ.get("SFX_CHAIN_TEST", "false"))
+    install_verify = validate_bool_flag("INSTALL_VERIFY",
+                                        os.environ.get("INSTALL_VERIFY", "false"))
+    reassemble_bypass = validate_bool_flag(
+        "REASSEMBLE_BYPASS_FINGERPRINT",
+        os.environ.get("REASSEMBLE_BYPASS_FINGERPRINT", "false"))
+    validate_flag_combinations(with_sfx_mix, sfx_chain_test,
+                               install_verify, reassemble_bypass)
+
+    # Q3: VO offset (optional, default 0). Validated here so the muxer and
+    # audio guard share one deterministic alignment contract.
+    vo_offset = validate_vo_offset(os.environ.get("VO_OFFSET_SECONDS", "0"))
+
+    # Q1: frame range validated against the composition's authoritative total.
+    # (validate_frame_range also rejects end < start.)
+    total_frames = validate_frame_range(composition, start, end)
+
     if chunk_size > (end - start + 1):
         print(f"WARNING: CHUNK_SIZE ({chunk_size}) > total frames "
               f"({end - start + 1}); single chunk", file=sys.stderr)
@@ -260,6 +368,7 @@ def main() -> int:
         label=label,
         vo_sha=vo_sha,
         bed_sha=bed_sha,
+        vo_offset_seconds=vo_offset,
     )
 
     # --- Write outputs ---

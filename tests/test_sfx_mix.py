@@ -282,10 +282,16 @@ class TestWorkflowInert(unittest.TestCase):
         self.assertIn("needs.assemble.result", job["if"])
 
     def test_existing_jobs_untouched_by_flag(self):
-        # No existing job may reference with_sfx_mix or sfx-mix.
+        # No existing job may GATE ON with_sfx_mix or sfx-mix in its if:.
+        # (Q2 2026-10-11: the plan job receives WITH_SFX_MIX etc. as env vars
+        # solely for fail-closed combination validation; that passthrough
+        # does not alter job behavior and is explicitly allowed.)
         for name in ("plan", "render-chunk", "assemble"):
-            text = json.dumps(self.wf["jobs"][name])
-            self.assertNotIn("with_sfx_mix", text, f"job {name} references flag")
+            job = self.wf["jobs"][name]
+            cond = job.get("if", "")
+            self.assertNotIn("with_sfx_mix", cond,
+                             f"job {name} gates on flag in if:")
+            text = json.dumps(job)
             self.assertNotIn("sfx-mix", text, f"job {name} references sfx-mix")
 
 

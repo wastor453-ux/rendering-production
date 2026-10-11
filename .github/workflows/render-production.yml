@@ -43,6 +43,10 @@ on:
         description: 'Music bed source (relative to repo root)'
         required: false
         default: 'public/audio/bed.mp3'
+      vo_offset_seconds:
+        description: 'Q3 (2026-10-11): position in seconds within vo_file where the rendered range audio begins. 0 = vo_file starts at the rendered range (segment-specific VO, e.g. hb_p3.wav for an H3-only render). Set to start_frame/30 when vo_file is a full-composition VO but only a later range is rendered. Must be >= 0. The muxer seeks to this offset (not to start_frame/30).'
+        required: false
+        default: '0'
       resume_from_run_id:
         description: 'P3.12: resume from a prior run ID (explicit). Empty = fresh render. The prior run is strictly validated (generation fingerprint, assets, env) before any chunk is reused.'
         required: false
@@ -161,6 +165,11 @@ jobs:
           LABEL: ${{ inputs.label }}
           OUTPUT_DIR: /tmp/job
           REPO_ROOT: .
+          WITH_SFX_MIX: ${{ inputs.with_sfx_mix }}
+          SFX_CHAIN_TEST: ${{ inputs.sfx_chain_test }}
+          INSTALL_VERIFY: ${{ inputs.install_verify }}
+          REASSEMBLE_BYPASS_FINGERPRINT: ${{ inputs.reassemble_bypass_fingerprint }}
+          VO_OFFSET_SECONDS: ${{ inputs.vo_offset_seconds }}
 
       - name: Install ffmpeg (for audio guard)
         run: |
@@ -177,6 +186,9 @@ jobs:
         # This caused 5 Q-004 assembly failures (placeholder 83s VO vs 771s video).
         # The bed loops, so only the VO is strictly validated.
         # P3.6.2: inputs via env vars, not raw interpolation.
+        # Q3 (2026-10-11): offset-aware. VO_OFFSET_SECONDS is the position in
+        # vo_file where the rendered range's audio begins. Available audio is
+        # VO_DUR - VO_OFFSET; the guard checks that against VIDEO_DUR.
         # Skipped in reassembly mode: audio comes from the prior run's artifacts,
         # not from the VO file input.
         if: inputs.with_audio == true && inputs.reassemble_bypass_fingerprint != true
@@ -184,6 +196,7 @@ jobs:
           START_FRAME: ${{ inputs.start_frame }}
           END_FRAME: ${{ inputs.end_frame }}
           VO_FILE: ${{ inputs.vo_file }}
+          VO_OFFSET_SECONDS: ${{ inputs.vo_offset_seconds }}
         run: |
           set -euo pipefail
           FPS=30
@@ -236,21 +249,34 @@ jobs:
             exit 1
           fi
           echo "VO duration: ${VO_DUR}s ($VO_FILE)"
-          # Fail if VO is more than 30s shorter than video
-          VIDEO_DUR="$VIDEO_DUR" VO_DUR="$VO_DUR" python3 -c "
-          import os, sys
+          echo "VO offset: ${VO_OFFSET_SECONDS}s"
+          # Q3: available audio is VO_DUR - VO_OFFSET. Fail if more than 30s
+          # short of the video duration. The offset is validated by plan.py
+          # (finite, non-negative); reject offset >= VO duration here.
+          VIDEO_DUR="$VIDEO_DUR" VO_DUR="$VO_DUR" VO_OFFSET_SECONDS="$VO_OFFSET_SECONDS" python3 -c "
+          import os, sys, math
           video_dur = float(os.environ['VIDEO_DUR'])
           vo_dur = float(os.environ['VO_DUR'])
-          gap = video_dur - vo_dur
+          offset = float(os.environ['VO_OFFSET_SECONDS'])
+          if not math.isfinite(offset) or offset < 0:
+              print(f'FATAL: invalid VO offset: {offset}', file=sys.stderr)
+              sys.exit(1)
+          if offset >= vo_dur:
+              print(f'FATAL: VO offset {offset:.1f}s >= VO duration {vo_dur:.1f}s: '
+                    f'no audio available from offset', file=sys.stderr)
+              sys.exit(1)
+          available = vo_dur - offset
+          gap = video_dur - available
           if gap > 30:
-              print(f'FATAL: VO too short: {vo_dur:.1f}s < video {video_dur:.1f}s '
-                    f'(gap {gap:.1f}s). Concatenate all VO parts first.', file=sys.stderr)
+              print(f'FATAL: VO too short from offset: {available:.1f}s available '
+                    f'(vo {vo_dur:.1f}s - offset {offset:.1f}s) < video {video_dur:.1f}s '
+                    f'(gap {gap:.1f}s).', file=sys.stderr)
               sys.exit(1)
           elif gap > 0:
-              print(f'WARNING: VO {vo_dur:.1f}s slightly shorter than video '
-                    f'{video_dur:.1f}s (gap {gap:.1f}s)')
+              print(f'WARNING: VO {available:.1f}s (from offset) slightly shorter than '
+                    f'video {video_dur:.1f}s (gap {gap:.1f}s)')
           else:
-              print(f'VO duration OK: {vo_dur:.1f}s >= video {video_dur:.1f}s')
+              print(f'VO duration OK: {available:.1f}s available >= video {video_dur:.1f}s')
           "
 
       - name: Validate reassembly inputs
@@ -1071,13 +1097,19 @@ jobs:
           python3 - <<'PY'
           import os, sys
           sys.path.insert(0, '.github/scripts')
-          from plan import validate_int, validate_repo_path
+          from plan import validate_int, validate_repo_path, validate_vo_offset
           validate_int("START_FRAME", os.environ['START_FRAME'], min_val=0)
           validate_int("END_FRAME", os.environ['END_FRAME'], min_val=0)
           validate_repo_path("VO_FILE", os.environ['VO_FILE'], ".")
           validate_repo_path("BED_FILE", os.environ['BED_FILE'], ".")
+          validate_vo_offset(os.environ['VO_OFFSET_SECONDS'])
           PY
-          START_S=$(echo "scale=3; $START_FRAME / $FPS" | bc)
+          # Q3 (2026-10-11): VO alignment is explicit via VO_OFFSET_SECONDS.
+          # The muxer seeks to VO_OFFSET (not to START_FRAME/30). For a
+          # full-composition VO rendered from frame 0, offset=0. For a
+          # segment-specific VO (e.g. hb_p3.wav for an H3-only render),
+          # offset=0. For a full-composition VO with a partial render,
+          # offset=start_frame/30.
           DUR_S=$(echo "scale=3; ($END_FRAME - $START_FRAME + 1) / $FPS" | bc)
 
           # P3: verify audio assets are real files, not LFS pointers
@@ -1090,18 +1122,19 @@ jobs:
 
           ffmpeg -y \
             -i /tmp/master_video.mp4 \
-            -ss $START_S -t $DUR_S -i "$VO_FILE" \
+            -ss $VO_OFFSET_SECONDS -t $DUR_S -i "$VO_FILE" \
             -stream_loop 5 -i "$BED_FILE" \
             -filter_complex "[1:a]volume=1.0[vo];[2:a]atrim=0:${DUR_S},volume=-18dB[bed];[vo][bed]amix=inputs=2:duration=longest[aout]" \
             -map 0:v -map "[aout]" \
             -c:v copy -c:a aac -b:a 192k \
             /tmp/master.mp4
-          echo "audio muxed"
+          echo "audio muxed (vo offset ${VO_OFFSET_SECONDS}s)"
         env:
           START_FRAME: ${{ inputs.start_frame }}
           END_FRAME: ${{ inputs.end_frame }}
           VO_FILE: ${{ inputs.vo_file }}
           BED_FILE: ${{ inputs.bed_file }}
+          VO_OFFSET_SECONDS: ${{ inputs.vo_offset_seconds }}
 
       - name: Verify master (video + audio + pipeline)
         run: |

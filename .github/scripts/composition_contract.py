@@ -29,89 +29,112 @@ import re
 
 # ---------------------------------------------------------------------------
 # Registry — one entry per <Composition id="..."> in src/RemotionRoot.tsx.
+#
+# total_frames: authoritative composition duration in frames, resolved from
+# the canonical TSX source (see tests/test_composition_frames.py which
+# verifies every value against its source file). plan.py rejects any
+# start_frame/end_frame outside [0, total_frames).
 # ---------------------------------------------------------------------------
 COMPOSITIONS = {
     # --- legacy pipeline tests (pre-brain) ---------------------------------
     "TrialVideo":    dict(role="test", brain="exempt", timeline="fixed", tokens="legacy",
-                          audio="embedded", qa="none",
+                          audio="embedded", qa="none", total_frames=900,
                           exemption="Legacy 30s pipeline-test format; predates the brain"),
     "StressTest":    dict(role="test", brain="exempt", timeline="fixed", tokens="legacy",
-                          audio="embedded", qa="none",
+                          audio="embedded", qa="none", total_frames=150,
                           exemption="Retired stress-test format; predates the brain"),
     "PipeTestVideo": dict(role="test", brain="exempt", timeline="fixed", tokens="legacy",
-                          audio="embedded", qa="none",
+                          audio="embedded", qa="none", total_frames=900,
                           exemption="Pipeline smoke test"),
     "HysaTest":      dict(role="test", brain="exempt", timeline="fixed", tokens="legacy",
-                          audio="embedded", qa="none",
+                          audio="embedded", qa="none", total_frames=300,
                           exemption="Single-scenario test"),
     "BankTestVideo": dict(role="test", brain="exempt", timeline="fixed", tokens="legacy",
-                          audio="embedded", qa="none",
+                          audio="embedded", qa="none", total_frames=5400,
                           exemption="Single-scenario test"),
     "RecutVideo":    dict(role="test", brain="exempt", timeline="fixed", tokens="legacy",
-                          audio="embedded", qa="none",
+                          audio="embedded", qa="none", total_frames=5400,
                           exemption="Re-cut test"),
     # --- production ---------------------------------------------------------
     "MoneyDying":    dict(role="production", brain="required", timeline="fixed",
                           tokens="design_tokens", audio="embedded", qa="verify_render",
+                          total_frames=2322,
                           exemption=None),
     "HousingBroke":  dict(role="production", brain="required", timeline="fixed",
                           tokens="design_tokens", audio="embedded", qa="verify_render",
+                          total_frames=23151,
                           exemption=None),
     "ProductionBeats": dict(role="production", brain="required", timeline="compiled_beats",
                           tokens="design_tokens", audio="none", qa="verify_render",
+                          total_frames=2463,
                           exemption=None),
     # --- rehearsal ----------------------------------------------------------
     "P3Rehearsal":   dict(role="rehearsal", brain="required", timeline="compiled_beats",
                           tokens="design_tokens", audio="none", qa="verify_render",
+                          total_frames=2463,
                           exemption=None),
     # --- calibration --------------------------------------------------------
     "CalibrationV0": dict(role="calibration", brain="exempt", timeline="fixed",
                           tokens="design_tokens", audio="none", qa="manual",
+                          total_frames=300,
                           exemption="Isolated visual calibration; pixel measurement only"),
     "CalibrationV1": dict(role="calibration", brain="exempt", timeline="fixed",
                           tokens="design_tokens", audio="none", qa="manual",
+                          total_frames=300,
                           exemption="Isolated visual calibration; pixel measurement only"),
     "CalibrationV2": dict(role="calibration", brain="exempt", timeline="fixed",
                           tokens="design_tokens", audio="none", qa="manual",
+                          total_frames=300,
                           exemption="Isolated visual calibration; pixel measurement only"),
     "CalibrationV3": dict(role="calibration", brain="exempt", timeline="fixed",
                           tokens="design_tokens", audio="none", qa="manual",
+                          total_frames=300,
                           exemption="Isolated visual calibration; pixel measurement only"),
     "MaterialA":     dict(role="calibration", brain="exempt", timeline="fixed",
                           tokens="design_tokens", audio="none", qa="manual",
+                          total_frames=2463,
                           exemption="Material A/B comparison"),
     "MaterialB":     dict(role="calibration", brain="exempt", timeline="fixed",
                           tokens="design_tokens", audio="none", qa="manual",
+                          total_frames=2463,
                           exemption="Material A/B comparison"),
     # --- demo / fixtures ----------------------------------------------------
     "FinanceProof":  dict(role="demo", brain="exempt", timeline="fixed", tokens="legacy",
-                          audio="none", qa="none",
+                          audio="none", qa="none", total_frames=1860,
                           exemption="Legacy manual fixture (kept until golden regression passes)"),
     "VisualShowcase": dict(role="demo", brain="exempt", timeline="fixed",
                           tokens="design_tokens", audio="none", qa="manual",
+                          total_frames=4010,
                           exemption="31-section visual showcase demo"),
     # --- test ---------------------------------------------------------------
     "B6A":           dict(role="test", brain="exempt", timeline="compiled_beats",
                           tokens="design_tokens", audio="none", qa="none",
+                          total_frames=1695,
                           exemption="Arbitration test pair; compiled beat data without selector authority"),
     "B6B":           dict(role="test", brain="exempt", timeline="compiled_beats",
                           tokens="design_tokens", audio="none", qa="none",
+                          total_frames=1695,
                           exemption="Arbitration test pair; compiled beat data without selector authority"),
     "ChainTest":     dict(role="test", brain="exempt", timeline="compiled_beats",
                           tokens="design_tokens", audio="none", qa="none",
+                          total_frames=250,
                           exemption="Chain visualization test"),
     "CompositionA":  dict(role="test", brain="exempt", timeline="fixed",
                           tokens="design_tokens", audio="none", qa="manual",
+                          total_frames=2463,
                           exemption="Composition-scale test pair"),
     "CompositionB":  dict(role="test", brain="exempt", timeline="fixed",
                           tokens="design_tokens", audio="none", qa="manual",
+                          total_frames=2463,
                           exemption="Composition-scale test pair"),
     "ModeRegression": dict(role="test", brain="exempt", timeline="fixed",
                           tokens="design_tokens", audio="none", qa="pytest",
+                          total_frames=2070,
                           exemption="23-mode regression (tests/test_23_modes.py)"),
 }
 
-REQUIRED_FIELDS = {"role", "brain", "timeline", "tokens", "audio", "qa", "exemption"}
+REQUIRED_FIELDS = {"role", "brain", "timeline", "tokens", "audio", "qa",
+                   "exemption", "total_frames"}
 VALID_ROLES = {"production", "test", "demo", "calibration", "fixture", "rehearsal"}
 VALID_BRAIN = {"required", "exempt"}
 VALID_TIMELINE = {"compiled_beats", "fixed"}
@@ -123,6 +146,22 @@ VALID_QA = {"verify_render", "pytest", "manual", "none"}
 def get_contract(composition):
     """Return the contract dict for a composition id, or None if unregistered."""
     return COMPOSITIONS.get(composition)
+
+
+def get_total_frames(composition):
+    """Return the authoritative total frame count for a composition id.
+
+    Returns an int, or None if the composition is unregistered or its
+    contract lacks a valid total_frames. Callers must treat None as
+    "cannot validate" and fail closed.
+    """
+    contract = get_contract(composition)
+    if contract is None:
+        return None
+    total = contract.get("total_frames")
+    if not isinstance(total, int) or isinstance(total, bool) or total <= 0:
+        return None
+    return total
 
 
 def registered_ids():
@@ -198,6 +237,15 @@ def validate_for_dispatch(composition, with_audio):
             f"containing an audio stream. Dispatch with with_audio=true, or fix "
             f"the composition's audio policy."
         )
+
+    # Q1 (2026-10-11): total_frames must be a positive integer. plan.py
+    # rejects frame ranges outside [0, total_frames); a missing or invalid
+    # total fails closed here so the bound is never silently skipped.
+    if get_total_frames(composition) is None:
+        errors.append(
+            f"Composition '{composition}' has missing or invalid total_frames "
+            f"in the contract registry. Frame-range validation cannot run."
+        )
     return errors
 
 
@@ -251,9 +299,12 @@ def self_test():
     for cid, c in COMPOSITIONS.items():
         assert REQUIRED_FIELDS <= set(c.keys()), f"{cid} missing fields"
         assert c["role"] in VALID_ROLES, f"{cid} bad role"
+        # Q1: every composition must carry a valid total_frames.
+        assert get_total_frames(cid) is not None, f"{cid} missing/invalid total_frames"
     # Unknown id is rejected.
     errs = validate_for_dispatch("NoSuchVideo", True)
     assert errs and "not registered" in errs[0]
+    assert get_total_frames("NoSuchVideo") is None
     # Invalid policy values are rejected.
     saved = COMPOSITIONS["B6A"]["brain"]
     COMPOSITIONS["B6A"]["brain"] = "maybe"

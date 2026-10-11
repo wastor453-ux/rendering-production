@@ -422,6 +422,11 @@ def main():
     parser.add_argument("--vo-file", default="public/audio/vo_p3.wav")
     parser.add_argument("--bed-file", default="public/audio/bed.mp3")
     parser.add_argument("--with-audio", default="true")
+    parser.add_argument("--vo-offset-seconds", default="0")
+    parser.add_argument("--with-sfx-mix", default="false")
+    parser.add_argument("--sfx-chain-test", default="false")
+    parser.add_argument("--install-verify", default="false")
+    parser.add_argument("--reassemble-bypass-fingerprint", default="false")
     parser.add_argument("--repo-root", default=".")
     args = parser.parse_args()
     
@@ -473,6 +478,50 @@ def main():
     print("\n[7] Beat contract (canonical schema)...")
     errs = check_beat_contract(args.composition, repo_root)
     all_errors.extend(errs)
+
+    print("\n[8] Workflow flag combinations (Q2)...")
+    from composition_contract import get_total_frames
+    # Q1: upper-bound check pre-dispatch
+    total = get_total_frames(args.composition)
+    if total is None:
+        all_errors.append(
+            f"composition {args.composition!r} has no valid total_frames; "
+            f"cannot validate frame range")
+    else:
+        if args.start_frame >= total:
+            all_errors.append(
+                f"start_frame ({args.start_frame}) outside {args.composition} "
+                f"(0-{total - 1})")
+        if args.end_frame >= total:
+            all_errors.append(
+                f"end_frame ({args.end_frame}) outside {args.composition} "
+                f"(0-{total - 1})")
+    # Q2: unsafe flag combinations
+    def _bool(name, val):
+        v = val.strip().lower()
+        if v not in ("true", "false"):
+            all_errors.append(f"{name} must be 'true'/'false', got {val!r}")
+            return False
+        return v == "true"
+    with_sfx_mix = _bool("with_sfx_mix", args.with_sfx_mix)
+    reassemble_bypass = _bool("reassemble_bypass_fingerprint",
+                              args.reassemble_bypass_fingerprint)
+    if with_sfx_mix and reassemble_bypass:
+        all_errors.append(
+            "reassemble_bypass_fingerprint=true cannot be combined with "
+            "with_sfx_mix=true")
+    # Q3: VO offset validation
+    import math
+    try:
+        offset = float(args.vo_offset_seconds)
+        if not math.isfinite(offset) or offset < 0:
+            all_errors.append(
+                f"vo_offset_seconds must be finite and >= 0, "
+                f"got {args.vo_offset_seconds!r}")
+    except (TypeError, ValueError):
+        all_errors.append(
+            f"vo_offset_seconds must be a number, "
+            f"got {args.vo_offset_seconds!r}")
 
     print("\n" + "=" * 60)
     if all_errors:
