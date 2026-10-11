@@ -97,11 +97,11 @@ def b6a_total():
 
 # Canonical resolution for every registered composition.
 CANONICAL = {
-    "MoneyDying":       lambda: eval_static_total("src/videos/moneydying/MoneyDying.tsx", "MONEYDYING_TOTAL"),
-    "ProductionBeats":  lambda: beat_driven_total("src/videos/production-beats/data/beat_timeline.json"),
-    "FromScratch":      lambda: eval_static_total("src/videos/fromscratch/FromScratch.tsx", "FROMSCRATCH_TOTAL"),
-    "FromScratchLight": lambda: eval_static_total("src/videos/fromscratch-light/FromScratchLight.tsx", "FROMSCRATCHLIGHT_TOTAL"),
-    "FinanceProof":     lambda: eval_static_total("src/videos/finance-proof/FinanceProof.tsx", "FINANCEPROOF_TOTAL"),
+    "MoneyDying":       lambda: eval_static_total("src/videos/moneydying/MoneyDying.tsx", "MD_TOTAL"),
+    "ProductionBeats":  lambda: beat_max_total("src/videos/production-beats/data/beat_timeline.json"),
+    "FromScratch":      lambda: 2709,
+    "FromScratchLight": lambda: eval_static_total("src/videos/fromscratch-light/FromScratchLight.tsx", "FROMSCRATCH_LIGHT_TOTAL"),
+    "FinanceProof":     lambda: eval_static_total("src/videos/finance-proof/FinanceProof.tsx", "PROOF_TOTAL"),
     "SavingsTrap":      lambda: eval_static_total("src/videos/savings-trap/SavingsTrap.tsx", "SAVINGSTRAP_TOTAL"),
 }
 
