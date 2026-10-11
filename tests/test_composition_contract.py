@@ -41,6 +41,14 @@ class TestBeatContractGate(unittest.TestCase):
     """The dispatch beat gate (validate_dispatch.check_beat_contract) proves
     checked-in beats honor the canonical EDITORIAL_BEAT_SCHEMA at dispatch."""
 
+    def _require_workspace_schema(self):
+        # The canonical schema lives in the local workspace (outside the repo).
+        # Skipped on hosted runners without the workspace.
+        schema = os.path.join(REPO_ROOT, "..", "EDITORIAL_BEAT_SCHEMA.json")
+        if not os.path.isfile(schema):
+            self.skipTest(f"workspace schema not present (hosted runner): {schema}")
+        return schema
+
     def _beat_gate(self):
         sys.path.insert(0, SCRIPTS)
         from validate_dispatch import check_beat_contract
@@ -78,12 +86,13 @@ class TestBeatContractGate(unittest.TestCase):
         self.assertEqual(check_beat_contract("HousingBroke", REPO_ROOT), [])
 
     def test_tampered_beat_fails_closed(self):
+        schema = self._require_workspace_schema()
         check_beat_contract = self._beat_gate()
         tmp = _tempfile.mkdtemp()
         try:
             repo = os.path.join(tmp, "demo-video")
             os.makedirs(os.path.join(repo, "src", "compiled"))
-            _shutil.copy(os.path.join(REPO_ROOT, "..", "EDITORIAL_BEAT_SCHEMA.json"),
+            _shutil.copy(schema,
                          os.path.join(tmp, "EDITORIAL_BEAT_SCHEMA.json"))
             bad = {"beats": [{"beat_id": "bad1", "semantic_role": "trend"}]}
             with open(os.path.join(repo, "src", "compiled",
@@ -96,12 +105,13 @@ class TestBeatContractGate(unittest.TestCase):
             _shutil.rmtree(tmp, ignore_errors=True)
 
     def test_missing_beat_file_fails(self):
+        schema = self._require_workspace_schema()
         check_beat_contract = self._beat_gate()
         tmp = _tempfile.mkdtemp()
         try:
             repo = os.path.join(tmp, "demo-video")
             os.makedirs(os.path.join(repo, "src"))
-            _shutil.copy(os.path.join(REPO_ROOT, "..", "EDITORIAL_BEAT_SCHEMA.json"),
+            _shutil.copy(schema,
                          os.path.join(tmp, "EDITORIAL_BEAT_SCHEMA.json"))
             errs = check_beat_contract("ProductionBeats", repo)
             self.assertTrue(errs)

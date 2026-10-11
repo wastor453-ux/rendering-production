@@ -1381,12 +1381,14 @@ class TestPushScriptCompleteness(unittest.TestCase):
     def test_push_script_includes_all_workflows(self):
         """Every .github/workflows/*.yml must be in the push script."""
         import os
+        push_script = os.path.expanduser(
+            "~/workspace/skills/github/bin/push_p40_branch.py")
+        if not os.path.isfile(push_script):
+            self.skipTest(f"push script not present (hosted runner)")
         wf_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                               "..", ".github", "workflows")
         workflows = [f for f in os.listdir(wf_dir) if f.endswith(".yml")]
         # Read push script
-        push_script = os.path.expanduser(
-            "~/workspace/skills/github/bin/push_p40_branch.py")
         with open(push_script) as f:
             script_content = f.read()
         for wf in workflows:
@@ -1397,12 +1399,14 @@ class TestPushScriptCompleteness(unittest.TestCase):
     def test_push_script_includes_all_scripts(self):
         """Every .github/scripts/*.py must be in the push script."""
         import os
+        push_script = os.path.expanduser(
+            "~/workspace/skills/github/bin/push_p40_branch.py")
+        if not os.path.isfile(push_script):
+            self.skipTest(f"push script not present (hosted runner)")
         script_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                   "..", ".github", "scripts")
         scripts = [f for f in os.listdir(script_dir)
                    if f.endswith(".py") and not f.startswith("__")]
-        push_script = os.path.expanduser(
-            "~/workspace/skills/github/bin/push_p40_branch.py")
         with open(push_script) as f:
             script_content = f.read()
         for s in scripts:
