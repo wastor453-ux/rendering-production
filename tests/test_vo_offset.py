@@ -71,7 +71,7 @@ class TestValidateVoOffset(unittest.TestCase):
 
 class TestOffsetAwareGuard(unittest.TestCase):
     def test_h3_segment_vo_passes(self):
-        # H3 demo: frames 3753-9200 (181.6s), hb_p3.wav (180.565s), offset=0.
+        # Beat-3 demo: segment-specific VO, offset=0.
         # Previously the mux would seek 125.1s into this file (wrong).
         code, msg = guard_check(181.6, 180.565, 0)
         self.assertEqual(code, 0, msg)
