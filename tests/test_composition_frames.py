@@ -103,7 +103,6 @@ CANONICAL = {
     "FromScratchLight": lambda: eval_static_total("src/videos/fromscratch-light/FromScratchLight.tsx", "FROMSCRATCHLIGHT_TOTAL"),
     "FinanceProof":     lambda: eval_static_total("src/videos/finance-proof/FinanceProof.tsx", "FINANCEPROOF_TOTAL"),
     "SavingsTrap":      lambda: eval_static_total("src/videos/savings-trap/SavingsTrap.tsx", "SAVINGSTRAP_TOTAL"),
-    "VisualShowcase":   lambda: eval_static_total("src/videos/visual-showcase/VisualShowcase.tsx", "VISUALSHOWCASE_TOTAL"),
 }
 
 
