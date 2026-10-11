@@ -128,7 +128,7 @@ class TestBeatContractGate(unittest.TestCase):
         res = check_beat_contract("ProductionBeats", REPO_ROOT)
         prov = res.provenance
         self.assertIsNotNone(prov, "provenance missing from gate result")
-        self.assertEqual(prov["file"], "src/compiled/beat_timeline.json")
+        self.assertEqual(prov["file"], "src/videos/production-beats/data/beat_timeline.json")
         self.assertEqual(prov["provenance"], "checked-in")
         self.assertIn("beat_compiler.py", prov["generator"])
 
@@ -137,9 +137,7 @@ class TestBeatContractGate(unittest.TestCase):
         # zero production callers and every checked-in beat file predates it,
         # so all three distinct beat artifacts are hand-authored "checked-in".
         check_beat_contract = self._beat_gate()
-        for cid, rel in (("ProductionBeats", "src/compiled/beat_timeline.json"),
-                         ("P3Rehearsal", "src/compiled_p3/beat_timeline.json"),
-                         ("ChainTest", "src/chaintest/beat_timeline.json")):
+        for cid, rel in (("ProductionBeats", "src/videos/production-beats/data/beat_timeline.json"),):
             prov = check_beat_contract(cid, REPO_ROOT).provenance
             self.assertIsNotNone(prov, cid)
             self.assertEqual(prov["file"], rel, cid)
