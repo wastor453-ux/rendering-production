@@ -92,7 +92,7 @@ def make_inputs(source_sha="abc123", workflow_sha="ignored"):
     """Build valid fingerprint inputs."""
     return {
         "source_sha": source_sha,
-        "composition": "HousingBroke",
+        "composition": "TestVideo",
         "width": 1920, "height": 1080, "fps": 30,
         "start_frame": 0, "end_frame": 23150, "chunk_size": 600,
         "codec": "libx264", "crf": "18", "with_audio": False,
@@ -118,7 +118,7 @@ def make_manifest(source_sha="abc123"):
             "source_sha": source_sha,
         },
         "inputs": {
-            "composition": "HousingBroke",
+            "composition": "TestVideo",
             "width": 1920, "height": 1080, "fps": 30,
             "start_frame": 0, "end_frame": 23150, "chunk_size": 600,
             "codec": "libx264", "crf": "18", "with_audio": False,

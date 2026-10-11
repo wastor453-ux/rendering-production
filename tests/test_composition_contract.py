@@ -85,7 +85,7 @@ class TestBeatContractGate(unittest.TestCase):
 
     def test_fixed_timeline_composition_skips(self):
         check_beat_contract = self._beat_gate()
-        self.assertEqual(check_beat_contract("HousingBroke", REPO_ROOT), [])
+        self.assertEqual(check_beat_contract("FromScratchLight", REPO_ROOT), [])
 
     def test_tampered_beat_fails_closed(self):
         schema = self._require_workspace_schema()
@@ -317,12 +317,12 @@ class TestRegistryCompleteness(unittest.TestCase):
     def test_duplicate_id_detected(self):
         dup_src = (
             'COMPOSITIONS = {\n'
-            '    "HousingBroke": dict(role="production"),\n'
-            '    "HousingBroke": dict(role="test"),\n'
+            '    "FromScratchLight": dict(role="production"),\n'
+            '    "FromScratchLight": dict(role="test"),\n'
             '}\n'
         )
         dups = find_duplicate_ids(dup_src)
-        self.assertEqual(dups, {"HousingBroke": 2})
+        self.assertEqual(dups, {"FromScratchLight": 2})
 
     def test_each_id_declared_once(self):
         # The real registry file: every id exactly once.
@@ -364,19 +364,19 @@ class TestDispatchGates(unittest.TestCase):
         self.assertTrue(errs)
 
     def test_production_cannot_claim_exemption(self):
-        saved = COMPOSITIONS["HousingBroke"]["exemption"]
-        COMPOSITIONS["HousingBroke"]["exemption"] = "bogus"
+        saved = COMPOSITIONS["FromScratchLight"]["exemption"]
+        COMPOSITIONS["FromScratchLight"]["exemption"] = "bogus"
         try:
-            errs = validate_for_dispatch("HousingBroke", True)
+            errs = validate_for_dispatch("FromScratchLight", True)
             self.assertTrue(errs)
             self.assertIn("cannot", errs[0])
         finally:
-            COMPOSITIONS["HousingBroke"]["exemption"] = saved
+            COMPOSITIONS["FromScratchLight"]["exemption"] = saved
 
     def test_embedded_audio_with_audio_false_rejected(self):
-        # Verified defect E1: HousingBroke embeds <Audio>; a with_audio=false
+        # Verified defect E1: FromScratchLight embeds <Audio>; a with_audio=false
         # master would be labeled video_only while containing an audio stream.
-        errs = validate_for_dispatch("HousingBroke", False)
+        errs = validate_for_dispatch("FromScratchLight", False)
         self.assertTrue(errs)
         self.assertIn("video_only", errs[0])
         errs = validate_for_dispatch("MoneyDying", False)
@@ -419,7 +419,7 @@ class TestPlanGate(unittest.TestCase):
 
     def test_plan_accepts_registered(self):
         import plan
-        self.assertEqual(plan.validate_composition("HousingBroke"), "HousingBroke")
+        self.assertEqual(plan.validate_composition("FromScratchLight"), "FromScratchLight")
         self.assertEqual(plan.validate_composition("CalibrationV2"), "CalibrationV2")
 
     def test_plan_still_rejects_bad_format(self):

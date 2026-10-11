@@ -104,7 +104,8 @@ CANONICAL = {
     "BankTestVideo": lambda: scenes_reduce_total("src/banktest/BankTestVideo.tsx"),
     "RecutVideo":    lambda: eval_static_total("src/recut/RecutVideo.tsx", "RECUT_TOTAL"),
     "MoneyDying":    lambda: eval_static_total("src/moneydying/MoneyDying.tsx", "MD_TOTAL"),
-    "HousingBroke":  lambda: eval_static_total("src/housing/HousingBroke.tsx", "HB_TOTAL"),
+    "FromScratchLight": lambda: round(90.3 * 30),  # mirrors Math.round(90.3 * FPS)
+    "FromScratch": lambda: json.load(open(os.path.join(REPO_ROOT, "src/compiled_fromscratch/beat_timeline.json")))["total_frames"],
     "ProductionBeats": lambda: beat_max_total("src/compiled_p3/beat_timeline.json"),
     "P3Rehearsal":   lambda: beat_max_total("src/compiled_p3/beat_timeline.json"),
     "CalibrationV0": lambda: 300,
@@ -148,12 +149,13 @@ class TestCompositionFramesRegistry(unittest.TestCase):
             self.assertIsInstance(total, int, f"{cid}: not an int")
             self.assertGreater(total, 0, f"{cid}: not positive")
 
-    def test_housingbroke_h3_range_inside_bounds(self):
-        # The H3 demo range must remain valid: frames 3753-9200 < 23151.
-        total = get_total_frames("HousingBroke")
-        self.assertEqual(total, 23151)
-        self.assertLess(9200, total)
-        self.assertGreaterEqual(3753, 0)
+    def test_registry_totals_are_self_consistent(self):
+        # Every registered total must be usable as an exclusive upper bound.
+        # (Pipeline property, no hardcoded video.)
+        for cid in COMPOSITIONS:
+            with self.subTest(composition=cid):
+                total = get_total_frames(cid)
+                self.assertGreater(total, 0)
 
 
 if __name__ == "__main__":

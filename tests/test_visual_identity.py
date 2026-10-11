@@ -32,7 +32,6 @@ RETIRED_PATTERNS = [
 
 # Production directories that must NOT use the retired theme
 PRODUCTION_DIRS = [
-    "src/housing/",
     "src/compositions/",
 ]
 
@@ -79,22 +78,6 @@ class TestVisualIdentity(unittest.TestCase):
         )
         self.assertEqual(blocked, [], msg)
 
-    def test_light_brain_used_by_housing(self):
-        """All HousingBroke scenes must import from src/light/."""
-        housing_dir = os.path.join(REPO_ROOT, "src", "housing")
-        scenes = [
-            "H1Hook.tsx", "H2Spike.tsx", "H3Autopsy.tsx",
-            "H4Debt.tsx", "H5Freeze.tsx", "H6Escape.tsx", "H7Close.tsx",
-        ]
-        for scene in scenes:
-            path = os.path.join(housing_dir, scene)
-            self.assertTrue(os.path.isfile(path), f"Missing: {scene}")
-            with open(path, "r") as fh:
-                content = fh.read()
-            self.assertIn(
-                "../light/", content,
-                f"{scene} does not import from src/light/"
-            )
 
 
 if __name__ == "__main__":

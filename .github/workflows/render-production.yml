@@ -57,10 +57,15 @@ on:
         type: boolean
         default: false
       with_sfx_mix:
-        description: 'SFX mix stage (A1-only, LOCAL build 2026-10-10). Runs AFTER assemble: mixes the staged A1 SFX triggers for the composition (from assets/sfx/<slug>_events.json) under the VO+bed intermediate per SOUND_DESIGN.md (VO never ducked, SFX -4dB under VO, 12f click breathing room, -14 LUFS / -1 dBTP). DEFAULT FALSE = completely inert; existing runs are unaffected.'
+        description: 'SFX mix stage (A1-only). Runs AFTER assemble: mixes A1 SFX triggers under the VO+bed intermediate per SOUND_DESIGN.md (VO never ducked, SFX -4dB under VO, 12f click breathing room, -14 LUFS / -1 dBTP). DEFAULT FALSE = completely inert; existing runs are unaffected.'
         required: false
         type: boolean
         default: false
+      sfx_events_file:
+        description: 'Path to SFX events JSON (pipeline input, not a repo convention). Example: /tmp/sfx_events.json. If empty or missing, sfx-mix fails closed.'
+        required: false
+        type: string
+        default: '' 
       sfx_chain_test:
         description: 'SFX CHAIN TEST ONLY (2026-10-10). Runs a bounded 10s SFX integration test on the runner: verifies 180 A1 assets, compiles triggers, dry-runs and renders a 10s test mix, checks duration/rate/loudness/provenance. Skips ALL render/assemble jobs. DEFAULT FALSE = completely inert.'
         required: false
@@ -1341,15 +1346,13 @@ jobs:
           set -euo pipefail
           # tools/compile_sfx_triggers_a1.py: fail-closed on missing assets,
           # bad timing, or unknown A1 entries. Exits 2 on any violation.
-                    # SFX event selection (GENERIC, 2026-10-11): derive filenames from
-          # composition name. Each production composition provides its own
-          # assets/sfx/<slug>_events.json + <slug>_assetmap.json.
-          # FAILS CLOSED if files are missing - never silently uses wrong SFX.
-          SFX_SLUG=$(echo "${{ inputs.composition }}" | tr '[:upper:]' '[:lower:]')
-          SFX_EVENTS="assets/sfx/${SFX_SLUG}_events.json"
-          SFX_MAP="assets/sfx/${SFX_SLUG}_assetmap.json"
-          [ -f "$SFX_EVENTS" ] || { echo "FATAL: SFX events not found: $SFX_EVENTS" >&2; echo "Provide assets/sfx/${SFX_SLUG}_events.json for composition '${{ inputs.composition }}'" >&2; exit 2; }
-          [ -f "$SFX_MAP" ] || { echo "FATAL: SFX asset map not found: $SFX_MAP" >&2; exit 2; }
+                    # SFX events are a PIPELINE INPUT (2026-10-11). No video-named files,
+          # no naming conventions. The dispatcher provides the events file path.
+          # FAILS CLOSED if not provided or missing.
+          SFX_EVENTS="${{ inputs.sfx_events_file }}"
+          SFX_MAP="assets/a1/MANIFEST.json"
+          [ -n "$SFX_EVENTS" ] || { echo "FATAL: sfx_events_file input not provided" >&2; exit 2; }
+          [ -f "$SFX_EVENTS" ] || { echo "FATAL: SFX events not found: $SFX_EVENTS" >&2; exit 2; }
           python3 tools/compile_sfx_triggers_a1.py \
             --events "$SFX_EVENTS" \
             --manifest assets/a1/MANIFEST.json \
@@ -1412,12 +1415,17 @@ jobs:
       - name: Compile triggers
         run: |
           set -euo pipefail
-          # sfx-chain-test uses FromScratchLight events (the canonical test fixture;
-          # HousingBroke test data was deleted 2026-10-11 per Hamza)
+          # sfx-chain-test uses synthetic inline events (no video files).
+          cat > /tmp/test_events.json <<'EOF'
+          {"events": [
+            {"id": "test1", "frame": 0, "asset": "ui-swipe-25", "peak_frame": 12, "cut_frame": 24, "volume_db": -4},
+            {"id": "test2", "frame": 30, "asset": "ui-tick-09", "peak_frame": 36, "cut_frame": 42, "volume_db": -6}
+          ]}
+          EOF
           python3 tools/compile_sfx_triggers_a1.py \
-            --events assets/sfx/fromscratchlight_events.json \
+            --events /tmp/test_events.json \
             --manifest assets/a1/MANIFEST.json \
-            --asset-map assets/sfx/fromscratchlight_assetmap.json \
+            --asset-map assets/a1/MANIFEST.json \
             --out /tmp/sfx_triggers.json --fps 30
           python3 -c "import json; t=json.load(open('/tmp/sfx_triggers.json')); print('triggers:', len(t['triggers']))"
 

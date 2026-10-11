@@ -5,31 +5,47 @@ Test: No hardcoded scenes in production compositions (2026-10-11)
 This test FAILS if any production composition hardcodes scenes instead of
 using the visual_mode routing system from VISUAL_BRAIN.md.
 
-The HousingBroke bypass pattern (hardcoded H1-H7 scenes) must never recur.
-Every production composition must route through the semantic visual selector.
+Pipeline test (no hardcoded video): discovers every role="production"
+composition from the registry and verifies each routes through the
+semantic visual selector. Works for any current or future video.
 """
 
 import os
 import re
 import sys
 
-def test_no_hardcoded_scenes():
-    src_dir = os.path.join(os.path.dirname(__file__), "..", "src")
-    violations = []
+REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
+sys.path.insert(0, os.path.join(REPO_ROOT, ".github", "scripts"))
+from composition_contract import COMPOSITIONS
 
-    # Production compositions that must use visual_mode routing
-    production_comps = ["FromScratchLight"]
 
-    for comp in production_comps:
-        path = os.path.join(src_dir, f"{comp}.tsx")
-        if not os.path.exists(path):
+def _production_tsx_files():
+    """Map production composition IDs to their TSX source files."""
+    # Convention: src/<CompId>.tsx (matches RemotionRoot registration).
+    result = []
+    src_dir = os.path.join(REPO_ROOT, "src")
+    for cid, c in COMPOSITIONS.items():
+        if c.get("role") != "production":
             continue
+        path = os.path.join(src_dir, f"{cid}.tsx")
+        if os.path.isfile(path):
+            result.append((cid, path))
+    return result
 
+
+def test_no_hardcoded_scenes():
+    violations = []
+    comps = _production_tsx_files()
+    if not comps:
+        print("SKIP: no production TSX files found")
+        sys.exit(0)
+
+    for comp, path in comps:
         with open(path, 'r') as f:
             content = f.read()
 
         # Check 1: Must import from ./light/
-        if "from "./light/" not in content and "from './light/" not in content:
+        if 'from "./light/' not in content and "from './light/" not in content:
             violations.append(f"{comp}: does not import from ./light/ components")
 
         # Check 2: Must reference visual_mode
@@ -52,7 +68,7 @@ def test_no_hardcoded_scenes():
             print(f"  - {v}")
         sys.exit(1)
 
-    print("PASS: No hardcoded scenes in production compositions")
+    print(f"PASS: No hardcoded scenes in {len(comps)} production compositions")
     sys.exit(0)
 
 if __name__ == "__main__":

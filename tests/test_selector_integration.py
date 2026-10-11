@@ -61,7 +61,7 @@ def test_compiler_to_selector():
     """Beat compiler output → valid selector evidence → expected mode."""
     print("P0-1: Compiler → Selector integration...")
 
-    # Real narration with word timings (from HousingBroke-style content)
+    # Real narration with word timings (finance explainer content)
     words = [
         # Beat 1: Hook (claim)
         {"word": "The", "start": 0.0, "end": 0.2},

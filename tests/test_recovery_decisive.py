@@ -64,7 +64,7 @@ from build_ledger import build_ledger as build_chunk_ledger
 def make_inputs():
     return {
         "source_sha": "abc123",
-        "composition": "HousingBroke",
+        "composition": "TestVideo",
         "width": 1920, "height": 1080, "fps": 30,
         "start_frame": 0, "end_frame": 23150, "chunk_size": 600,
         "codec": "libx264", "crf": "18", "with_audio": False,
@@ -100,7 +100,7 @@ def make_prior_manifest():
         "job_identity": "run-123-attempt-1-abc12345",
         "github": {"run_id": "123", "source_sha": "abc123"},
         "inputs": {
-            "composition": "HousingBroke",
+            "composition": "TestVideo",
             "width": 1920, "height": 1080, "fps": 30,
             "start_frame": 0, "end_frame": 23150, "chunk_size": 600,
             "codec": "libx264", "crf": "18", "with_audio": False,
