@@ -129,11 +129,7 @@ def check_composition(composition, expected_frames, repo_root):
 # The beat compiler is not in the pipeline; the dispatch gate below proves the
 # checked-in beats honor the canonical EDITORIAL_BEAT_SCHEMA contract instead.
 BEAT_FILES = {
-    "ProductionBeats": "src/compiled/beat_timeline.json",
-    "B6A": "src/compiled/beat_timeline.json",
-    "B6B": "src/compiled/beat_timeline.json",
-    "P3Rehearsal": "src/compiled_p3/beat_timeline.json",
-    "ChainTest": "src/chaintest/beat_timeline.json",
+    "ProductionBeats": "src/videos/production-beats/data/beat_timeline.json",
 }
 
 
