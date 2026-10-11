@@ -70,7 +70,7 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           import json
-          b = json.load(open("src/compiled_p3/beat_timeline.json"))
+          b = json.load(open("src/compiled/beat_timeline.json"))
           b["beats"][0]["visual_mode"] = "dark_mystery_hacker"
           json.dump(b, open("/tmp/gatefix/badmode.json", "w"))
           PY
@@ -89,7 +89,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 .github/scripts/pipeline_check.py \
-            --register "beat_json=src/compiled_p3/beat_timeline.json" \
+            --register "beat_json=src/compiled/beat_timeline.json" \
             --registry /tmp/gatefix/r3.json --run-id pos1 --kind json
           python3 .github/scripts/pipeline_check.py \
             --define "visual_modes_schema=src/visual_mode_schema.json" \
