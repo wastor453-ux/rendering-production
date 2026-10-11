@@ -57,7 +57,7 @@ on:
         type: boolean
         default: false
       with_sfx_mix:
-        description: 'SFX mix stage (A1-only, LOCAL build 2026-10-10). Runs AFTER assemble: mixes the composition's staged A1 SFX triggers (from assets/sfx/<slug>_events.json) under the VO+bed intermediate per SOUND_DESIGN.md (VO never ducked, SFX -4dB under VO, 12f click breathing room, -14 LUFS / -1 dBTP). DEFAULT FALSE = completely inert; existing runs are unaffected.'
+        description: 'SFX mix stage (A1-only, LOCAL build 2026-10-10). Runs AFTER assemble: mixes the staged A1 SFX triggers for the composition (from assets/sfx/<slug>_events.json) under the VO+bed intermediate per SOUND_DESIGN.md (VO never ducked, SFX -4dB under VO, 12f click breathing room, -14 LUFS / -1 dBTP). DEFAULT FALSE = completely inert; existing runs are unaffected.'
         required: false
         type: boolean
         default: false
