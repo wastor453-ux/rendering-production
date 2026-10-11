@@ -44,7 +44,7 @@ function BeatRenderer({ beat }: { beat: Beat }) {
       return (
         <LightCanvas>
           <GlassCard>
-            <HeroNumber value={beat.number ?? 0} suffix="%" />
+            <HeroNumber kicker={beat.kicker ?? "INFLATION"} value={beat.number ?? 0} suffix="%" caption="Average annual inflation eroding savings" />
             <HeroTypography kicker={beat.kicker ?? ""} lines={lines.length ? lines : [beat.text]} />
           </GlassCard>
         </LightCanvas>
@@ -64,7 +64,7 @@ function BeatRenderer({ beat }: { beat: Beat }) {
       return (
         <LightCanvas>
           <GlassCard>
-            <LineChartStory data={[100, 97, 94, 91, 88, 85, 82, 79, 76, 73]} />
+            <LineChartStory data={[100, 97, 94, 91, 88, 85, 82, 79, 76, 73]} eventIndex={5} eventLabel="Purchasing power drops 27%" metric="Value of $10K" />
           </GlassCard>
         </LightCanvas>
       );
