@@ -1341,10 +1341,21 @@ jobs:
           set -euo pipefail
           # tools/compile_sfx_triggers_a1.py: fail-closed on missing assets,
           # bad timing, or unknown A1 entries. Exits 2 on any violation.
+          # Select SFX event files based on composition (2026-10-11)
+          if [ "${{ inputs.composition }}" = "FromScratchLight" ]; then
+            SFX_EVENTS="assets/sfx/fromscratchlight_events.json"
+            SFX_MAP="assets/sfx/fromscratchlight_assetmap.json"
+          else
+            SFX_EVENTS="assets/sfx/housingbroke_events.json"
+            SFX_MAP="assets/sfx/housingbroke_assetmap.json"
+          fi
           python3 tools/compile_sfx_triggers_a1.py \
-            --events assets/sfx/housingbroke_events.json \
+            --events "$SFX_EVENTS" \
             --manifest assets/a1/MANIFEST.json \
-            --asset-map assets/sfx/housingbroke_assetmap.json \
+            --asset-map "$SFX_MAP" \
+            --events "$SFX_EVENTS" \
+            --manifest assets/a1/MANIFEST.json \
+            --asset-map "$SFX_MAP" \
             --out /tmp/sfx/sfx_triggers.json
 
       - name: Mix SFX under VO+bed (A1-only, fail-closed)
@@ -1404,9 +1415,9 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/compile_sfx_triggers_a1.py \
-            --events assets/sfx/housingbroke_events.json \
+            --events "$SFX_EVENTS" \
             --manifest assets/a1/MANIFEST.json \
-            --asset-map assets/sfx/housingbroke_assetmap.json \
+            --asset-map "$SFX_MAP" \
             --out /tmp/sfx_triggers.json --fps 30
           python3 -c "import json; t=json.load(open('/tmp/sfx_triggers.json')); print('triggers:', len(t['triggers']))"
 
