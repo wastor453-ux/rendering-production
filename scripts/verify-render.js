@@ -406,3 +406,48 @@ function finish() {
   process.exit(pass ? 0 : 1);
 }
 finish();
+
+// === POSITIVE QA CHECKS (2026-10-11 per Hamza) ===
+// These verify the video is GOOD, not just "not bad"
+
+function checkPositiveQuality(frameData, results) {
+  const checks = [];
+
+  // P1: Cards are visible (not flat white invisible)
+  // Card should have detectable border/shadow vs background
+  checks.push({
+    name: "P1_CARDS_VISIBLE",
+    pass: frameData.cardEdgeContrast > 10,
+    detail: `Card edge contrast: ${frameData.cardEdgeContrast}`
+  });
+
+  // P2: Text is readable (not too small, has contrast)
+  checks.push({
+    name: "P2_TEXT_READABLE",
+    pass: frameData.textContrast > 50 && frameData.minFontSize >= 24,
+    detail: `Text contrast: ${frameData.textContrast}, min font: ${frameData.minFontSize}px`
+  });
+
+  // P3: Visual variety (not same template repeated)
+  checks.push({
+    name: "P3_VISUAL_VARIETY",
+    pass: frameData.uniqueModes >= 2,
+    detail: `Unique visual modes: ${frameData.uniqueModes}`
+  });
+
+  // P4: No excessive static holds (max 4.5s per RETENTION_BRAIN)
+  checks.push({
+    name: "P4_NO_LONG_HOLDS",
+    pass: frameData.maxHoldSeconds <= 4.5,
+    detail: `Max hold: ${frameData.maxHoldSeconds}s`
+  });
+
+  // P5: Light premium identity (bright canvas, not dark)
+  checks.push({
+    name: "P5_LIGHT_IDENTITY",
+    pass: frameData.meanLuminance > 180,
+    detail: `Mean luminance: ${frameData.meanLuminance}`
+  });
+
+  return checks;
+}
