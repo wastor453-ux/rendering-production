@@ -86,8 +86,8 @@ def showcase_totals():
 
 
 def b6a_total():
-    """Replicate B6A_TOTAL = FROM + DUR from src/compiled/beat_timeline.json."""
-    with open(os.path.join(REPO_ROOT, "src/compiled/beat_timeline.json")) as f:
+    """Replicate B6A_TOTAL = FROM + DUR from src/videos/production-beats/data/beat_timeline.json."""
+    with open(os.path.join(REPO_ROOT, "src/videos/production-beats/data/beat_timeline.json")) as f:
         doc = json.load(f)
     beat = next(b for b in doc["beats"] if b["beat_id"] == "b6")
     from_f = math.floor(beat["start_time"] * 30)
@@ -106,20 +106,15 @@ CANONICAL = {
     "MoneyDying":    lambda: eval_static_total("src/moneydying/MoneyDying.tsx", "MD_TOTAL"),
     "FromScratchLight": lambda: round(90.3 * 30),  # mirrors Math.round(90.3 * FPS)
     "FromScratch": lambda: json.load(open(os.path.join(REPO_ROOT, "src/compiled_fromscratch/beat_timeline.json")))["total_frames"],
-    "ProductionBeats": lambda: beat_max_total("src/compiled_p3/beat_timeline.json"),
-    "P3Rehearsal":   lambda: beat_max_total("src/compiled_p3/beat_timeline.json"),
+    "ProductionBeats": lambda: beat_max_total("src/videos/production-beats/data/beat_timeline.json"),
     "CalibrationV0": lambda: 300,
     "CalibrationV1": lambda: 300,
     "CalibrationV2": lambda: 300,
     "CalibrationV3": lambda: 300,
-    "MaterialA":     lambda: beat_max_total("src/compiled_p3/beat_timeline.json"),
-    "MaterialB":     lambda: beat_max_total("src/compiled_p3/beat_timeline.json"),
     "FinanceProof":  lambda: eval_static_total("src/FinanceProof.tsx", "PROOF_TOTAL"),
     "VisualShowcase": lambda: showcase_totals()["showcase"],
     "B6A":           b6a_total,
     "B6B":           b6a_total,
-    "CompositionA":  lambda: beat_max_total("src/compiled_p3/beat_timeline.json"),
-    "CompositionB":  lambda: beat_max_total("src/compiled_p3/beat_timeline.json"),
     "ModeRegression": lambda: showcase_totals()["regression"],
 }
 
