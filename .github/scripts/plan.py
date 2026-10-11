@@ -293,8 +293,8 @@ def main() -> int:
         return sha256_file(full)
 
     package_lock_sha = require_file("package-lock.json")
-    beats_sha = require_file("src/compiled_p3/beat_timeline.json")
-    events_sha = require_file("src/compiled_p3/events.json")
+    beats_sha = require_file("src/videos/production-beats/data/beat_timeline.json")
+    events_sha = require_file("src/videos/production-beats/data/events.json")
 
     # --- Payload checksums ---
     payload_shas = {}
