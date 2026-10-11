@@ -21,13 +21,12 @@ not prior labels.
 |----|--------|----------------|
 | B-01, B-02, B-04, B-05, B-07, B-08, B-09, B-10, B-11, B-13, B-14, B-15, B-17, B-18, B-19, B-23 | ✅ | Local tests pass; B-07: visual-mode-inventory.md generated from source; B-14: SOUND_DESIGN.md:41 synced; B-17: this register is the versioned re-validation; B-23: tools/verify_visual.py built, PASS on Q-004 |
 | B-14 | ✅ | SOUND_DESIGN.md:41 synced 2026-10-10 — 9 impacts assigned A1 assets, NOT approved |
-| B-03, B-06, B-22 | 🟡 | Contracts exist; runtime/full proof pending; B-22: PROVENANCE.md created, full closure needs B-16 decision |
+| B-03, B-06 | 🟡 | Contracts exist; runtime/full proof pending (needs render) |
+| B-22 | 🟡 | PROVENANCE.md ledger exists (1 asset: office.jpg, provenance UNKNOWN, license UNVERIFIED). B-16 deferred 2026-10-11 — no licensed assets to track. Ledger is honest but the single asset's provenance remains unknown; not closed. |
 | B-12 | 🔴 | Light encode A/B needs render (prohibited) |
-| B-16 | 🔴 | No licensed imagery inventory (needs Hamza's assets; options in creative-review package) |
+| B-16 | 🔴 | DEFERRED by Hamza 2026-10-11: licensed imagery deferred (procedural/AI-only). Owner: Hamza. Reopen when channel revenue justifies licensing or licensed assets are introduced. NOT closed — no inventory exists. |
 | B-20 | 🔴 | Bit-identical renders not proven (needs render) |
-| B-21 | 🔴 | Formal encode QA bar not defined (objective metrics in Q-004 report; needs Hamza's bar) |
-| B-22 | 🔴 | Imagery provenance not tracked |
-| B-23 | 🔴 | No independent visual verifier |
+| B-21 | ✅ | Encode QA bar approved 2026-10-11: `.production-state/ENCODE_QA_BAR.md` (1080p, 0 black/frozen, -14 LUFS, -1 dBTP, CRF 18) |
 
 ## CATEGORY C: Infrastructure & Recovery (13 fixed / 1 partial)
 
@@ -58,7 +57,7 @@ not prior labels.
 |----|--------|----------------|
 | F-04 | ✅ | Q-004 run 38057551643 green (technical). CREATIVE VERDICT SEPARATE: Hamza ruled below quality, no rerender |
 | F-02, F-03 | 🟡 | Selective recovery proven (37926640596); F-02 positive 39-chunk case: recovery validation correctly FAILED CLOSED on generation mismatch (run 38068791887) — safety property proven; positive case needs fresh render on current code (prohibited) |
-| F-01 | 🔴 | Q-001 needs definition (Hamza) |
+| F-01 | ✅ | Q-001 defined 2026-10-11: first quality-bar video under Light Premium Fintech identity meeting H-01 criteria (`.production-state/CREATIVE_APPROVAL_CRITERIA.md`) and B-21 encode bar (`.production-state/ENCODE_QA_BAR.md`) |
 | F-05, F-06, F-07 | 🔴 | Await Hamza's visual verdict on Q-004 master |
 
 ## CATEGORY G: Evidence & Package (5/5 fixed)
@@ -81,8 +80,8 @@ not prior labels.
 
 | ID | Status | Evidence / gap |
 |----|--------|----------------|
-| H-01 | 🔴 | Creative approval criteria: Q004 visual direction REJECTED 2026-10-10. Measurable criteria not yet defined — must exist before any redesign proposal. |
-| H-02 | 🔴 | Demo lifecycle: demo video ordered 2026-10-10. Plan and acceptance checklist pending (Batch 4). No render dispatched. |
+| H-01 | ✅ | Creative approval criteria approved 2026-10-11: `.production-state/CREATIVE_APPROVAL_CRITERIA.md` (16 measurable criteria). Q-004 direction remains REJECTED; criteria enable future redesign proposals. |
+| H-02 | ✅ | Demo acceptance checklist approved 2026-10-11: `.production-state/DEMO_ACCEPTANCE_CHECKLIST.md`. No render dispatched yet. |
 | H-03 | ✅ | Unified pre-render enforcement checklist: `.production-state/PRE_RENDER_CHECKLIST.md` + `tools/pre_render_check.py` + `tests/test_pre_render.py` (11/11 pass). 8 checks, all mapped to canonical sources. |
 
 ## RECONCILED COUNTS
@@ -90,18 +89,18 @@ not prior labels.
 | Category | Fixed | Partial | Open | Blocked | Total |
 |----------|-------|---------|------|---------|-------|
 | A | 8 | 0 | 0 | 0 | 8 |
-| B | 16 | 3 | 4 | 0 | 23 |
+| B | 17 | 3 | 3 | 0 | 23 |
 | C | 13 | 1 | 0 | 0 | 14 |
 | D | 4 | 0 | 0 | 0 | 4 |
 | E | 3 | 2 | 0 | 0 | 5 |
-| F | 1 | 2 | 4 | 0 | 7 |
+| F | 2 | 2 | 3 | 0 | 7 |
 | G | 5 | 0 | 0 | 0 | 5 |
 | N | 12 | 0 | 0 | 1 | 13 |
-| **TOTAL** | **62** | **8** | **8** | **1** | **79** |
-| H (new) | 1 | 0 | 2 | 0 | 3 |
-| **GRAND TOTAL** | **63** | **8** | **10** | **1** | **82** |
+| **TOTAL** | **64** | **8** | **6** | **1** | **79** |
+| H (new) | 3 | 0 | 0 | 0 | 3 |
+| **GRAND TOTAL** | **67** | **8** | **6** | **1** | **82** |
 
-63 + 8 + 10 + 1 = 82 ✓ (79 original + 3 new)
+67 + 8 + 6 + 1 = 82 ✓ (4 closed this batch: B-21, F-01, H-01, H-02)
 
 ## Changes in this phase (all on `p4-4-ccdecbc-readiness`, non-force)
 - Creative-review package: `~/workspace/your_files/impact-sounds-review/index.html`
