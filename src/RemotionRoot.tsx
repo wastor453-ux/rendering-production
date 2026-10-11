@@ -17,10 +17,8 @@ import { FromScratchLight, FROMSCRATCH_LIGHT_TOTAL, FROMSCRATCH_LIGHT_FPS } from
 import { P3Rehearsal, P3_TOTAL } from "./P3Rehearsal";
 import { B6A, B6B, B6A_TOTAL } from "./B6Arbitration";
 import { CalibrationV0, CalibrationV1, CalibrationV2, CalibrationV3 } from "./test/VisualCalibration";
-import { ChainTest, CHAINTEST_TOTAL } from "./ChainTest";
 import { MaterialA, MaterialB, MATERIAL_AB_TOTAL } from "./MaterialAB";
 import { CompositionA, CompositionB, COMP_AB_TOTAL } from "./CompositionAB";
-import { ModeRegression, MODE_REGRESSION_TOTAL } from "./ModeRegression";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -97,71 +95,7 @@ export const RemotionRoot: React.FC = () => {
         width={1920}
         height={1080}
       />
-      <Composition
-        id="B6A"
-        component={B6A}
-        durationInFrames={B6A_TOTAL}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="B6B"
-        component={B6B}
-        durationInFrames={B6A_TOTAL}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="ChainTest"
-        component={ChainTest}
-        durationInFrames={CHAINTEST_TOTAL}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="MaterialA"
-        component={MaterialA}
-        durationInFrames={MATERIAL_AB_TOTAL}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="MaterialB"
-        component={MaterialB}
-        durationInFrames={MATERIAL_AB_TOTAL}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="CompositionA"
-        component={CompositionA}
-        durationInFrames={COMP_AB_TOTAL}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="CompositionB"
-        component={CompositionB}
-        durationInFrames={COMP_AB_TOTAL}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
-        id="ModeRegression"
-        component={ModeRegression}
-        durationInFrames={MODE_REGRESSION_TOTAL}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
+<Composition
         id="ProductionBeats"
         component={ProductionBeats}
         durationInFrames={PRODUCTION_TOTAL}
