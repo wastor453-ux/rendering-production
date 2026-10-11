@@ -40,6 +40,19 @@ On successful render:
 Weekly job deletes `_archive/` folders older than 7 days.
 If an update is needed within 7 days, restore from archive.
 
+
+### Voiceover Handling
+Voiceover (VO) files are video-specific and must live in the video folder:
+- Location: `src/videos/{video-name}/audio/vo.wav` (or `vo.mp3`)
+- The workflow `vo_file` input points to this path when dispatching
+- When the video is archived/deleted, its VO goes with it
+- VO files must NEVER accumulate in `public/audio/` (shared location)
+
+This ensures:
+1. Each video's VO is isolated (no cross-contamination)
+2. Deleting a video removes its VO (no orphan files)
+3. The 7-day cleanup removes VO along with the video
+
 ## Why This Fixes "Same Cheap Style"
 Old problem: Video B didn't generate its own `beat_timeline.json`, so the
 pipeline used Video A's file. Result: same beats, same visuals, same cheap style.
