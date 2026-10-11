@@ -1244,7 +1244,7 @@ class TestScopeControl(unittest.TestCase):
         files = result.stdout.strip().split('\n')
         # Creative paths that must NOT appear in the infrastructure patch
         forbidden_prefixes = [
-            "src/light/", "src/compiled_p3/", "crackit/",
+            "src/light/", "src/videos/production-beats/data/", "crackit/",
             "public/audio/sfx/",  # curated SFX pack
         ]
         for f in files:
