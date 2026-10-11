@@ -57,7 +57,7 @@ on:
         type: boolean
         default: false
       with_sfx_mix:
-        description: 'SFX mix stage (A1-only, LOCAL build 2026-10-10). Runs AFTER assemble: mixes the 33 staged A1 SFX triggers under the VO+bed intermediate per SOUND_DESIGN.md (VO never ducked, SFX -4dB under VO, 12f click breathing room, -14 LUFS / -1 dBTP). DEFAULT FALSE = completely inert; existing runs are unaffected.'
+        description: 'SFX mix stage (A1-only, LOCAL build 2026-10-10). Runs AFTER assemble: mixes the composition's staged A1 SFX triggers (from assets/sfx/<slug>_events.json) under the VO+bed intermediate per SOUND_DESIGN.md (VO never ducked, SFX -4dB under VO, 12f click breathing room, -14 LUFS / -1 dBTP). DEFAULT FALSE = completely inert; existing runs are unaffected.'
         required: false
         type: boolean
         default: false
@@ -1341,18 +1341,16 @@ jobs:
           set -euo pipefail
           # tools/compile_sfx_triggers_a1.py: fail-closed on missing assets,
           # bad timing, or unknown A1 entries. Exits 2 on any violation.
-          # Select SFX event files based on composition (2026-10-11)
-          if [ "${{ inputs.composition }}" = "FromScratchLight" ]; then
-            SFX_EVENTS="assets/sfx/fromscratchlight_events.json"
-            SFX_MAP="assets/sfx/fromscratchlight_assetmap.json"
-          else
-            SFX_EVENTS="assets/sfx/housingbroke_events.json"
-            SFX_MAP="assets/sfx/housingbroke_assetmap.json"
-          fi
+                    # SFX event selection (GENERIC, 2026-10-11): derive filenames from
+          # composition name. Each production composition provides its own
+          # assets/sfx/<slug>_events.json + <slug>_assetmap.json.
+          # FAILS CLOSED if files are missing - never silently uses wrong SFX.
+          SFX_SLUG=$(echo "${{ inputs.composition }}" | tr '[:upper:]' '[:lower:]')
+          SFX_EVENTS="assets/sfx/${SFX_SLUG}_events.json"
+          SFX_MAP="assets/sfx/${SFX_SLUG}_assetmap.json"
+          [ -f "$SFX_EVENTS" ] || { echo "FATAL: SFX events not found: $SFX_EVENTS" >&2; echo "Provide assets/sfx/${SFX_SLUG}_events.json for composition '${{ inputs.composition }}'" >&2; exit 2; }
+          [ -f "$SFX_MAP" ] || { echo "FATAL: SFX asset map not found: $SFX_MAP" >&2; exit 2; }
           python3 tools/compile_sfx_triggers_a1.py \
-            --events "$SFX_EVENTS" \
-            --manifest assets/a1/MANIFEST.json \
-            --asset-map "$SFX_MAP" \
             --events "$SFX_EVENTS" \
             --manifest assets/a1/MANIFEST.json \
             --asset-map "$SFX_MAP" \
