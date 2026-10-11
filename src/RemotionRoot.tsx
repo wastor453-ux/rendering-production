@@ -7,7 +7,7 @@ import { VisualShowcase, SHOWCASE_TOTAL } from "./light/Showcase";
 import { FinanceProof, PROOF_TOTAL } from "./FinanceProof";
 import { ProductionBeats, PRODUCTION_TOTAL } from "./ProductionBeats";
 import { FromScratch } from "./FromScratch";
-import { FromScratchLight, FROMSCRATCH_LIGHT_TOTAL, FROMSCRATCH_LIGHT_FPS } from "./FromScratchLight";
+import { FromScratchLight, FROMSCRATCH_LIGHT_TOTAL, FROMSCRATCH_LIGHT_FPS } from "./videos/fromscratch-light/FromScratchLight";
 
 export const RemotionRoot: React.FC = () => {
   return (

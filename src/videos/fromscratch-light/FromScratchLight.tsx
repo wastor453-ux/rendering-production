@@ -4,10 +4,10 @@
 // NEVER dark. NEVER hardcoded backgrounds. ALWAYS light system.
 import React from "react";
 import { AbsoluteFill, Audio, Sequence, staticFile } from "remotion";
-import { LightCanvas, GlassCard, Kicker } from "./light/primitives";
-import { HeroTypography, HeroNumber } from "./light/editorial";
-import { ComparisonBars, LineChartStory } from "./light/charts";
-import { T } from "./light/tokens";
+import { LightCanvas, GlassCard, Kicker } from "../light/primitives";
+import { HeroTypography, HeroNumber } from "../light/editorial";
+import { ComparisonBars, LineChartStory } from "../light/charts";
+import { T } from "../light/tokens";
 
 interface Beat {
   beat_id: string;
