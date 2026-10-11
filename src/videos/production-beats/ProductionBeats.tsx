@@ -22,32 +22,32 @@
 
 import React from "react";
 import { Sequence } from "remotion";
-import { LightCanvas, GlassCard, Kicker } from "./light/primitives";
+import { LightCanvas, GlassCard, Kicker } from "../light/primitives";
 import {
   HeroTypography, HeroNumber, ThesisComposition, ClosingComposition,
   ImageryGlassOverlay, RealWorldImagery,
-} from "./light/editorial";
-import { LineChartStory, BarChart, AreaChartStory, DonutChart, ComparisonBars } from "./light/charts";
-import { TwoSidedComparison, CausalDiagram, BeforeAfter, CausalLoop, Timeline, FlowDiagram } from "./light/explain";
+} from "../light/editorial";
+import { LineChartStory, BarChart, AreaChartStory, DonutChart, ComparisonBars } from "../light/charts";
+import { TwoSidedComparison, CausalDiagram, BeforeAfter, CausalLoop, Timeline, FlowDiagram } from "../light/explain";
 import {
   MetricGrid, Dashboard, PortfolioCardStack, RankedTable,
   GlassNotification, FeatureIconSystem,
-} from "./light/ui";
-import { resolveVisualModeAuthority, SemanticEvidence } from "./light/select";
-import { buildEvidence } from "./light/evidence";
+} from "../light/ui";
+import { resolveVisualModeAuthority, SemanticEvidence } from "../light/select";
+import { buildEvidence } from "../light/evidence";
 // Re-export: ChainTest imports buildEvidence from here (R-3 moved it to ./light/evidence).
 export { buildEvidence };
-import { toLocalMilestone, legacyImpactProps, CompiledEvent, VisualEventMilestone } from "./light/milestone";
-import { useMaterial } from "./light/materialTheme";
-import { resolveScale } from "./light/compositionScale";
+import { toLocalMilestone, legacyImpactProps, CompiledEvent, VisualEventMilestone } from "../light/milestone";
+import { useMaterial } from "../light/materialTheme";
+import { resolveScale } from "../light/compositionScale";
 
-import beatDoc from "./compiled/beat_timeline.json";
-import eventsDoc from "./compiled/events.json";
+import beatDoc from "./data/beat_timeline.json";
+import eventsDoc from "./data/events.json";
 // §9 — payloads imported statically (deterministic bundle); resolvePayload fails closed.
-import savingsRate from "./compiled/payloads/savings_rate_3_1.json";
-import savingsTrend from "./compiled/payloads/savings_trend_10y.json";
-import rentVsMortgage from "./compiled/payloads/rent_vs_mortgage.json";
-import stocksVsBonds from "./compiled/payloads/stocks_vs_bonds.json";
+import savingsRate from "./data/payloads/savings_rate_3_1.json";
+import savingsTrend from "./data/payloads/savings_trend_10y.json";
+import rentVsMortgage from "./data/payloads/rent_vs_mortgage.json";
+import stocksVsBonds from "./data/payloads/stocks_vs_bonds.json";
 
 const FPS = 30;
 
