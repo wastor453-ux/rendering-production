@@ -73,6 +73,10 @@ What this file proves:
 
 Run: python3 tests/test_recovery_split.py
 """
+import os as _os
+import sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(__file__), "..", ".github", "scripts"))
+
 
 import sys
 import os
