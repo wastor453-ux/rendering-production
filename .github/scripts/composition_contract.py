@@ -64,10 +64,6 @@ COMPOSITIONS = {
                           tokens="design_tokens", audio="none", qa="verify_render",
                           total_frames=5400,
                           exemption=None),
-    "VisualShowcase": dict(role="demo", brain="exempt", timeline="fixed",
-                          tokens="design_tokens", audio="none", qa="manual",
-                          total_frames=4010,
-                          exemption="31-section visual showcase demo"),
     # --- test ---------------------------------------------------------------
 }
 
