@@ -13,6 +13,7 @@ import { HousingBrokeVideo, HB_TOTAL, FPS as HB_FPS } from "./housing/HousingBro
 import { VisualShowcase, SHOWCASE_TOTAL } from "./light/Showcase";
 import { FinanceProof, PROOF_TOTAL } from "./FinanceProof";
 import { ProductionBeats, PRODUCTION_TOTAL } from "./ProductionBeats";
+import { FromScratch } from "./FromScratch";
 import { P3Rehearsal, P3_TOTAL } from "./P3Rehearsal";
 import { B6A, B6B, B6A_TOTAL } from "./B6Arbitration";
 import { CalibrationV0, CalibrationV1, CalibrationV2, CalibrationV3 } from "./test/VisualCalibration";
@@ -172,6 +173,14 @@ export const RemotionRoot: React.FC = () => {
         id="ProductionBeats"
         component={ProductionBeats}
         durationInFrames={PRODUCTION_TOTAL}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="FromScratch"
+        component={FromScratch}
+        durationInFrames={2709}
         fps={30}
         width={1920}
         height={1080}
