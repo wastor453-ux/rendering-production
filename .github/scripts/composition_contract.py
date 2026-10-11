@@ -44,7 +44,7 @@ COMPOSITIONS = {
                           exemption=None),
     "ProductionBeats": dict(role="production", brain="required", timeline="compiled_beats",
                           tokens="design_tokens", audio="none", qa="verify_render",
-                          total_frames=2463,
+                          total_frames=1820,
                           exemption=None),
     "FromScratch": dict(role="production", brain="required", timeline="compiled_beats",
                           tokens="design_tokens", audio="embedded", qa="verify_render",
