@@ -151,7 +151,7 @@ def main():
         asset_map = load(a.asset_map)
     else:
         asset_map = {}
-        for e in events.get("events", []):
+        for e in events:
             eid = e.get("event_id")
             asset = e.get("asset")
             if eid and asset:
