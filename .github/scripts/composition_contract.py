@@ -301,7 +301,8 @@ def self_test():
     """Smoke assertions runnable via `python3 .github/scripts/composition_contract.py`."""
     # Registry must match RemotionRoot.tsx registrations (no hardcoded count).
     import os as _os
-    _repo = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+    _here = _os.path.dirname(_os.path.abspath(__file__))
+    _repo = _os.path.dirname(_os.path.dirname(_here))
     root_ids = remotion_root_ids(_repo)
     assert set(COMPOSITIONS) == set(root_ids), \
         f"registry/RemotionRoot mismatch: registry-only={set(COMPOSITIONS)-set(root_ids)}, root-only={set(root_ids)-set(COMPOSITIONS)}"
