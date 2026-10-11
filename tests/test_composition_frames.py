@@ -118,7 +118,6 @@ CANONICAL = {
     "VisualShowcase": lambda: showcase_totals()["showcase"],
     "B6A":           b6a_total,
     "B6B":           b6a_total,
-    "ChainTest":     lambda: beat_max_total("src/chaintest/beat_timeline.json"),
     "CompositionA":  lambda: beat_max_total("src/compiled_p3/beat_timeline.json"),
     "CompositionB":  lambda: beat_max_total("src/compiled_p3/beat_timeline.json"),
     "ModeRegression": lambda: showcase_totals()["regression"],
