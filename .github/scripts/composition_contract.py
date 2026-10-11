@@ -60,7 +60,7 @@ COMPOSITIONS = {
     "FinanceProof":  dict(role="demo", brain="exempt", timeline="fixed", tokens="legacy",
                           audio="none", qa="none", total_frames=1860,
                           exemption="Legacy manual fixture (kept until golden regression passes)"),
-    "VisualShowcase": dict(role="demo", brain="exempt", timeline="fixed",
+    "SavingsTrap":   dict(role="production", brain="required", timeline="compiled_beats",\n                          tokens="design_tokens", audio="none", qa="verify_render",\n                          total_frames=5400,\n                          exemption=None),\n    "VisualShowcase": dict(role="demo", brain="exempt", timeline="fixed",
                           tokens="design_tokens", audio="none", qa="manual",
                           total_frames=4010,
                           exemption="31-section visual showcase demo"),

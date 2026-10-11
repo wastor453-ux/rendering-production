@@ -1,5 +1,6 @@
 import React from "react";
 import { Composition } from "remotion";
+import { SavingsTrap, SAVINGSTRAP_TOTAL } from "./videos/savings-trap/SavingsTrap";
 // DARK BRAIN REMOVED 2026-10-10: DemoVideo, StyleRefs, InflationRef retired (used src/theme.ts dark neon system)
 // See _retired/dark-brain/ for archived files.
 import { MoneyDyingVideo, MD_TOTAL, FPS as MD_FPS } from "./videos/moneydying/MoneyDying";
@@ -60,6 +61,14 @@ export const RemotionRoot: React.FC = () => {
         id="VisualShowcase"
         component={VisualShowcase}
         durationInFrames={SHOWCASE_TOTAL}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="SavingsTrap"
+        component={SavingsTrap}
+        durationInFrames={SAVINGSTRAP_TOTAL}
         fps={30}
         width={1920}
         height={1080}

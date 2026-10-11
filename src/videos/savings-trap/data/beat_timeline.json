@@ -1,0 +1,45 @@
+{
+  "beats": [
+    {
+      "beat_id": "st_hook",
+      "start_time": 0,
+      "end_time": 15,
+      "visual_mode": "hero_typography",
+      "text": "Your savings account is lying to you.",
+      "kicker": "THE SAVINGS TRAP"
+    },
+    {
+      "beat_id": "st_inflation",
+      "start_time": 15,
+      "end_time": 45,
+      "visual_mode": "hero_number",
+      "text": "Inflation at 3.1% vs savings at 0.5%",
+      "number": 3.1,
+      "kicker": "THE MATH"
+    },
+    {
+      "beat_id": "st_comparison",
+      "start_time": 45,
+      "end_time": 90,
+      "visual_mode": "comparison_bars",
+      "text": "$10,000 today vs $10,000 in 10 years",
+      "kicker": "10-YEAR EROSION"
+    },
+    {
+      "beat_id": "st_chart",
+      "start_time": 90,
+      "end_time": 135,
+      "visual_mode": "line_chart",
+      "text": "Purchasing power declining every year",
+      "kicker": "THE TREND"
+    },
+    {
+      "beat_id": "st_close",
+      "start_time": 135,
+      "end_time": 180,
+      "visual_mode": "hero_typography",
+      "text": "Stop saving. Start investing.",
+      "kicker": "THE FIX"
+    }
+  ]
+}
