@@ -36,13 +36,17 @@ def sha256_file(path):
 class TestA1Canonical(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # Canonical manifest lives in local workspace; skipped on hosted.
-        if not os.path.isfile(A1_MANIFEST):
-            raise unittest.SkipTest(f"canonical A1 manifest not present (hosted runner)")
-        with open(A1_MANIFEST) as f:
+        # Use vendored repo manifest (portable); canonical comparison is separate.
+        vendored = os.path.join(os.path.dirname(__file__), "..", "assets", "a1", "MANIFEST.json")
+        if not os.path.isfile(vendored):
+            raise unittest.SkipTest(f"vendored A1 manifest not present: {vendored}")
+        with open(vendored) as f:
             cls.manifest = json.load(f)
-        with open(STAGED) as f:
-            cls.staged = json.load(f)
+        # STAGED manifest is workspace-only; skip those tests if absent
+        cls.staged = None
+        if os.path.isfile(STAGED):
+            with open(STAGED) as f:
+                cls.staged = json.load(f)
 
     def test_manifest_has_180_assets(self):
         self.assertEqual(len(self.manifest['assets']), 180)
@@ -67,15 +71,21 @@ class TestA1Canonical(unittest.TestCase):
         self.assertEqual(len(ids), len(set(ids)))
 
     def test_staged_manifest_covers_33_events(self):
+        if self.staged is None:
+            self.skipTest("staged manifest not present (hosted runner)")
         self.assertEqual(len(self.staged['events']), 33)
         self.assertEqual(
             [e['seq'] for e in self.staged['events']], list(range(1, 34)))
 
     def test_no_event_dropped(self):
+        if self.staged is None:
+            self.skipTest("staged manifest not present (hosted runner)")
         dropped = self.staged['coverage']['dropped']
         self.assertEqual(dropped, 0)
 
     def test_all_a1_assignments_resolve(self):
+        if self.staged is None:
+            self.skipTest("staged manifest not present (hosted runner)")
         manifest_ids = {a['asset_id'] for a in self.manifest['assets']}
         for e in self.staged['events']:
             if e['source'] == 'A1':
@@ -83,6 +93,8 @@ class TestA1Canonical(unittest.TestCase):
                               f"Event {e['seq']} references unknown asset {e['asset_id']}")
 
     def test_triggers_deterministic(self):
+        if self.staged is None:
+            self.skipTest("staged manifest not present (hosted runner)")
         for e in self.staged['events']:
             if e['source'] == 'A1':
                 expected = e['impact_frame'] - round(e['peak_time_s'] * 30)

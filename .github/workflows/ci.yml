@@ -165,3 +165,43 @@ jobs:
           python3 .github/scripts/pipeline_check.py \
             --stage S9_assembly --registry /tmp/gatefix/ra3.json --run-id aud3
           echo "PASS: with_audio=true accepted with valid mixed_audio"
+      - name: S11 strict mode (release gate)
+        run: |
+          set -euo pipefail
+          # S11 requires: final_mix, qa_report (QA PASS), release_auth, + 8 completion records
+          python3 - <<'PY'
+          import json, wave, struct
+          # minimal final_mix (valid media file)
+          w = wave.open("/tmp/gatefix/final_mix.wav", "w")
+          w.setnchannels(1); w.setsampwidth(2); w.setframerate(44100)
+          w.writeframes(struct.pack("<100h", *([0]*100))); w.close()
+          # qa_report with verify_render PASS
+          qa = {"verify_render": "PASS", "gate0_editorial": True}
+          json.dump(qa, open("/tmp/gatefix/qa.json", "w"))
+          PY
+          echo "--- S11 without completions -> FAIL ---"
+          python3 .github/scripts/pipeline_check.py \
+            --require-completions \
+            --registry /tmp/gatefix/rs11.json --run-id s11test
+          python3 .github/scripts/pipeline_check.py \
+            --register "final_mix=/tmp/gatefix/final_mix.wav" \
+            --registry /tmp/gatefix/rs11.json --run-id s11test --kind media
+          python3 .github/scripts/pipeline_check.py \
+            --register "qa_report=/tmp/gatefix/qa.json" \
+            --registry /tmp/gatefix/rs11.json --run-id s11test --kind json
+          if python3 .github/scripts/pipeline_check.py \
+            --stage S11_release --registry /tmp/gatefix/rs11.json --run-id s11test; then
+            echo "FAIL: S11 passed without completions"; exit 1
+          fi
+          echo "PASS: S11 rejected without completion records (exit 2)"
+          echo "--- S11 with completions but no release_auth -> FAIL ---"
+          for s in S1_discovery S2_selection S3_transcript S4_script S5_voice S6_planning S8_sound S10_qa; do
+            python3 .github/scripts/pipeline_check.py \
+              --record-completion "$s" \
+              --registry /tmp/gatefix/rs11.json --run-id s11test
+          done
+          if python3 .github/scripts/pipeline_check.py \
+            --stage S11_release --registry /tmp/gatefix/rs11.json --run-id s11test; then
+            echo "FAIL: S11 passed without release_auth"; exit 1
+          fi
+          echo "PASS: S11 rejected without release authorization (exit 2)"

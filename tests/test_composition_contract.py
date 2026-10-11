@@ -42,11 +42,13 @@ class TestBeatContractGate(unittest.TestCase):
     checked-in beats honor the canonical EDITORIAL_BEAT_SCHEMA at dispatch."""
 
     def _require_workspace_schema(self):
-        # The canonical schema lives in the local workspace (outside the repo).
-        # Skipped on hosted runners without the workspace.
+        # Prefer the repo's checked-in schema (portable); fall back to workspace.
+        repo_schema = os.path.join(REPO_ROOT, ".github", "schemas", "EDITORIAL_BEAT_SCHEMA.json")
+        if os.path.isfile(repo_schema):
+            return repo_schema
         schema = os.path.join(REPO_ROOT, "..", "EDITORIAL_BEAT_SCHEMA.json")
         if not os.path.isfile(schema):
-            self.skipTest(f"workspace schema not present (hosted runner): {schema}")
+            self.skipTest(f"beat schema not present: {schema}")
         return schema
 
     def _beat_gate(self):
