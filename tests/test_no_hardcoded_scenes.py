@@ -26,15 +26,25 @@ LEGACY_DARK_EXEMPT = {"FromScratch"}
 
 def _production_tsx_files():
     """Map production composition IDs to their TSX source files."""
-    # Convention: src/<CompId>.tsx (matches RemotionRoot registration).
+    # Convention: src/videos/<folder>/<CompId>.tsx (video isolation, D-028).
     result = []
-    src_dir = os.path.join(REPO_ROOT, "src")
+    videos_dir = os.path.join(REPO_ROOT, "src", "videos")
     for cid, c in COMPOSITIONS.items():
         if c.get("role") != "production":
             continue
-        path = os.path.join(src_dir, f"{cid}.tsx")
-        if os.path.isfile(path):
-            result.append((cid, path))
+        # Search in src/videos/*/ for the composition file
+        found = None
+        if os.path.isdir(videos_dir):
+            for folder in os.listdir(videos_dir):
+                folder_path = os.path.join(videos_dir, folder)
+                if not os.path.isdir(folder_path) or folder.startswith("_"):
+                    continue
+                path = os.path.join(folder_path, f"{cid}.tsx")
+                if os.path.isfile(path):
+                    found = path
+                    break
+        if found:
+            result.append((cid, found))
     return result
 
 
