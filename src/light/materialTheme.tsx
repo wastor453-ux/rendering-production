@@ -40,7 +40,7 @@ export const MATERIAL_A: MaterialTokens = {
 
 export const MATERIAL_B: MaterialTokens = {
   // near-white cool-gray, a touch deeper for atmospheric separation
-  canvas: "#F3F6FB",
+  canvas: "#F8FAFF",
   blobOpacity: 0.62,
   blobLavenderOpacity: 0.68,
   blobBlueOpacity: 0.78,
