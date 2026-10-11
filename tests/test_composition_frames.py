@@ -97,25 +97,13 @@ def b6a_total():
 
 # Canonical resolution for every registered composition.
 CANONICAL = {
-    "TrialVideo":    lambda: scenes_reduce_total("src/trial/TrialVideo.tsx"),
-    "StressTest":    lambda: eval_static_total("src/stress/StressTest.tsx", "STRESS_TOTAL"),
-    "PipeTestVideo": lambda: scenes_reduce_total("src/pipetest/PipeTest.tsx"),
-    "HysaTest":      lambda: eval_static_total("src/hysa/HysaTest.tsx", "HYSA_TOTAL"),
-    "BankTestVideo": lambda: scenes_reduce_total("src/banktest/BankTestVideo.tsx"),
-    "RecutVideo":    lambda: eval_static_total("src/recut/RecutVideo.tsx", "RECUT_TOTAL"),
-    "MoneyDying":    lambda: eval_static_total("src/moneydying/MoneyDying.tsx", "MD_TOTAL"),
-    "FromScratchLight": lambda: round(90.3 * 30),  # mirrors Math.round(90.3 * FPS)
-    "FromScratch": lambda: json.load(open(os.path.join(REPO_ROOT, "src/compiled_fromscratch/beat_timeline.json")))["total_frames"],
-    "ProductionBeats": lambda: beat_max_total("src/videos/production-beats/data/beat_timeline.json"),
-    "CalibrationV0": lambda: 300,
-    "CalibrationV1": lambda: 300,
-    "CalibrationV2": lambda: 300,
-    "CalibrationV3": lambda: 300,
-    "FinanceProof":  lambda: eval_static_total("src/FinanceProof.tsx", "PROOF_TOTAL"),
-    "VisualShowcase": lambda: showcase_totals()["showcase"],
-    "B6A":           b6a_total,
-    "B6B":           b6a_total,
-    "ModeRegression": lambda: showcase_totals()["regression"],
+    "MoneyDying":       lambda: eval_static_total("src/videos/moneydying/MoneyDying.tsx", "MONEYDYING_TOTAL"),
+    "ProductionBeats":  lambda: beat_driven_total("src/videos/production-beats/data/beat_timeline.json"),
+    "FromScratch":      lambda: eval_static_total("src/videos/fromscratch/FromScratch.tsx", "FROMSCRATCH_TOTAL"),
+    "FromScratchLight": lambda: eval_static_total("src/videos/fromscratch-light/FromScratchLight.tsx", "FROMSCRATCHLIGHT_TOTAL"),
+    "FinanceProof":     lambda: eval_static_total("src/videos/finance-proof/FinanceProof.tsx", "FINANCEPROOF_TOTAL"),
+    "SavingsTrap":      lambda: eval_static_total("src/videos/savings-trap/SavingsTrap.tsx", "SAVINGSTRAP_TOTAL"),
+    "VisualShowcase":   lambda: eval_static_total("src/videos/visual-showcase/VisualShowcase.tsx", "VISUALSHOWCASE_TOTAL"),
 }
 
 
