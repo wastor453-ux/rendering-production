@@ -299,7 +299,10 @@ def check_registry_consistency(repo_root):
 
 def self_test():
     """Smoke assertions runnable via `python3 .github/scripts/composition_contract.py`."""
-    assert len(COMPOSITIONS) == 24, f"expected 24 compositions, got {len(COMPOSITIONS)}"
+    # Registry must match RemotionRoot.tsx registrations (no hardcoded count).
+    root_ids = remotion_root_ids()
+    assert set(COMPOSITIONS) == set(root_ids), \
+        f"registry/RemotionRoot mismatch: registry-only={set(COMPOSITIONS)-set(root_ids)}, root-only={set(root_ids)-set(COMPOSITIONS)}"
     for cid, c in COMPOSITIONS.items():
         assert REQUIRED_FIELDS <= set(c.keys()), f"{cid} missing fields"
         assert c["role"] in VALID_ROLES, f"{cid} bad role"
