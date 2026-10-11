@@ -74,10 +74,14 @@ def test_no_hardcoded_scenes():
         print("FAIL: Hardcoded scene violations found:")
         for v in violations:
             print(f"  - {v}")
-        sys.exit(1)
+        # Fail for both pytest and script mode
+        raise AssertionError(f"{len(violations)} hardcoded scene violations")
 
     print(f"PASS: No hardcoded scenes in {len(comps)} production compositions")
-    sys.exit(0)
 
 if __name__ == "__main__":
-    test_no_hardcoded_scenes()
+    try:
+        test_no_hardcoded_scenes()
+    except AssertionError as e:
+        print(e)
+        sys.exit(1)
