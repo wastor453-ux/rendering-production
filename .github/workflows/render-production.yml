@@ -81,11 +81,6 @@ on:
       # selection with generation-fingerprint validation, not filename
       # matching. Do NOT use `gh run rerun --failed`: recovery uses a new
       # workflow_dispatch with its own canonical execution identity.
-    sfx_asset_map_file:
-      description: 'Path to SFX asset map JSON (event_id -> A1 filename, pipeline input). If empty or missing, sfx-mix fails closed.'
-      required: false
-      type: string
-      default: ''
 
 env:
   NODE_VERSION: '24.20.0'
@@ -1333,7 +1328,6 @@ jobs:
       - name: Compile SFX triggers (A1, peak timing)
         env:
           SFX_EVENTS_FILE: ${{ inputs.sfx_events_file }}
-          SFX_ASSET_MAP_FILE: ${{ inputs.sfx_asset_map_file }}
         run: |
           set -euo pipefail
           # tools/compile_sfx_triggers_a1.py: fail-closed on missing assets,
@@ -1342,15 +1336,12 @@ jobs:
           # No video-named files, no naming conventions.
           # FAILS CLOSED if not provided or missing.
           SFX_EVENTS="$SFX_EVENTS_FILE"
-          SFX_MAP="$SFX_ASSET_MAP_FILE"
           [ -n "$SFX_EVENTS" ] || { echo "FATAL: sfx_events_file input not provided" >&2; exit 2; }
           [ -f "$SFX_EVENTS" ] || { echo "FATAL: SFX events not found: $SFX_EVENTS" >&2; exit 2; }
-          [ -n "$SFX_MAP" ] || { echo "FATAL: sfx_asset_map_file input not provided" >&2; exit 2; }
-          [ -f "$SFX_MAP" ] || { echo "FATAL: SFX asset map not found: $SFX_MAP" >&2; exit 2; }
+
           python3 tools/compile_sfx_triggers_a1.py \
             --events "$SFX_EVENTS" \
             --manifest assets/a1/MANIFEST.json \
-            --asset-map "$SFX_MAP" \
             --out /tmp/sfx/sfx_triggers.json
 
       - name: Mix SFX under VO+bed (A1-only, fail-closed)
