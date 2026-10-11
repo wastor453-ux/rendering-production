@@ -14,6 +14,7 @@ import { VisualShowcase, SHOWCASE_TOTAL } from "./light/Showcase";
 import { FinanceProof, PROOF_TOTAL } from "./FinanceProof";
 import { ProductionBeats, PRODUCTION_TOTAL } from "./ProductionBeats";
 import { FromScratch } from "./FromScratch";
+import { FromScratchLight, FROMSCRATCH_LIGHT_TOTAL, FROMSCRATCH_LIGHT_FPS } from "./FromScratchLight";
 import { P3Rehearsal, P3_TOTAL } from "./P3Rehearsal";
 import { B6A, B6B, B6A_TOTAL } from "./B6Arbitration";
 import { CalibrationV0, CalibrationV1, CalibrationV2, CalibrationV3 } from "./test/VisualCalibration";
@@ -182,6 +183,14 @@ export const RemotionRoot: React.FC = () => {
         component={FromScratch}
         durationInFrames={2709}
         fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="FromScratchLight"
+        component={FromScratchLight}
+        durationInFrames={FROMSCRATCH_LIGHT_TOTAL}
+        fps={FROMSCRATCH_LIGHT_FPS}
         width={1920}
         height={1080}
       />
