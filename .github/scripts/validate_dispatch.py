@@ -130,6 +130,7 @@ def check_composition(composition, expected_frames, repo_root):
 # checked-in beats honor the canonical EDITORIAL_BEAT_SCHEMA contract instead.
 BEAT_FILES = {
     "ProductionBeats": "src/videos/production-beats/data/beat_timeline.json",
+    "SavingsTrap": "src/videos/savings-trap/data/beat_timeline.json",
 }
 
 
