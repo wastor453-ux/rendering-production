@@ -72,6 +72,10 @@ COMPOSITIONS = {
                           tokens="design_tokens", audio="embedded", qa="verify_render",
                           total_frames=2709,
                           exemption=None),
+    "FromScratchLight": dict(role="production", brain="required", timeline="compiled_beats",
+                          tokens="design_tokens", audio="embedded", qa="verify_render",
+                          total_frames=2709,
+                          exemption=None),
     # --- rehearsal ----------------------------------------------------------
     "P3Rehearsal":   dict(role="rehearsal", brain="required", timeline="compiled_beats",
                           tokens="design_tokens", audio="none", qa="verify_render",
