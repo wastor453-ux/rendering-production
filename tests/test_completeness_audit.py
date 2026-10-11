@@ -24,8 +24,8 @@ def _has_local_workspace():
 LOCAL_REQUIRED_FILES = [
     (os.path.expanduser("~/AGENTS.md"), "AGENTS.md"),
     (os.path.join(CRACKIT, "SYSTEM_RULE_CHAIN.md"), "rule chain"),
-    (os.path.join(CRACKIT, "EDITORIAL_BRAIN.md"), "editorial brain"),
-    (os.path.join(CRACKIT, "EDITING_BRAIN.md"), "editing brain"),
+    (os.path.join(CRACKIT, "RETENTION_BRAIN.md"), "retention brain"),
+    (os.path.join(CRACKIT, "EXECUTION_BRAIN.md"), "editing brain"),
     (os.path.join(CRACKIT, "VISUAL_BRAIN.md"), "visual brain"),
     (os.path.join(CRACKIT, "RULE_OWNERSHIP_MAP.md"), "ownership map"),
     (os.path.join(CRACKIT, "EDITORIAL_BEAT_SCHEMA.json"), "beat schema"),
