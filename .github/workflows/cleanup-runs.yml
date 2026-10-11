@@ -1,0 +1,57 @@
+name: Cleanup Old Workflow Runs
+
+# Keeps the latest 10 runs of each workflow, deletes the rest.
+# Runs daily and after each render-production completion.
+# Permanent fix for run accumulation (Hamza 2026-10-12).
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight UTC
+  workflow_dispatch:
+    inputs:
+      keep:
+        description: 'Number of recent runs to keep per workflow'
+        required: false
+        type: string
+        default: '10'
+  workflow_run:
+    workflows: ["Render Production (Chunked Parallel)"]
+    types: [completed]
+
+permissions:
+  actions: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete old workflow runs (keep latest 10)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KEEP: ${{ inputs.keep || '10' }}
+        run: |
+          set -euo pipefail
+          echo "Keeping latest $KEEP runs per workflow..."
+          
+          # Get all workflows in the repo
+          WORKFLOWS=$(gh api repos/${{ github.repository }}/actions/workflows --jq '.workflows[].id')
+          
+          for WF_ID in $WORKFLOWS; do
+            WF_NAME=$(gh api repos/${{ github.repository }}/actions/workflows/$WF_ID --jq '.name')
+            echo "--- Workflow: $WF_NAME (ID: $WF_ID) ---"
+            
+            # Get all run IDs, sorted newest first
+            RUN_IDS=$(gh api "repos/${{ github.repository }}/actions/workflows/$WF_ID/runs?per_page=100" --jq '.workflow_runs | sort_by(.created_at) | reverse | .[].id')
+            
+            COUNT=0
+            for RUN_ID in $RUN_IDS; do
+              COUNT=$((COUNT + 1))
+              if [ "$COUNT" -gt "$KEEP" ]; then
+                echo "Deleting run $RUN_ID (older than latest $KEEP)..."
+                gh api -X DELETE "repos/${{ github.repository }}/actions/runs/$RUN_ID" --silent || echo "  Failed to delete $RUN_ID (may already be gone)"
+              fi
+            done
+            echo "Kept $KEEP most recent runs for $WF_NAME"
+          done
+          
+          echo "Cleanup complete."
