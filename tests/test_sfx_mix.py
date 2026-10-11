@@ -89,6 +89,8 @@ class TestA1OnlyEnforcement(unittest.TestCase):
         self.assertEqual(len(self.idx), 180)
 
     def test_all_33_staged_events_resolve(self):
+        if not os.path.isfile(STAGED):
+            self.skipTest(f"staged manifest not present (hosted runner): {STAGED}")
         staged = json.load(open(STAGED))
         by_name = {a["filename"] for a in self.manifest["assets"]}
         bad = []

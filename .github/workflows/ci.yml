@@ -30,7 +30,9 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install test dependencies
-        run: pip install pyyaml
+        run: |
+          pip install pyyaml
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
       - name: Run full test suite
         run: |
           set -euo pipefail

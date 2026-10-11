@@ -36,6 +36,9 @@ def sha256_file(path):
 class TestA1Canonical(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # Canonical manifest lives in local workspace; skipped on hosted.
+        if not os.path.isfile(A1_MANIFEST):
+            raise unittest.SkipTest(f"canonical A1 manifest not present (hosted runner)")
         with open(A1_MANIFEST) as f:
             cls.manifest = json.load(f)
         with open(STAGED) as f:
@@ -122,6 +125,8 @@ class TestLegacyRetired(unittest.TestCase):
         self.assertEqual(n, 36, f"Expected 36 retired files, found {n}")
 
     def test_skill_routes_to_a1_only(self):
+        if not os.path.isfile(SKILL):
+            self.skipTest(f"skill file not present (hosted runner): {SKILL}")
         with open(SKILL) as f:
             skill = f.read()
         self.assertIn('A1_sfx/MANIFEST.json', skill)
@@ -130,6 +135,8 @@ class TestLegacyRetired(unittest.TestCase):
                          skill)
 
     def test_sound_design_routes_to_a1_only(self):
+        if not os.path.isfile(SOUND_DESIGN):
+            self.skipTest(f"sound design file not present (hosted runner)")
         with open(SOUND_DESIGN) as f:
             sd = f.read()
         self.assertIn('A1_sfx/MANIFEST.json', sd)
@@ -140,6 +147,8 @@ class TestLegacyRetired(unittest.TestCase):
 
     def test_no_hardcoded_old_bench_in_tools(self):
         tool = os.path.join(CRACKIT, 'tools', 'compile_sfx_triggers.py')
+        if not os.path.isfile(tool):
+            self.skipTest(f"tool not present (hosted runner): {tool}")
         with open(tool) as f:
             src = f.read()
         # The tool takes --manifest as an argument; it must not default to the old bench
@@ -161,6 +170,9 @@ class TestVendoredManifestSync(unittest.TestCase):
                             "a1", "MANIFEST.json")
 
     def test_assets_in_sync(self):
+        # Canonical lives in local workspace; skipped on hosted runners.
+        if not os.path.isfile(self.CANONICAL):
+            self.skipTest(f"canonical manifest not present (hosted runner)")
         with open(self.CANONICAL) as f:
             canon = json.load(f)["assets"]
         with open(self.VENDORED) as f:
