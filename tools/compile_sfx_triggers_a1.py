@@ -130,7 +130,7 @@ def main():
     ap.add_argument("--events", required=True)
     ap.add_argument("--manifest", required=True,
                     help="canonical A1 MANIFEST.json (dict with assets list)")
-    ap.add_argument("--asset-map", required=True,
+    ap.add_argument("--asset-map", required=False, default=None,
                     help="JSON: {event_id: asset_filename} — the SFX selection output")
     ap.add_argument("--out", required=True)
     ap.add_argument("--fps", type=int, default=30)
@@ -145,7 +145,21 @@ def main():
 
     events = load(a.events)["events"]
     assets_by_name = load_a1_assets(load(a.manifest))
-    asset_map = load(a.asset_map)
+    # Asset map: explicit file OR derived from events[].asset field.
+    # This avoids needing a separate workflow input (GitHub API caching).
+    if a.asset_map:
+        asset_map = load(a.asset_map)
+    else:
+        asset_map = {}
+        for e in events.get("events", []):
+            eid = e.get("event_id")
+            asset = e.get("asset")
+            if eid and asset:
+                asset_map[eid] = asset
+        if not asset_map:
+            print("FATAL: no asset map provided and events have no 'asset' fields", file=sys.stderr)
+            sys.exit(2)
+        print(f"Derived asset map from events: {len(asset_map)} entries", file=sys.stderr)
 
     triggers = build_triggers(events, assets_by_name, asset_map, a.fps)
 
