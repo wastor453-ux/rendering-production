@@ -33,7 +33,7 @@ export const MATERIAL_A: MaterialTokens = {
   blobPeachOpacity: 0.28,
   glassFill: TOKENS_A.glassFill,
   glassBorder: TOKENS_A.glassBorder,
-  glassBorderWidth: 1,
+  glassBorderWidth: 2,
   glassShadow: `${TOKENS_A.glassShadow}, inset 0 1px 0 rgba(255,255,255,0.9)`,
   compositionScale: 1.0,
 };
@@ -49,7 +49,7 @@ export const MATERIAL_B: MaterialTokens = {
   glassFill: "rgba(255,255,255,0.86)",
   // refined thin border: crisper edge, still 1px, still cool blue-gray
   glassBorder: "rgba(128,146,192,0.62)",
-  glassBorderWidth: 1,
+  glassBorderWidth: 2,
   // softer, deeper lift
   glassShadow: "0 26px 72px rgba(71,91,140,0.18), inset 0 1px 0 rgba(255,255,255,0.95)",
   compositionScale: 1.0,
