@@ -22,24 +22,24 @@
 
 import React from "react";
 import { Sequence } from "remotion";
-import { LightCanvas, GlassCard, Kicker } from "../light/primitives";
+import { LightCanvas, GlassCard, Kicker } from "../../light/primitives";
 import {
   HeroTypography, HeroNumber, ThesisComposition, ClosingComposition,
   ImageryGlassOverlay, RealWorldImagery,
-} from "../light/editorial";
-import { LineChartStory, BarChart, AreaChartStory, DonutChart, ComparisonBars } from "../light/charts";
-import { TwoSidedComparison, CausalDiagram, BeforeAfter, CausalLoop, Timeline, FlowDiagram } from "../light/explain";
+} from "../../light/editorial";
+import { LineChartStory, BarChart, AreaChartStory, DonutChart, ComparisonBars } from "../../light/charts";
+import { TwoSidedComparison, CausalDiagram, BeforeAfter, CausalLoop, Timeline, FlowDiagram } from "../../light/explain";
 import {
   MetricGrid, Dashboard, PortfolioCardStack, RankedTable,
   GlassNotification, FeatureIconSystem,
-} from "../light/ui";
-import { resolveVisualModeAuthority, SemanticEvidence } from "../light/select";
-import { buildEvidence } from "../light/evidence";
+} from "../../light/ui";
+import { resolveVisualModeAuthority, SemanticEvidence } from "../../light/select";
+import { buildEvidence } from "../../light/evidence";
 // Re-export: ChainTest imports buildEvidence from here (R-3 moved it to ./light/evidence).
 export { buildEvidence };
-import { toLocalMilestone, legacyImpactProps, CompiledEvent, VisualEventMilestone } from "../light/milestone";
-import { useMaterial } from "../light/materialTheme";
-import { resolveScale } from "../light/compositionScale";
+import { toLocalMilestone, legacyImpactProps, CompiledEvent, VisualEventMilestone } from "../../light/milestone";
+import { useMaterial } from "../../light/materialTheme";
+import { resolveScale } from "../../light/compositionScale";
 
 import beatDoc from "./data/beat_timeline.json";
 import eventsDoc from "./data/events.json";

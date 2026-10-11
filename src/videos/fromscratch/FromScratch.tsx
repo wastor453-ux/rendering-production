@@ -5,7 +5,7 @@
 
 import React from "react";
 import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame } from "remotion";
-import beatDoc from "../compiled_fromscratch/beat_timeline.json";
+import beatDoc from "../../compiled_fromscratch/beat_timeline.json";
 
 const FPS = 30;
 

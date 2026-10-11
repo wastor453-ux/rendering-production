@@ -7,10 +7,10 @@
 // PayloadValidator. Do not copy these values into production.
 import React from "react";
 import { Sequence, useCurrentFrame } from "remotion";
-import { LightCanvas, GlassCard, Kicker } from "../light/primitives";
-import { HeroTypography, HeroNumber, ThesisComposition, ClosingComposition } from "../light/editorial";
-import { LineChartStory, BarChart } from "../light/charts";
-import { TwoSidedComparison, CausalDiagram } from "../light/explain";
+import { LightCanvas, GlassCard, Kicker } from "../../light/primitives";
+import { HeroTypography, HeroNumber, ThesisComposition, ClosingComposition } from "../../light/editorial";
+import { LineChartStory, BarChart } from "../../light/charts";
+import { TwoSidedComparison, CausalDiagram } from "../../light/explain";
 
 // FIXTURE DATA (B-11): Synthetic illustrative values for visual proof.
 // NOT production data. Production uses PayloadValidator.
