@@ -1014,20 +1014,23 @@ jobs:
         # stages require assemble success, so a failed gate stops the chain.
         # run_id = canonical job_identity (mixed-run assembly rejected).
         # with_audio=false is a supported mode: mixed_audio not required then.
+        env:
+          WITH_AUDIO_INPUT: ${{ inputs.with_audio }}
+          VO_FILE_INPUT: ${{ inputs.vo_file }}
         run: |
           set -euo pipefail
           JOB_ID="${{ needs.plan.outputs.job_identity }}"
           LEDGER="/tmp/ledger/chunk-ledger-${JOB_ID}.json"
           REG="/tmp/pipeline_registry.json"
           python3 .github/scripts/pipeline_check.py \
-            --define "with_audio=${{ inputs.with_audio }}" \
+            --define "with_audio=${WITH_AUDIO_INPUT}" \
             --registry "${REG}" --run-id "${JOB_ID}"
           python3 .github/scripts/pipeline_check.py \
             --register "chunk_ledger=${LEDGER}" \
             --registry "${REG}" --run-id "${JOB_ID}" --kind json
-          if [ "${{ inputs.with_audio }}" = "true" ] && [ -n "${{ inputs.vo_file }}" ]; then
+          if [ "${WITH_AUDIO_INPUT}" = "true" ] && [ -n "${VO_FILE_INPUT}" ]; then
             python3 .github/scripts/pipeline_check.py \
-              --register "mixed_audio=${{ inputs.vo_file }}" \
+              --register "mixed_audio=${VO_FILE_INPUT}" \
               --registry "${REG}" --run-id "${JOB_ID}" --kind media
           fi
           python3 .github/scripts/pipeline_check.py \
