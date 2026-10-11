@@ -81,6 +81,11 @@ on:
       # selection with generation-fingerprint validation, not filename
       # matching. Do NOT use `gh run rerun --failed`: recovery uses a new
       # workflow_dispatch with its own canonical execution identity.
+    sfx_asset_map_file:
+      description: 'Path to SFX asset map JSON (event_id -> A1 filename, pipeline input). If empty or missing, sfx-mix fails closed.'
+      required: false
+      type: string
+      default: ''
 
 env:
   NODE_VERSION: '24.20.0'
