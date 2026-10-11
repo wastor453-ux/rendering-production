@@ -1,0 +1,22 @@
+{
+  "events": [
+    {
+      "event_id": "e2e_test1",
+      "beat_id": "b1",
+      "phrase": "e2e test",
+      "visual_impact_frame": 30
+    },
+    {
+      "event_id": "e2e_test2",
+      "beat_id": "b1",
+      "phrase": "e2e test",
+      "visual_impact_frame": 60
+    },
+    {
+      "event_id": "e2e_test3",
+      "beat_id": "b2",
+      "phrase": "e2e test",
+      "visual_impact_frame": 90
+    }
+  ]
+}
