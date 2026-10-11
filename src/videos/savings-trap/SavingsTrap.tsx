@@ -26,16 +26,17 @@ interface Beat {
 }
 
 function BeatRenderer({ beat }: { beat: Beat }) {
-  const frame = useCurrentFrame();
-  const localFrame = frame - Math.floor(beat.start_time * FPS);
+  // Components use useCurrentFrame() internally - no frame prop needed.
+  // HeroTypography needs lines: string[] (not text: string)
+  // ComparisonBars needs left/right as nested objects (not flat props)
+  const lines = beat.text.split("\n").filter(Boolean);
 
   switch (beat.visual_mode) {
     case "hero_typography":
       return (
         <LightCanvas>
           <GlassCard>
-            {beat.kicker && <Kicker>{beat.kicker}</Kicker>}
-            <HeroTypography text={beat.text} frame={localFrame} />
+            <HeroTypography kicker={beat.kicker ?? ""} lines={lines.length ? lines : [beat.text]} />
           </GlassCard>
         </LightCanvas>
       );
@@ -43,9 +44,8 @@ function BeatRenderer({ beat }: { beat: Beat }) {
       return (
         <LightCanvas>
           <GlassCard>
-            {beat.kicker && <Kicker>{beat.kicker}</Kicker>}
-            <HeroNumber value={beat.number ?? 0} suffix="%" frame={localFrame} />
-            <HeroTypography text={beat.text} frame={localFrame} />
+            <HeroNumber value={beat.number ?? 0} suffix="%" />
+            <HeroTypography kicker={beat.kicker ?? ""} lines={lines.length ? lines : [beat.text]} />
           </GlassCard>
         </LightCanvas>
       );
@@ -53,13 +53,9 @@ function BeatRenderer({ beat }: { beat: Beat }) {
       return (
         <LightCanvas>
           <GlassCard>
-            {beat.kicker && <Kicker>{beat.kicker}</Kicker>}
             <ComparisonBars
-              leftLabel="$10K Today"
-              leftValue={100}
-              rightLabel="$10K in 10Y"
-              rightValue={73}
-              frame={localFrame}
+              left={{ label: "$10K Today", value: 100 }}
+              right={{ label: "$10K in 10Y", value: 73 }}
             />
           </GlassCard>
         </LightCanvas>
@@ -68,11 +64,7 @@ function BeatRenderer({ beat }: { beat: Beat }) {
       return (
         <LightCanvas>
           <GlassCard>
-            {beat.kicker && <Kicker>{beat.kicker}</Kicker>}
-            <LineChartStory
-              data={[100, 97, 94, 91, 88, 85, 82, 79, 76, 73]}
-              frame={localFrame}
-            />
+            <LineChartStory data={[100, 97, 94, 91, 88, 85, 82, 79, 76, 73]} />
           </GlassCard>
         </LightCanvas>
       );
@@ -80,7 +72,7 @@ function BeatRenderer({ beat }: { beat: Beat }) {
       return (
         <LightCanvas>
           <GlassCard>
-            <HeroTypography text={beat.text} frame={localFrame} />
+            <HeroTypography kicker={beat.kicker ?? ""} lines={[beat.text]} />
           </GlassCard>
         </LightCanvas>
       );
