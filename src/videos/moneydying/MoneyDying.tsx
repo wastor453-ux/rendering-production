@@ -4,7 +4,7 @@ import { MD1Hook } from "./MD1Hook";
 import { MD2Math } from "./MD2Math";
 import { MD3Why } from "./MD3Why";
 import { MD4Takeaway } from "./MD4Takeaway";
-import { T } from "../light/tokens";
+import { T } from "../../light/tokens";
 
 export const FPS = 30;
 

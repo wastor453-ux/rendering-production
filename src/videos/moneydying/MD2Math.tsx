@@ -1,8 +1,8 @@
 import React from "react";
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
-import { LightCanvas, GlassCard, Label } from "../light/primitives";
-import { AreaChart } from "../light/charts";
-import { T } from "../light/tokens";
+import { LightCanvas, GlassCard, Label } from "../../light/primitives";
+import { AreaChart } from "../../light/charts";
+import { T } from "../../light/tokens";
 
 const CLAMP = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const expo = Easing.bezier(0.16, 1, 0.3, 1);

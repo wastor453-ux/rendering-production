@@ -1,8 +1,8 @@
 import React from "react";
 import { AbsoluteFill, Easing, interpolate, Sequence, useCurrentFrame } from "remotion";
-import { LightCanvas } from "../light/primitives";
-import { HeroTypography } from "../light/editorial";
-import { T } from "../light/tokens";
+import { LightCanvas } from "../../light/primitives";
+import { HeroTypography } from "../../light/editorial";
+import { T } from "../../light/tokens";
 
 /**
  * MD3 — Why it works (495f / 15.5s). Three toasts, then the punchline.

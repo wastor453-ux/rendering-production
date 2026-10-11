@@ -1,8 +1,8 @@
 import React from "react";
 import { AbsoluteFill, Easing, interpolate, Sequence, useCurrentFrame } from "remotion";
-import { LightCanvas, GlassCard } from "../light/primitives";
-import { HeroTypography } from "../light/editorial";
-import { T } from "../light/tokens";
+import { LightCanvas, GlassCard } from "../../light/primitives";
+import { HeroTypography } from "../../light/editorial";
+import { T } from "../../light/tokens";
 
 const CLAMP = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const expo = Easing.bezier(0.16, 1, 0.3, 1);

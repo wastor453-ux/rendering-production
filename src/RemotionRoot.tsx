@@ -2,7 +2,7 @@ import React from "react";
 import { Composition } from "remotion";
 // DARK BRAIN REMOVED 2026-10-10: DemoVideo, StyleRefs, InflationRef retired (used src/theme.ts dark neon system)
 // See _retired/dark-brain/ for archived files.
-import { MoneyDyingVideo, MD_TOTAL, FPS as MD_FPS } from "./moneydying/MoneyDying";
+import { MoneyDyingVideo, MD_TOTAL, FPS as MD_FPS } from "./videos/moneydying/MoneyDying";
 import { VisualShowcase, SHOWCASE_TOTAL } from "./light/Showcase";
 import { FinanceProof, PROOF_TOTAL } from "./videos/finance-proof/FinanceProof";
 import { ProductionBeats, PRODUCTION_TOTAL } from "./videos/production-beats/ProductionBeats";
