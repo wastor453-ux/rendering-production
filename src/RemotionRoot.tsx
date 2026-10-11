@@ -8,7 +8,6 @@ import { FinanceProof, PROOF_TOTAL } from "./FinanceProof";
 import { ProductionBeats, PRODUCTION_TOTAL } from "./ProductionBeats";
 import { FromScratch } from "./FromScratch";
 import { FromScratchLight, FROMSCRATCH_LIGHT_TOTAL, FROMSCRATCH_LIGHT_FPS } from "./FromScratchLight";
-import { P3Rehearsal, P3_TOTAL } from "./P3Rehearsal";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -57,15 +56,7 @@ export const RemotionRoot: React.FC = () => {
         width={1920}
         height={1080}
       />
-      <Composition
-        id="P3Rehearsal"
-        component={P3Rehearsal}
-        durationInFrames={P3_TOTAL}
-        fps={30}
-        width={1920}
-        height={1080}
-      />
-      <Composition
+<Composition
         id="VisualShowcase"
         component={VisualShowcase}
         durationInFrames={SHOWCASE_TOTAL}

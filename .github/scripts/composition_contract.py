@@ -55,10 +55,6 @@ COMPOSITIONS = {
                           total_frames=2709,
                           exemption=None),
     # --- rehearsal ----------------------------------------------------------
-    "P3Rehearsal":   dict(role="rehearsal", brain="required", timeline="compiled_beats",
-                          tokens="design_tokens", audio="none", qa="verify_render",
-                          total_frames=2463,
-                          exemption=None),
     # --- calibration --------------------------------------------------------
     # --- demo / fixtures ----------------------------------------------------
     "FinanceProof":  dict(role="demo", brain="exempt", timeline="fixed", tokens="legacy",
