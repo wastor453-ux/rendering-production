@@ -229,21 +229,11 @@ jobs:
           # Use python instead of bc (bc may not be installed)
           VIDEO_DUR=$(python3 -c "print(($END_FRAME - $START_FRAME + 1) / $FPS)")
           echo "Video duration: ${VIDEO_DUR}s"
-          # P4.4: VO may be built on-runner from hb_p1..hb_p7 in assemble job.
-          # If not present here, verify the parts exist.
+          # VO is a pipeline input. If the file does not exist, fail closed.
+          # (No video-specific part handling.)
           if [ ! -f "$VO_FILE" ]; then
-            if [[ "$VO_FILE" == *"vo_housingbroke.wav" ]]; then
-              echo "VO not yet built, checking parts..."
-              for i in 1 2 3 4 5 6 7; do
-                [ -f "public/audio/hb_p${i}.wav" ] || {
-                  echo "FATAL: VO part missing: public/audio/hb_p${i}.wav" >&2
-                  exit 1
-                }
-              done
-              echo "All 7 VO parts present, will be concatenated in assemble job"
-              # Skip duration check (parts validated individually below)
-              echo "VO parts OK, skipping duration guard"
-              exit 0
+            echo "FATAL: VO file not found: $VO_FILE" >&2
+            exit 1
             else
               echo "FATAL: VO file not found: $VO_FILE" >&2
               exit 1
@@ -1122,8 +1112,8 @@ jobs:
           echo "video assembled: /tmp/master_video.mp4"
 
       - name: Build concatenated VO (if needed)
-        # P4.4: If the VO file doesn't exist (e.g. vo_housingbroke.wav built
-        # from parts), concatenate hb_p1..hb_p7 on the runner.
+        # If the VO file was not provided as a single file, this step is skipped.
+        # (VO assembly from parts is not part of the generic pipeline.)
         if: inputs.with_audio
         env:
           VO_FILE: ${{ inputs.vo_file }}
