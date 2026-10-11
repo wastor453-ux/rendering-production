@@ -57,6 +57,9 @@ class TestA1Canonical(unittest.TestCase):
             '8cf48d70358dda8e3d2391beeb8edf0a5945f29feecd28bdc5796b60bff2e539')
 
     def test_all_manifest_files_exist_and_hash_match(self):
+        # Audio files live in local workspace; skipped on hosted.
+        if not os.path.isdir(os.path.join(CRACKIT, 'A1_sfx')):
+            self.skipTest("A1 audio files not present (hosted runner)")
         bad = []
         for a in self.manifest['assets']:
             p = os.path.join(CRACKIT, 'A1_sfx', a['rel_path'])
