@@ -181,7 +181,7 @@ jobs:
           PY
           echo "--- S11 without completions -> FAIL ---"
           python3 .github/scripts/pipeline_check.py \
-            --require-completions \
+            --define "require_completions=1" \
             --registry /tmp/gatefix/rs11.json --run-id s11test
           python3 .github/scripts/pipeline_check.py \
             --register "final_mix=/tmp/gatefix/final_mix.wav" \
