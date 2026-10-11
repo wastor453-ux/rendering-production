@@ -234,10 +234,6 @@ jobs:
           if [ ! -f "$VO_FILE" ]; then
             echo "FATAL: VO file not found: $VO_FILE" >&2
             exit 1
-            else
-              echo "FATAL: VO file not found: $VO_FILE" >&2
-              exit 1
-            fi
           fi
           # Check for LFS pointer
           if head -c 100 "$VO_FILE" | grep -q "version https://git-lfs.github.com"; then
