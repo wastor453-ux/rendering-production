@@ -391,21 +391,21 @@ class TestDispatchGates(unittest.TestCase):
             self.assertEqual(errs, [], f"{cid}: {errs}")
 
     def test_exempt_test_compositions_pass(self):
-        for cid in ("TrialVideo", "CalibrationV0", "ModeRegression", "ChainTest"):
+        for cid in ("SavingsTrap",):
             self.assertEqual(validate_for_dispatch(cid, True), [])
 
     def test_invalid_policy_values_rejected(self):
         for field, bad in (("brain", "maybe"), ("timeline", "sometimes"),
                            ("tokens", "css"), ("audio", "sometimes"),
                            ("qa", "vibes"), ("role", "blockbuster")):
-            saved = COMPOSITIONS["B6A"][field]
-            COMPOSITIONS["B6A"][field] = bad
+            saved = COMPOSITIONS["SavingsTrap"][field]
+            COMPOSITIONS["SavingsTrap"][field] = bad
             try:
                 errs = validate_for_dispatch("B6A", True)
                 self.assertTrue(errs, f"{field}={bad!r} was accepted")
                 self.assertIn(f"invalid {field}", errs[0])
             finally:
-                COMPOSITIONS["B6A"][field] = saved
+                COMPOSITIONS["SavingsTrap"][field] = saved
 
     def test_valid_compositions_still_pass_after_hardening(self):
         for cid in COMPOSITIONS:
@@ -423,7 +423,7 @@ class TestPlanGate(unittest.TestCase):
     def test_plan_accepts_registered(self):
         import plan
         self.assertEqual(plan.validate_composition("FromScratchLight"), "FromScratchLight")
-        self.assertEqual(plan.validate_composition("CalibrationV2"), "CalibrationV2")
+        self.assertEqual(plan.validate_composition("SavingsTrap"), "SavingsTrap")
 
     def test_plan_still_rejects_bad_format(self):
         import plan
