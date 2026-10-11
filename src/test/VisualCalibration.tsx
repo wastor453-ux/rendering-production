@@ -13,7 +13,7 @@
 import React from "react";
 import { AbsoluteFill } from "remotion";
 import { MaterialProvider, MATERIAL_B, MaterialTokens } from "../light/materialTheme";
-import { H1Hook } from "../housing/H1Hook";
+// H1Hook removed: src/housing/ was deleted; using placeholder for material variant test
 
 // V0: Baseline (current MATERIAL_B, unchanged)
 const V0: MaterialTokens = { ...MATERIAL_B };
@@ -49,7 +49,7 @@ const V3: MaterialTokens = {
 const VariantFrame: React.FC<{ material: MaterialTokens }> = ({ material }) => (
   <AbsoluteFill>
     <MaterialProvider material={material}>
-      <H1Hook />
+      <div style={{ padding: 40, color: "#333", fontSize: 32 }}>Material variant placeholder (H1Hook removed)</div>
     </MaterialProvider>
   </AbsoluteFill>
 );
