@@ -1406,16 +1406,21 @@ jobs:
         run: |
           set -euo pipefail
           # sfx-chain-test uses synthetic inline events (no video files).
+          # Schema: event_id, beat_id, phrase, visual_impact_frame.
+          # Asset map: event_id -> A1 filename.
           cat > /tmp/test_events.json <<'EOF'
           {"events": [
-            {"id": "test1", "frame": 0, "asset": "ui-swipe-25", "peak_frame": 12, "cut_frame": 24, "volume_db": -4},
-            {"id": "test2", "frame": 30, "asset": "ui-tick-09", "peak_frame": 36, "cut_frame": 42, "volume_db": -6}
+            {"event_id": "test1", "beat_id": "b1", "phrase": "test", "visual_impact_frame": 30},
+            {"event_id": "test2", "beat_id": "b1", "phrase": "test", "visual_impact_frame": 60}
           ]}
+          EOF
+          cat > /tmp/test_assetmap.json <<'EOF'
+          {"test1": "ready-coin-04.wav", "test2": "ready-coin-05.wav"}
           EOF
           python3 tools/compile_sfx_triggers_a1.py \
             --events /tmp/test_events.json \
             --manifest assets/a1/MANIFEST.json \
-            --asset-map assets/a1/MANIFEST.json \
+            --asset-map /tmp/test_assetmap.json \
             --out /tmp/sfx_triggers.json --fps 30
           python3 -c "import json; t=json.load(open('/tmp/sfx_triggers.json')); print('triggers:', len(t['triggers']))"
 
