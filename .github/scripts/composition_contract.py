@@ -18,7 +18,7 @@ Enforcement rules (used by validate_dispatch.py and plan.py):
   3. brain == "exempt" requires a non-empty exemption reason -> FAILS.
   4. audio == "embedded" with with_audio=false -> FAILS. A master labeled
      video_only must never contain an audio stream (verified defect E1:
-     HousingBroke.tsx and MoneyDying.tsx embed <Audio>).
+     MoneyDying.tsx embeds <Audio>; any production composition may).
 
 This module has no dependencies beyond the standard library so it can be
 imported by dispatch-time scripts and by CI consistency tests.
@@ -320,16 +320,22 @@ def self_test():
     # No duplicate declarations in the registry source.
     assert check_no_duplicate_ids() == []
     # Embedded-audio + with_audio=false is rejected (defect E1).
-    errs = validate_for_dispatch("HousingBroke", False)
-    assert errs and "video_only" in errs[0]
-    # Production cannot claim exemption.
-    saved = COMPOSITIONS["HousingBroke"]["exemption"]
-    COMPOSITIONS["HousingBroke"]["exemption"] = "bogus"
+    # Test every production composition with embedded audio (pipeline, not video-specific).
+    embedded = [c for c, v in COMPOSITIONS.items()
+                if v.get("role") == "production" and v.get("audio") == "embedded"]
+    assert embedded, "no embedded-audio production compositions"
+    for cid in embedded:
+        errs = validate_for_dispatch(cid, False)
+        assert errs and "video_only" in errs[0], f"{cid}: {errs}"
+    # Production cannot claim exemption (test any production composition).
+    pcid = next(c for c, v in COMPOSITIONS.items() if v.get("role") == "production")
+    saved = COMPOSITIONS[pcid]["exemption"]
+    COMPOSITIONS[pcid]["exemption"] = "bogus"
     try:
-        errs = validate_for_dispatch("HousingBroke", True)
+        errs = validate_for_dispatch(pcid, True)
         assert errs and "cannot" in errs[0] and "exempt" in errs[0]
     finally:
-        COMPOSITIONS["HousingBroke"]["exemption"] = saved
+        COMPOSITIONS[pcid]["exemption"] = saved
     # All registered ids pass with_audio=true.
     for cid in COMPOSITIONS:
         errs = validate_for_dispatch(cid, True)
