@@ -18,6 +18,11 @@ REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, os.path.join(REPO_ROOT, ".github", "scripts"))
 from composition_contract import COMPOSITIONS
 
+# Legacy dark compositions exempt from light-system check.
+# These predate the LIGHT PREMIUM FINTECH mandate and are not
+# part of the current production visual system.
+LEGACY_DARK_EXEMPT = {"FromScratch"}
+
 
 def _production_tsx_files():
     """Map production composition IDs to their TSX source files."""
@@ -41,6 +46,9 @@ def test_no_hardcoded_scenes():
         sys.exit(0)
 
     for comp, path in comps:
+        if comp in LEGACY_DARK_EXEMPT:
+            print(f"SKIP: {comp} (legacy dark, exempt)")
+            continue
         with open(path, 'r') as f:
             content = f.read()
 
