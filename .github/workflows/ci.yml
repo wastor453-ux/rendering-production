@@ -35,8 +35,8 @@ jobs:
           python3 -m unittest discover -s tests > /tmp/test_out.txt 2>&1 || true
           grep -E "^(OK|FAILED|Ran)" /tmp/test_out.txt | head -5
           if grep -q "^FAILED" /tmp/test_out.txt; then
-            echo "=== FAILURES ==="
-            grep -B2 -A10 "^FAIL:" /tmp/test_out.txt | head -60
+            echo "=== FAILURES & ERRORS ==="
+            grep -B2 -A10 "^\(FAIL\|ERROR\):" /tmp/test_out.txt | head -80
             exit 1
           fi
 
