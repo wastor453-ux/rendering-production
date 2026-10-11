@@ -4,19 +4,22 @@
       "event_id": "e2e_test1",
       "beat_id": "b1",
       "phrase": "e2e test",
-      "visual_impact_frame": 30
+      "visual_impact_frame": 30,
+      "asset": "ready-click-04.wav"
     },
     {
       "event_id": "e2e_test2",
       "beat_id": "b1",
       "phrase": "e2e test",
-      "visual_impact_frame": 60
+      "visual_impact_frame": 60,
+      "asset": "ready-click-05.wav"
     },
     {
       "event_id": "e2e_test3",
       "beat_id": "b2",
       "phrase": "e2e test",
-      "visual_impact_frame": 90
+      "visual_impact_frame": 90,
+      "asset": "ready-click-04.wav"
     }
   ]
 }
