@@ -1216,7 +1216,7 @@ jobs:
           fi
 
           [ -f "src/compiled_p3/beat_timeline.json" ] || { echo "beats missing"; exit 1; }
-          [ -f "src/compiled_p3/events.json" ] || { echo "events missing"; exit 1; }
+          [ -f "src/videos/production-beats/data/events.json" ] || { echo "events missing"; exit 1; }
 
           # Record final stage + checksum in job manifest (P5)
           MASTER_SHA=$(sha256sum /tmp/master.mp4 | cut -d' ' -f1)

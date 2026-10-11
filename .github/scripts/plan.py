@@ -298,7 +298,7 @@ def main() -> int:
 
     # --- Payload checksums ---
     payload_shas = {}
-    payload_dir = os.path.join(repo_root, "src/compiled_p3/payloads")
+    payload_dir = os.path.join(repo_root, "src/videos/production-beats/data/payloads")
     if os.path.isdir(payload_dir):
         for f in sorted(os.listdir(payload_dir)):
             if f.endswith(".json"):
