@@ -17,8 +17,11 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CRACKIT = os.path.expanduser("~/workspace/crackit")
 SKILLS = os.path.expanduser("~/workspace/skills/sound-design")
 
-# Required canonical files (from SYSTEM_RULE_CHAIN.md §0 precedence)
-REQUIRED_FILES = [
+# Local-dev files (not in repo; skipped on hosted runners without the workspace)
+def _has_local_workspace():
+    return os.path.isdir(CRACKIT)
+
+LOCAL_REQUIRED_FILES = [
     (os.path.expanduser("~/AGENTS.md"), "AGENTS.md"),
     (os.path.join(CRACKIT, "SYSTEM_RULE_CHAIN.md"), "rule chain"),
     (os.path.join(CRACKIT, "EDITORIAL_BRAIN.md"), "editorial brain"),
@@ -34,6 +37,11 @@ REQUIRED_FILES = [
     (os.path.join(SKILLS, "SKILL.md"), "sound skill"),
     (os.path.join(CRACKIT, "skill-playbook.md"), "playbook"),
     (os.path.join(CRACKIT, "PIPELINE.md"), "pipeline"),
+]
+
+# Required canonical files (from SYSTEM_RULE_CHAIN.md §0 precedence)
+# Repo-relative only (portable). Local-workspace files are in LOCAL_REQUIRED_FILES.
+REQUIRED_FILES = [
     # Demo-video enforcement
     (os.path.join(REPO, ".production-state", "PRE_RENDER_CHECKLIST.md"), "checklist"),
     (os.path.join(REPO, ".production-state", "RULE_TRACEABILITY_AUDIT.md"), "traceability"),
@@ -53,6 +61,16 @@ class TestFileCompleteness(unittest.TestCase):
             if not os.path.exists(path):
                 missing.append(f"{name}: {path}")
         self.assertEqual(missing, [], f"Missing required files: {missing}")
+
+    def test_local_workspace_files_exist(self):
+        # Local-dev brain files; skipped on hosted runners without the workspace.
+        if not _has_local_workspace():
+            self.skipTest("local workspace ~/workspace/crackit not present (hosted runner)")
+        missing = []
+        for path, name in LOCAL_REQUIRED_FILES:
+            if not os.path.exists(path):
+                missing.append(f"{name}: {path}")
+        self.assertEqual(missing, [], f"Missing local files: {missing}")
 
     def test_missing_file_causes_failure(self):
         # Isolated fixture: create a temp dir mimicking the required structure
@@ -124,6 +142,8 @@ class TestSafetyConstraints(unittest.TestCase):
         master = os.path.expanduser(
             "~/workspace/your_files/Q004_HousingBroke_master.mp4"
         )
+        if not os.path.isdir(os.path.expanduser("~/workspace")):
+            self.skipTest("local workspace not present (hosted runner); Q004 master is a local artifact")
         self.assertTrue(os.path.exists(master), "Q004 master must be preserved")
 
 

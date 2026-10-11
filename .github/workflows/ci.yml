@@ -108,38 +108,56 @@ jobs:
             echo "FAIL: S9 accepted incomplete ledger"; exit 1
           fi
           echo "PASS: S9 rejected incomplete ledger (exit 2)"
-      - name: S9 with_audio=false passes without audio
+      - name: S9 audio modes (regression)
         run: |
           set -euo pipefail
-          # minimal valid ledger: use the shape build_ledger produces
+          # Valid isolated ledger fixture (chunk-ledger kind, complete)
           python3 - <<'PY'
           import json
-          ledger = {"chunks": [{"index": 0, "frames": "0-599", "file": "c0.mp4"}],
-                    "run_id": "aud1", "complete": True}
-          json.dump(ledger, open("/tmp/gatefix/ledger.json", "w"))
+          ledger = {"kind": "chunk-ledger", "expected_chunks": 2, "ok_chunks": 2,
+                    "complete": True,
+                    "entries": [{"chunk_id": 0, "status": "rendered_ok"},
+                                {"chunk_id": 1, "status": "rendered_ok"}]}
+          json.dump(ledger, open("/tmp/gatefix/ledger_ok.json", "w"))
+          # tiny valid WAV (44-byte header + silence) as mixed_audio fixture
+          import wave, struct
+          w = wave.open("/tmp/gatefix/audio.wav", "w")
+          w.setnchannels(1); w.setsampwidth(2); w.setframerate(44100)
+          w.writeframes(struct.pack("<100h", *([0]*100)))
+          w.close()
           PY
+          echo "--- case 1: with_audio=false, no mixed_audio -> PASS ---"
           python3 .github/scripts/pipeline_check.py \
             --define "with_audio=false" \
-            --registry /tmp/gatefix/r5.json --run-id aud1
+            --registry /tmp/gatefix/ra1.json --run-id aud1
           python3 .github/scripts/pipeline_check.py \
-            --register "chunk_ledger=/tmp/gatefix/ledger.json" \
-            --registry /tmp/gatefix/r5.json --run-id aud1 --kind json
-          # S9 requires ledger completeness; this fixture tests the audio-conditional
-          # (mixed_audio not required when with_audio=false)
+            --register "chunk_ledger=/tmp/gatefix/ledger_ok.json" \
+            --registry /tmp/gatefix/ra1.json --run-id aud1 --kind json
           python3 .github/scripts/pipeline_check.py \
-            --stage S9_assembly --registry /tmp/gatefix/r5.json --run-id aud1 \
-            && echo "PASS: with_audio=false path" || echo "INFO: ledger shape needs production fixture"
-      - name: S9 with_audio=true requires audio
-        run: |
-          set -euo pipefail
+            --stage S9_assembly --registry /tmp/gatefix/ra1.json --run-id aud1
+          echo "PASS: with_audio=false accepted without mixed_audio"
+          echo "--- case 2: with_audio=true, no mixed_audio -> FAIL (exit 2) ---"
           python3 .github/scripts/pipeline_check.py \
             --define "with_audio=true" \
-            --registry /tmp/gatefix/r6.json --run-id aud2
+            --registry /tmp/gatefix/ra2.json --run-id aud2
           python3 .github/scripts/pipeline_check.py \
-            --register "chunk_ledger=/tmp/gatefix/ledger.json" \
-            --registry /tmp/gatefix/r6.json --run-id aud2 --kind json
+            --register "chunk_ledger=/tmp/gatefix/ledger_ok.json" \
+            --registry /tmp/gatefix/ra2.json --run-id aud2 --kind json
           if python3 .github/scripts/pipeline_check.py \
-            --stage S9_assembly --registry /tmp/gatefix/r6.json --run-id aud2; then
+            --stage S9_assembly --registry /tmp/gatefix/ra2.json --run-id aud2; then
             echo "FAIL: S9 accepted audio mode without mixed_audio"; exit 1
           fi
-          echo "PASS: S9 requires mixed_audio when with_audio=true (exit 2)"
+          echo "PASS: with_audio=true rejected without mixed_audio (exit 2)"
+          echo "--- case 3: with_audio=true, valid mixed_audio -> PASS ---"
+          python3 .github/scripts/pipeline_check.py \
+            --define "with_audio=true" \
+            --registry /tmp/gatefix/ra3.json --run-id aud3
+          python3 .github/scripts/pipeline_check.py \
+            --register "chunk_ledger=/tmp/gatefix/ledger_ok.json" \
+            --registry /tmp/gatefix/ra3.json --run-id aud3 --kind json
+          python3 .github/scripts/pipeline_check.py \
+            --register "mixed_audio=/tmp/gatefix/audio.wav" \
+            --registry /tmp/gatefix/ra3.json --run-id aud3 --kind media
+          python3 .github/scripts/pipeline_check.py \
+            --stage S9_assembly --registry /tmp/gatefix/ra3.json --run-id aud3
+          echo "PASS: with_audio=true accepted with valid mixed_audio"

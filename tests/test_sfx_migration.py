@@ -88,12 +88,18 @@ class TestA1Canonical(unittest.TestCase):
 
 
 class TestLegacyRetired(unittest.TestCase):
+    def _require_retired(self):
+        # Retired backups live in the local workspace; skipped on hosted runners.
+        if not os.path.isdir(RETIRED):
+            self.skipTest(f"retired backup dir not present (hosted runner): {RETIRED}")
+
     def test_old_manifest_not_in_active_path(self):
         self.assertFalse(
             os.path.isfile(os.path.join(CRACKIT, 'bench_manifest.premium.json')),
             "Retired bench manifest still in active path")
 
     def test_old_bench_files_not_in_active_path(self):
+        self._require_retired()
         # The 36 retired files must not exist under sfx-aejuice/bench/
         retired_manifest = os.path.join(RETIRED, 'bench_manifest.premium.json.RETIRED')
         self.assertTrue(os.path.isfile(retired_manifest), "Retired backup missing")
@@ -109,6 +115,7 @@ class TestLegacyRetired(unittest.TestCase):
         self.assertEqual(leaked, [], f"Retired files still in active path: {leaked}")
 
     def test_retired_backup_exists_and_labeled(self):
+        self._require_retired()
         self.assertTrue(os.path.isfile(os.path.join(RETIRED, 'README.md')))
         self.assertTrue(os.path.isdir(os.path.join(RETIRED, 'sfx-bench-36')))
         n = sum(len(files) for _, _, files in os.walk(os.path.join(RETIRED, 'sfx-bench-36')))
