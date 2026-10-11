@@ -1328,17 +1328,20 @@ jobs:
       - name: Compile SFX triggers (A1, peak timing)
         env:
           SFX_EVENTS_FILE: ${{ inputs.sfx_events_file }}
+          SFX_ASSET_MAP_FILE: ${{ inputs.sfx_asset_map_file }}
         run: |
           set -euo pipefail
           # tools/compile_sfx_triggers_a1.py: fail-closed on missing assets,
           # bad timing, or unknown A1 entries. Exits 2 on any violation.
-                    # SFX events are a PIPELINE INPUT (2026-10-11). No video-named files,
-          # no naming conventions. The dispatcher provides the events file path.
+                    # SFX events and asset map are PIPELINE INPUTS (2026-10-11).
+          # No video-named files, no naming conventions.
           # FAILS CLOSED if not provided or missing.
           SFX_EVENTS="$SFX_EVENTS_FILE"
-          SFX_MAP="assets/a1/MANIFEST.json"
+          SFX_MAP="$SFX_ASSET_MAP_FILE"
           [ -n "$SFX_EVENTS" ] || { echo "FATAL: sfx_events_file input not provided" >&2; exit 2; }
           [ -f "$SFX_EVENTS" ] || { echo "FATAL: SFX events not found: $SFX_EVENTS" >&2; exit 2; }
+          [ -n "$SFX_MAP" ] || { echo "FATAL: sfx_asset_map_file input not provided" >&2; exit 2; }
+          [ -f "$SFX_MAP" ] || { echo "FATAL: SFX asset map not found: $SFX_MAP" >&2; exit 2; }
           python3 tools/compile_sfx_triggers_a1.py \
             --events "$SFX_EVENTS" \
             --manifest assets/a1/MANIFEST.json \
