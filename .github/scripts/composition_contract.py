@@ -250,13 +250,13 @@ def self_test():
     assert errs and "not registered" in errs[0]
     assert get_total_frames("NoSuchVideo") is None
     # Invalid policy values are rejected.
-    saved = COMPOSITIONS["B6A"]["brain"]
-    COMPOSITIONS["B6A"]["brain"] = "maybe"
+    saved = COMPOSITIONS["SavingsTrap"]["brain"]
+    COMPOSITIONS["SavingsTrap"]["brain"] = "maybe"
     try:
-        errs = validate_for_dispatch("B6A", True)
+        errs = validate_for_dispatch("SavingsTrap", True)
         assert errs and "invalid brain" in errs[0], errs
     finally:
-        COMPOSITIONS["B6A"]["brain"] = saved
+        COMPOSITIONS["SavingsTrap"]["brain"] = saved
     # No duplicate declarations in the registry source.
     assert check_no_duplicate_ids() == []
     # Embedded-audio + with_audio=false is rejected (defect E1).
