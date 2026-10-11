@@ -39,7 +39,8 @@ class TestR008NoBypass(unittest.TestCase):
     def test_all_jobs_use_snapshot_script(self):
         """Each job that needs packages references install_snapshot.sh.
 
-        Job map (5 install sites):
+        Job map (6 production + 3 install-verify = 9 install sites):
+          plan          — Install ffmpeg (for audio guard ffprobe)
           render-chunk  — Install system deps (BROWSER_PACKAGES) + browser repair
           assemble      — Install ffmpeg (minimal)
           sfx-mix       — Install ffmpeg (minimal)
@@ -54,9 +55,9 @@ class TestR008NoBypass(unittest.TestCase):
             if "bash .github/scripts/install_snapshot.sh" in line
             and not line.strip().startswith("#")
         ]
-        # 5 production sites + 3 install-verify sites
-        self.assertEqual(len(invocations), 8,
-                         f"Expected exactly 8 install sites, found {len(invocations)}")
+        # 5 production sites + 3 install-verify sites + 1 plan-job ffmpeg (audio guard)
+        self.assertEqual(len(invocations), 9,
+                         f"Expected exactly 9 install sites, found {len(invocations)}")
 
         # Map each invocation to its workflow job
         job_headers = [(i, line.strip().rstrip(":"))

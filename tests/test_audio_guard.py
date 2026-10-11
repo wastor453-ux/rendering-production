@@ -59,8 +59,11 @@ if [ -z "$VO_DUR" ]; then
   echo "FATAL: ffprobe failed to read duration from $VO_FILE" >&2
   exit 1
 fi
-if ! python3 -c "float('$VO_DUR')" 2>/dev/null; then
+if ! VO_DUR="$VO_DUR" python3 -c \
+  "import math, os; d=float(os.environ['VO_DUR']); assert math.isfinite(d) and d >= 0" \
+  2>/dev/null; then
   echo "FATAL: ffprobe returned invalid duration '$VO_DUR' for $VO_FILE" >&2
+  echo "  (must be a finite, non-negative number)" >&2
   exit 1
 fi
 echo "VO duration: ${{VO_DUR}}s ($VO_FILE)"
@@ -118,6 +121,37 @@ class TestAudioGuard(unittest.TestCase):
         self.assertEqual(code, 1, "Invalid duration must be fatal")
         self.assertIn("FATAL", err)
         self.assertIn("invalid duration", err)
+
+    def test_fatal_for_infinite_duration(self):
+        # ffprobe returns inf → FATAL, exit 1
+        for val in ["inf", "-inf", "Infinity"]:
+            code, out, err = run_guard(181.6, val)
+            self.assertEqual(code, 1, f"Infinite duration '{val}' must be fatal")
+            self.assertIn("FATAL", err)
+
+    def test_fatal_for_nan_duration(self):
+        # ffprobe returns nan → FATAL, exit 1
+        code, out, err = run_guard(181.6, "nan")
+        self.assertEqual(code, 1, "NaN duration must be fatal")
+        self.assertIn("FATAL", err)
+
+    def test_fatal_for_negative_duration(self):
+        # ffprobe returns negative → FATAL, exit 1
+        code, out, err = run_guard(181.6, "-5.0")
+        self.assertEqual(code, 1, "Negative duration must be fatal")
+        self.assertIn("FATAL", err)
+
+    def test_accept_zero_duration(self):
+        # Zero is technically valid (edge case, not from real ffprobe)
+        code, out, err = run_guard(0, "0")
+        self.assertEqual(code, 0, f"Zero duration should be valid. stderr: {err}")
+
+    def test_fatal_for_missing_ffprobe(self):
+        # Simulate ffprobe command not found (exit 127 scenario)
+        # The guard's empty-check catches this since VO_DUR would be empty
+        code, out, err = run_guard(181.6, "")
+        self.assertEqual(code, 1, "Missing ffprobe (empty output) must be fatal")
+        self.assertIn("ffprobe failed", err)
 
     def test_fatal_for_lfs_pointer(self):
         # LFS pointer file → FATAL, exit 1

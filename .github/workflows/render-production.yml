@@ -162,6 +162,16 @@ jobs:
           OUTPUT_DIR: /tmp/job
           REPO_ROOT: .
 
+      - name: Install ffmpeg (for audio guard)
+        run: |
+          set -euo pipefail
+          # R-008: ffmpeg install goes through the pinned snapshot.
+          # The audio duration guard needs ffprobe (exit 127 without it).
+          if ! python3 .github/scripts/preflight.py --for assemble >/dev/null 2>&1; then
+            bash .github/scripts/install_snapshot.sh ffmpeg
+          fi
+          command -v ffprobe >/dev/null || { echo "FATAL: ffprobe not available after install" >&2; exit 1; }
+
       - name: P4.4 audio duration guard
         # Fail fast if VO is too short for the video duration.
         # This caused 5 Q-004 assembly failures (placeholder 83s VO vs 771s video).
@@ -216,8 +226,13 @@ jobs:
             echo "  ffprobe available: $(command -v ffprobe >/dev/null && echo yes || echo no)" >&2
             exit 1
           fi
-          if ! python3 -c "float('$VO_DUR')" 2>/dev/null; then
+          # Validate: must be finite, non-negative numeric (rejects inf/nan/negative)
+          # Uses env var (not interpolation) to avoid shell injection
+          if ! VO_DUR="$VO_DUR" python3 -c \
+            "import math, os; d=float(os.environ['VO_DUR']); assert math.isfinite(d) and d >= 0" \
+            2>/dev/null; then
             echo "FATAL: ffprobe returned invalid duration '$VO_DUR' for $VO_FILE" >&2
+            echo "  (must be a finite, non-negative number)" >&2
             exit 1
           fi
           echo "VO duration: ${VO_DUR}s ($VO_FILE)"
