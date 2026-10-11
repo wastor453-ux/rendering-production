@@ -298,8 +298,13 @@ class TestBeatSchemaSync(unittest.TestCase):
 class TestRegistryCompleteness(unittest.TestCase):
     """The contract must cover exactly the 24 compositions RemotionRoot registers."""
 
-    def test_24_registered(self):
-        self.assertEqual(len(COMPOSITIONS), 24)
+    def test_registry_matches_remotion_root(self):
+        # Registry must match RemotionRoot.tsx (no hardcoded count).
+        # Catches additions/removals without brittle number pinning.
+        root_ids = remotion_root_ids(REPO_ROOT)
+        self.assertEqual(set(COMPOSITIONS), set(root_ids),
+                         f"mismatch: registry-only={set(COMPOSITIONS)-set(root_ids)}, "
+                         f"root-only={set(root_ids)-set(COMPOSITIONS)}")
 
     def test_matches_remotion_root(self):
         root_ids = remotion_root_ids(REPO_ROOT)
