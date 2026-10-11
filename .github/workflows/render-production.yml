@@ -1120,16 +1120,10 @@ jobs:
         run: |
           set -euo pipefail
           if [ ! -f "$VO_FILE" ]; then
-            echo "VO file not found: $VO_FILE, trying hb_p1..hb_p7..."
-            for i in 1 2 3 4 5 6 7; do
-              [ -f "public/audio/hb_p${i}.wav" ] || { echo "FATAL: hb_p${i}.wav missing"; exit 1; }
-              echo "file '$PWD/public/audio/hb_p${i}.wav'"
-            done > /tmp/vo_concat.txt
-            ffmpeg -y -f concat -safe 0 -i /tmp/vo_concat.txt -c copy "$VO_FILE"
-            echo "Concatenated VO built: $VO_FILE"
-          else
-            echo "Using VO file: $VO_FILE"
+            echo "FATAL: VO file not found: $VO_FILE" >&2
+            exit 1
           fi
+          echo "Using VO file: $VO_FILE"
 
       - name: Mux canonical audio (VO + music bed)
         if: inputs.with_audio
@@ -1151,7 +1145,7 @@ jobs:
           # Q3 (2026-10-11): VO alignment is explicit via VO_OFFSET_SECONDS.
           # The muxer seeks to VO_OFFSET (not to START_FRAME/30). For a
           # full-composition VO rendered from frame 0, offset=0. For a
-          # segment-specific VO (e.g. hb_p3.wav for an H3-only render),
+          # segment-specific VO (e.g. beat3.wav for a beat-3-only render),
           # offset=0. For a full-composition VO with a partial render,
           # offset=start_frame/30.
           DUR_S=$(echo "scale=3; ($END_FRAME - $START_FRAME + 1) / $FPS" | bc)
