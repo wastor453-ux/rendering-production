@@ -1412,10 +1412,12 @@ jobs:
       - name: Compile triggers
         run: |
           set -euo pipefail
+          # sfx-chain-test uses FromScratchLight events (the canonical test fixture;
+          # HousingBroke test data was deleted 2026-10-11 per Hamza)
           python3 tools/compile_sfx_triggers_a1.py \
-            --events "$SFX_EVENTS" \
+            --events assets/sfx/fromscratchlight_events.json \
             --manifest assets/a1/MANIFEST.json \
-            --asset-map "$SFX_MAP" \
+            --asset-map assets/sfx/fromscratchlight_assetmap.json \
             --out /tmp/sfx_triggers.json --fps 30
           python3 -c "import json; t=json.load(open('/tmp/sfx_triggers.json')); print('triggers:', len(t['triggers']))"
 
