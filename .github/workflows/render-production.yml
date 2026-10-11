@@ -1415,7 +1415,7 @@ jobs:
           ]}
           EOF
           cat > /tmp/test_assetmap.json <<'EOF'
-          {"test1": "ready-coin-04.wav", "test2": "ready-coin-05.wav"}
+          {"test1": "ready-click-04.wav", "test2": "ready-click-05.wav"}
           EOF
           python3 tools/compile_sfx_triggers_a1.py \
             --events /tmp/test_events.json \
