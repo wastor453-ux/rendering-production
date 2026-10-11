@@ -44,7 +44,7 @@ on:
         required: false
         default: 'public/audio/bed.mp3'
       vo_offset_seconds:
-        description: 'Q3 (2026-10-11): position in seconds within vo_file where the rendered range audio begins. 0 = vo_file starts at the rendered range (segment-specific VO, e.g. hb_p3.wav for an H3-only render). Set to start_frame/30 when vo_file is a full-composition VO but only a later range is rendered. Must be >= 0. The muxer seeks to this offset (not to start_frame/30).'
+        description: 'Q3 (2026-10-11): position in seconds within vo_file where the rendered range audio begins. 0 = vo_file starts at the rendered range (segment-specific VO, e.g. beat3.wav for a beat-3-only render). Set to start_frame/30 when vo_file is a full-composition VO but only a later range is rendered. Must be >= 0. The muxer seeks to this offset (not to start_frame/30).'
         required: false
         default: '0'
       resume_from_run_id:
