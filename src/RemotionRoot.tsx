@@ -4,9 +4,9 @@ import { Composition } from "remotion";
 // See _retired/dark-brain/ for archived files.
 import { MoneyDyingVideo, MD_TOTAL, FPS as MD_FPS } from "./moneydying/MoneyDying";
 import { VisualShowcase, SHOWCASE_TOTAL } from "./light/Showcase";
-import { FinanceProof, PROOF_TOTAL } from "./FinanceProof";
+import { FinanceProof, PROOF_TOTAL } from "./videos/finance-proof/FinanceProof";
 import { ProductionBeats, PRODUCTION_TOTAL } from "./ProductionBeats";
-import { FromScratch } from "./FromScratch";
+import { FromScratch } from "./videos/fromscratch/FromScratch";
 import { FromScratchLight, FROMSCRATCH_LIGHT_TOTAL, FROMSCRATCH_LIGHT_FPS } from "./videos/fromscratch-light/FromScratchLight";
 
 export const RemotionRoot: React.FC = () => {
