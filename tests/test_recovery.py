@@ -54,7 +54,7 @@ def base_inputs(**overrides):
     d = {
         "source_sha": "abc123" * 10 + "ab",  # 62 chars
         "workflow_content_sha": "def456" * 10 + "cd",
-        "composition": "P3Rehearsal",
+        "composition": "SavingsTrap",
         "width": 1920, "height": 1080, "fps": 30,
         "start_frame": 0, "end_frame": 299, "chunk_size": 100,
         "codec": "h264", "crf": "18", "with_audio": True,

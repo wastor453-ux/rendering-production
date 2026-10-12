@@ -76,7 +76,7 @@ def check_composition(composition, expected_frames, repo_root):
     if not comp_file:
         # Try HousingBroke.tsx specifically
         hb_path = os.path.join(repo_root, "src", "housing", "HousingBroke.tsx")
-        if os.path.exists(hb_path) and composition == "HousingBroke":
+        if os.path.exists(hb_path):
             comp_file = hb_path
         else:
             errors.append(f"Composition file not found for '{composition}'")

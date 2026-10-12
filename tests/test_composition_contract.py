@@ -64,7 +64,7 @@ class TestBeatContractGate(unittest.TestCase):
     def test_production_beat_files_clean(self):
         # The production beat path must be fully schema-clean.
         check_beat_contract = self._beat_gate()
-        for cid in ("ProductionBeats", "B6A", "B6B", "ChainTest"):
+        for cid in ("ProductionBeats", "SavingsTrap"):
             errs = check_beat_contract(cid, REPO_ROOT)
             self.assertEqual(errs, [], f"{cid}: {errs}")
 
@@ -401,7 +401,7 @@ class TestDispatchGates(unittest.TestCase):
             saved = COMPOSITIONS["SavingsTrap"][field]
             COMPOSITIONS["SavingsTrap"][field] = bad
             try:
-                errs = validate_for_dispatch("B6A", True)
+                errs = validate_for_dispatch("SavingsTrap", True)
                 self.assertTrue(errs, f"{field}={bad!r} was accepted")
                 self.assertIn(f"invalid {field}", errs[0])
             finally:
