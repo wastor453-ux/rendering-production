@@ -162,6 +162,7 @@ jobs:
           GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
           GITHUB_SHA: ${{ github.sha }}
           COMPOSITION: ${{ inputs.composition }}
+          VIDEO_ID: ${{ inputs.video_id }}
           START_FRAME: ${{ inputs.start_frame }}
           END_FRAME: ${{ inputs.end_frame }}
           CHUNK_SIZE: ${{ inputs.chunk_size }}
