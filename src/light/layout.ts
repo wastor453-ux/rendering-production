@@ -1,6 +1,6 @@
-// layout.ts — LAYOUT SYSTEM (VISUAL_BRAIN §10/§11)
+// layout.ts — LAYOUT SYSTEM (VISUAL_SYSTEM.md §10/§11)
 //
-// The brain demands: consistent grid rhythm, clear alignment axes,
+// The visual system requires: consistent grid rhythm, clear alignment axes,
 // left-aligned text when more natural, fixed card tiers.
 // This module is the single source of truth for scene layout.
 // Every scene MUST use these values — no ad-hoc widths or alignments.
@@ -32,7 +32,7 @@ export const PAGE = {
 } as const;
 
 /**
- * Text alignment law (VISUAL_BRAIN §10):
+ * Text alignment law (VISUAL_SYSTEM.md §10):
  * - Hero/claim text: LEFT aligned (per approved reference)
  * - Centered ONLY for: single hero numbers, closing thesis, symmetric comparisons
  * - Never center paragraphs of supporting copy
