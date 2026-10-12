@@ -226,7 +226,7 @@ function EventVisual({
       return (
         <div data-event-id={event.event_id} style={wrapperStyle}>
           <KPICard
-            label="Credit Score"
+            label={event.semantic_claim.replace(/_/g, " ")}
             value={event.on_screen_text}
             width={480}
           />
@@ -295,11 +295,10 @@ function EventVisual({
  *   - backgroundVariant: LightCanvas variant
  *
  * Usage:
- *   import timeline from "./data/event_timeline.json";
- *   import voAudio from "./audio/vo.wav";
- *   export const MyVideo = () => (
- *     <EventDrivenVideo timeline={timeline} audioSrc={voAudio} />
- *   );
+ *   Pass the video's timeline data and audio source as props:
+ *   <EventDrivenVideo timeline={timelineData} audioSrc={audioPath} />
+ *   where timelineData comes from the video's data/event_timeline.json
+ *   and audioPath comes from the video's audio/vo.wav
  */
 export function EventDrivenVideo({
   timeline,
