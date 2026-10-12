@@ -335,38 +335,7 @@ jobs:
             # PROVENANCE CHECK: Verify timeline was generated from current inputs
             # Prevents stale timelines from passing validation
             echo "Verifying timeline provenance..."
-            python3 << 'PYEOF2'
-            import json, hashlib, sys
-            # Get video_id from manifest
-            with open("src/videos/_active/manifest.json") as f:
-                video_id = json.load(f)["videoId"]
-            timeline_path = "src/videos/_active/timeline.json"
-            alignment_path = f"src/videos/{video_id}/data/alignment.json"
-            patterns_path = f"src/videos/{video_id}/data/semantic_patterns.json"
-            def file_hash(p):
-                h = hashlib.sha256()
-                with open(p, "rb") as f:
-                    for c in iter(lambda: f.read(8192), b""):
-                        h.update(c)
-                return h.hexdigest()
-            with open(timeline_path) as f:
-                tl = json.load(f)
-            prov = tl.get("provenance", {})
-            if not prov:
-                print("FATAL: Timeline has no provenance info (stale format)", file=sys.stderr)
-                sys.exit(1)
-            current_align = file_hash(alignment_path)
-            current_pat = file_hash(patterns_path)
-            if prov.get("alignment_sha256") != current_align:
-                print(f"FATAL: Timeline alignment hash mismatch (stale timeline)", file=sys.stderr)
-                print(f"  Expected: {current_align[:16]}...", file=sys.stderr)
-                print(f"  Found: {prov.get('alignment_sha256', 'none')[:16]}...", file=sys.stderr)
-                sys.exit(1)
-            if prov.get("patterns_sha256") != current_pat:
-                print(f"FATAL: Timeline patterns hash mismatch (stale timeline)", file=sys.stderr)
-                sys.exit(1)
-            print("✅ Timeline provenance verified (fresh)")
-            PYEOF2
+            python3 .github/scripts/verify_provenance.py
             echo "Validating typography..."
             python3 tools/validate_typography.py --strict
             echo "✅ Event timeline validation passed"
