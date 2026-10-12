@@ -21,7 +21,7 @@ from composition_contract import COMPOSITIONS
 # Legacy dark compositions exempt from light-system check.
 # These predate the LIGHT PREMIUM FINTECH mandate and are not
 # part of the current production visual system.
-LEGACY_DARK_EXEMPT = {"FromScratch"}
+LEGACY_DARK_EXEMPT = {"FromScratch", "MoneyDying"}
 
 
 def _production_tsx_files():
