@@ -1,0 +1,302 @@
+{
+ "video": "credit-score",
+ "note": "Video-specific semantic patterns. Pipeline tool is generic; this file is the video's own data.",
+ "patterns": [
+  {
+   "pattern": "controls\\ your\\ financial\\ life",
+   "visual_type": "hero_statement",
+   "entrance": "kinetic_build",
+   "progression": "word_highlight",
+   "exit": "morph_to_next",
+   "concept": "core_thesis"
+  },
+  {
+   "pattern": "approved\\ for\\ a\\ mortgage",
+   "visual_type": "impact_card",
+   "entrance": "pop_in",
+   "progression": "hold_with_pulse",
+   "exit": "fade_with_next",
+   "concept": "housing_impact"
+  },
+  {
+   "pattern": "what\\ interest\\ rate\\ you\\ pay",
+   "visual_type": "impact_card",
+   "entrance": "pop_in",
+   "progression": "hold_with_pulse",
+   "exit": "fade_with_next",
+   "concept": "rate_impact"
+  },
+  {
+   "pattern": "whether\\ you\\ get\\ that\\ apartment",
+   "visual_type": "impact_card",
+   "entrance": "pop_in",
+   "progression": "hold_with_pulse",
+   "exit": "fade_with_next",
+   "concept": "rental_impact"
+  },
+  {
+   "pattern": "no\\ idea\\ how\\ it's\\ calculated",
+   "visual_type": "question_card",
+   "entrance": "slide_in",
+   "progression": "hold",
+   "exit": "wipe_to_factors",
+   "concept": "knowledge_gap"
+  },
+  {
+   "pattern": "what\\ moves\\ your\\ score",
+   "visual_type": "promise_card",
+   "entrance": "slide_in",
+   "progression": "hold",
+   "exit": "wipe_to_factors",
+   "concept": "video_promise"
+  },
+  {
+   "pattern": "five\\ factors",
+   "visual_type": "section_title",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "morph_to_chart",
+   "concept": "factors_intro"
+  },
+  {
+   "pattern": "payment\\ history\\ is\\ 35",
+   "visual_type": "donut_segment",
+   "entrance": "donut_reveal",
+   "progression": "label_count_up",
+   "exit": "persist_dimmed",
+   "concept": "factor_payment"
+  },
+  {
+   "pattern": "pay\\ every\\ bill\\ on\\ time",
+   "visual_type": "advice_callout",
+   "entrance": "callout_in",
+   "progression": "hold",
+   "exit": "fade",
+   "concept": "advice_payment"
+  },
+  {
+   "pattern": "amounts\\ owed\\ is\\ 30",
+   "visual_type": "donut_segment",
+   "entrance": "donut_reveal",
+   "progression": "label_count_up",
+   "exit": "persist_dimmed",
+   "concept": "factor_amounts"
+  },
+  {
+   "pattern": "below\\ 30\\ %\\ of\\ your\\ limits",
+   "visual_type": "gauge_visual",
+   "entrance": "gauge_fill",
+   "progression": "marker_to_ideal",
+   "exit": "fade",
+   "concept": "advice_utilization"
+  },
+  {
+   "pattern": "length\\ of\\ credit\\ history\\ is\\ 15",
+   "visual_type": "donut_segment",
+   "entrance": "donut_reveal",
+   "progression": "label_count_up",
+   "exit": "persist_dimmed",
+   "concept": "factor_length"
+  },
+  {
+   "pattern": "don't\\ close\\ your\\ oldest\\ card",
+   "visual_type": "advice_callout",
+   "entrance": "callout_in",
+   "progression": "hold",
+   "exit": "fade",
+   "concept": "advice_length"
+  },
+  {
+   "pattern": "new\\ credit\\ is\\ 10",
+   "visual_type": "donut_segment",
+   "entrance": "donut_reveal",
+   "progression": "label_count_up",
+   "exit": "persist_dimmed",
+   "concept": "factor_new"
+  },
+  {
+   "pattern": "hard\\ inquiry\\ dings",
+   "visual_type": "advice_callout",
+   "entrance": "callout_in",
+   "progression": "hold",
+   "exit": "morph_to_example",
+   "concept": "advice_inquiry"
+  },
+  {
+   "pattern": "see\\ this\\ in\\ action",
+   "visual_type": "transition_card",
+   "entrance": "wipe_in",
+   "progression": "hold",
+   "exit": "morph_to_story",
+   "concept": "example_transition"
+  },
+  {
+   "pattern": "sarah\\ has\\ a\\ 720",
+   "visual_type": "score_card",
+   "entrance": "slide_in",
+   "progression": "count_up_to_value",
+   "exit": "persist",
+   "concept": "sarah_start"
+  },
+  {
+   "pattern": "misses\\ one\\ credit\\ card\\ payment\\ by\\ 30\\ days",
+   "visual_type": "timeline_event",
+   "entrance": "marker_drop",
+   "progression": "score_count_down",
+   "exit": "persist",
+   "concept": "sarah_miss"
+  },
+  {
+   "pattern": "drops\\ to\\ 680",
+   "visual_type": "score_delta",
+   "entrance": "delta_badge",
+   "progression": "arrow_draw",
+   "exit": "persist",
+   "concept": "sarah_drop1"
+  },
+  {
+   "pattern": "maxes\\ out\\ a\\ card\\ at\\ 90\\ %\\ utilization\\.\\ down\\ another\\ 30\\ points\\ to\\ 650,\\ but\\ then\\ she\\ pays\\ everything\\ on\\ time\\ for\\ six\\ months\\ and\\ drops\\ utilization\\ to\\ 15%\\.\\ her\\ score\\ rebounds\\ to\\ 710\\.\\ here\\ are\\ five\\ proven\\ ways\\ to\\ boost\\ your\\ score\\.\\ one,\\ set\\ up\\ auto\\ pay\\ for\\ minimum\\ payments\\.\\ never\\ miss\\ a\\ due\\ date\\ again\\.\\ two,\\ pay\\ down\\ balances\\ to\\ under\\ 30\\ %\\ than\\ under\\ 10\\ %\\ for\\ maximum\\ impact\\.\\ three,\\ don't\\ close\\ old\\ cards\\.\\ the\\ age\\ helps\\ your\\ length\\ of\\ history\\.\\ four,\\ limit\\ hard\\ inquiries\\ to\\ one\\ or\\ two\\ per\\ year\\.\\ five,\\ check\\ your\\ reports\\ free\\ at\\ annualcreditreport\\ \\.com\\ and\\ dispute\\ any\\ errors\\.\\ one\\ in\\ five\\ reports\\ has\\ a\\ mistake\\.\\ your\\ action\\ plan\\ starts\\ today\\.\\ step\\ one,\\ pull\\ your\\ free\\ credit\\ reports\\ and\\ check\\ for\\ errors\\.\\ step\\ two,\\ set\\ up\\ auto\\ pay\\ on\\ every\\ account\\ right\\ now\\.\\ step\\ three,\\ pick\\ your\\ highest\\ utilization",
+   "visual_type": "timeline_event",
+   "entrance": "marker_drop",
+   "progression": "score_count_down",
+   "exit": "persist",
+   "concept": "sarah_max"
+  },
+  {
+   "pattern": "another\\ 30\\ points\\ to\\ 650",
+   "visual_type": "score_delta",
+   "entrance": "delta_badge",
+   "progression": "arrow_draw",
+   "exit": "persist",
+   "concept": "sarah_drop2"
+  },
+  {
+   "pattern": "pays\\ everything\\ on\\ time\\ for\\ six\\ months",
+   "visual_type": "timeline_event_positive",
+   "entrance": "marker_drop_positive",
+   "progression": "progress_bar_fill",
+   "exit": "persist",
+   "concept": "sarah_recovery_actions"
+  },
+  {
+   "pattern": "rebounds\\ to\\ 710",
+   "visual_type": "score_delta",
+   "entrance": "delta_badge_positive",
+   "progression": "arrow_draw_up",
+   "exit": "morph_to_tips",
+   "concept": "sarah_recovery"
+  },
+  {
+   "pattern": "five\\ proven\\ ways",
+   "visual_type": "section_title",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "morph_to_list",
+   "concept": "tips_intro"
+  },
+  {
+   "pattern": "one,\\ set\\ up\\ auto\\ pay",
+   "visual_type": "tip_card",
+   "entrance": "slide_in",
+   "progression": "check_reveal",
+   "exit": "persist_dimmed",
+   "concept": "tip_autopay"
+  },
+  {
+   "pattern": "two,\\ pay\\ down\\ balances",
+   "visual_type": "tip_card",
+   "entrance": "slide_in",
+   "progression": "check_reveal",
+   "exit": "persist_dimmed",
+   "concept": "tip_balances"
+  },
+  {
+   "pattern": "three,\\ don't\\ close\\ old\\ cards",
+   "visual_type": "tip_card",
+   "entrance": "slide_in",
+   "progression": "check_reveal",
+   "exit": "persist_dimmed",
+   "concept": "tip_keep_cards"
+  },
+  {
+   "pattern": "four,\\ limit\\ hard\\ inquiries",
+   "visual_type": "tip_card",
+   "entrance": "slide_in",
+   "progression": "check_reveal",
+   "exit": "persist_dimmed",
+   "concept": "tip_inquiries"
+  },
+  {
+   "pattern": "five,\\ check\\ your\\ reports",
+   "visual_type": "tip_card",
+   "entrance": "slide_in",
+   "progression": "check_reveal",
+   "exit": "morph_to_action",
+   "concept": "tip_reports"
+  },
+  {
+   "pattern": "one\\ in\\ five\\ reports\\ has\\ a\\ mistake",
+   "visual_type": "stat_callout",
+   "entrance": "pop_in",
+   "progression": "hold",
+   "exit": "fade",
+   "concept": "tip_stat"
+  },
+  {
+   "pattern": "action\\ plan\\ starts\\ today",
+   "visual_type": "section_title",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "morph_to_steps",
+   "concept": "action_intro"
+  },
+  {
+   "pattern": "step\\ one,\\ pull\\ your\\ free\\ credit\\ reports",
+   "visual_type": "action_card",
+   "entrance": "slide_in",
+   "progression": "icon_animate",
+   "exit": "persist",
+   "concept": "step_reports"
+  },
+  {
+   "pattern": "step\\ two,\\ set\\ up\\ auto\\ pay",
+   "visual_type": "action_card",
+   "entrance": "slide_in",
+   "progression": "icon_animate",
+   "exit": "persist",
+   "concept": "step_autopay"
+  },
+  {
+   "pattern": "step\\ three,\\ pick\\ your\\ highest\\ utilization",
+   "visual_type": "action_card",
+   "entrance": "slide_in",
+   "progression": "icon_animate",
+   "exit": "persist",
+   "concept": "step_payment"
+  },
+  {
+   "pattern": "reward\\ consistency\\ over\\ time",
+   "visual_type": "principle_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "morph_to_close",
+   "concept": "principle_consistency"
+  },
+  {
+   "pattern": "small\\ actions\\ repeated\\ monthly",
+   "visual_type": "encouragement_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "morph_to_close",
+   "concept": "encouragement"
+  },
+  {
+   "pattern": "future\\ self\\ getting\\ approved\\ at\\ the\\ best\\ rates\\ will\\ thank\\ you\\.\\ your\\ future\\ self\\ getting\\ approved\\ at\\ the\\ best\\ rates\\ will\\ thank\\ you",
+   "visual_type": "closing_card",
+   "entrance": "fade_in",
+   "progression": "hold_to_end",
+   "exit": "end_card",
+   "concept": "closing"
+  }
+ ]
+}
