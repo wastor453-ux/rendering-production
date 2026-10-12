@@ -166,9 +166,15 @@ def main():
         all_errors.extend(errors)
         all_warnings.extend(warnings)
     
-    # Report warnings
-    for w in all_warnings:
-        print(f"⚠️  WARNING: {w}")
+    # Report warnings as FAILURES (fail-closed per audit)
+    # A warning about static output is not acceptable — it must block release
+    if all_warnings:
+        print("\n❌ ANIMATION QUALITY GATE FAILED (warnings are failures):")
+        for w in all_warnings:
+            print(f"  • {w}")
+        print("\nThese indicate static or low-quality output.")
+        print("Fix the root cause: add real frame-based animation.")
+        return 1
     
     # Fail on errors
     if all_errors:
