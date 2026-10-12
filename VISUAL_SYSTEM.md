@@ -192,3 +192,15 @@ Keep charts, figures, and text crisp in the foreground.
 
 *Version 2.0 • 2026-10-12 • From Hamza's A-to-Z Visual Package*
 *Visual DNA only — no HousingBroke texts, names, or branding*
+
+---
+
+## RELATED FILES (v2.0 — all cross-linked)
+
+- **VISUAL_INDEX.md** — Master index of all rules files
+- **VISUAL_SYSTEM.md** — Production rules (colors, backgrounds, panels, motion)
+- **VISUAL_ESSENTIALS.md** — 46-item component catalog from 4 images
+- **TIMING_RULES.md** — Retention timing (max 4s static, 9 changes per beat)
+- **REPLACEMENT_RULES.md** — Step-by-step rebuild specifications
+
+*All files reference v2.0 only. No old visual styles.*
