@@ -77,7 +77,7 @@ class TestBeatContractGate(unittest.TestCase):
         # silently. (ChainTest's t3 was repaired 2026-10-10 from the
         # arbitration record and is now clean.)
         check_beat_contract = self._beat_gate()
-        p3 = check_beat_contract("P3Rehearsal", REPO_ROOT)
+        p3 = check_beat_contract("SavingsTrap", REPO_ROOT)
         # 2026-10-10: schema includes 'allocation'/'emphasize' and the 6
         # music_intensity values are authored (Hamza's consolidation order).
         # P3Rehearsal is fully schema-clean; the pin now guards against drift.
@@ -150,7 +150,7 @@ class TestBeatContractGate(unittest.TestCase):
         check_beat_contract = self._beat_gate()
         buf = _io.StringIO()
         with _contextlib.redirect_stdout(buf):
-            p3 = check_beat_contract("P3Rehearsal", REPO_ROOT)
+            p3 = check_beat_contract("SavingsTrap", REPO_ROOT)
         self.assertIn("Provenance: src/videos/production-beats/data/beat_timeline.json "
                       "[checked-in]", buf.getvalue())
         self.assertEqual(len(p3), 0, f"P3Rehearsal violations changed: {p3}")
