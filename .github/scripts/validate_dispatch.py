@@ -134,6 +134,8 @@ BEAT_FILES = {
     "CompoundInterest": "src/videos/compound-interest/data/beat_timeline.json",
     "EmergencyFund": "src/videos/emergency-fund/data/beat_timeline.json",
     "BudgetRule": "src/videos/budget-rule/data/beat_timeline.json",
+    "CreditScore": "src/videos/credit-score/data/beat_timeline.json",
+    "EmergencyShield": "src/videos/emergency-shield/data/beat_timeline.json",
 }
 
 
