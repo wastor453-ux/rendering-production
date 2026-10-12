@@ -93,11 +93,11 @@ class TestBeatContractGate(unittest.TestCase):
         tmp = _tempfile.mkdtemp()
         try:
             repo = os.path.join(tmp, "demo-video")
-            os.makedirs(os.path.join(repo, "src", "compiled"))
+            os.makedirs(os.path.join(repo, "src", "videos", "production-beats", "data"))
             _shutil.copy(schema,
                          os.path.join(tmp, "EDITORIAL_BEAT_SCHEMA.json"))
             bad = {"beats": [{"beat_id": "bad1", "semantic_role": "trend"}]}
-            with open(os.path.join(repo, "src", "compiled",
+            with open(os.path.join(repo, "src", "videos", "production-beats", "data",
                                    "beat_timeline.json"), "w") as f:
                 _json.dump(bad, f)
             errs = check_beat_contract("ProductionBeats", repo)
