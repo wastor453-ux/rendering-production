@@ -11,12 +11,12 @@ Catches the problems that caused 5 failed Q-004 attempts BEFORE dispatching:
 
 Usage:
     python3 .github/scripts/validate_dispatch.py \
-        --composition HousingBroke \
+        --composition <CompositionName> \
         --start-frame 0 \
-        --end-frame 23150 \
+        --end-frame <N> \
         --chunk-size 600 \
-        --vo-file public/audio/vo_housingbroke.wav \
-        --bed-file public/audio/bed.mp3 \
+        --vo-file <path/to/vo.wav> \
+        --bed-file <path/to/bed.mp3> \
         --with-audio true
 
 Exit 0 = safe to dispatch. Exit 1 = problems found (listed).
@@ -74,13 +74,8 @@ def check_composition(composition, expected_frames, repo_root):
             break
     
     if not comp_file:
-        # Try HousingBroke.tsx specifically
-        hb_path = os.path.join(repo_root, "src", "housing", "HousingBroke.tsx")
-        if os.path.exists(hb_path):
-            comp_file = hb_path
-        else:
-            errors.append(f"Composition file not found for '{composition}'")
-            return errors
+        errors.append(f"Composition file not found for '{composition}'")
+        return errors
     
     print(f"  Composition file: {comp_file}")
     
