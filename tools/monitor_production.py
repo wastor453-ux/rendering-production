@@ -102,7 +102,7 @@ def auto_recover(state, classification):
         payload = {
             "ref": "p4-4-complete-preproduction-closure",
             "inputs": {
-                "composition": state.get("composition", "HousingBroke"),
+                "composition": state.get("composition"),
                 "label": f"Auto-recovery: reassemble run {run_id}",
                 "start_frame": "0", "end_frame": "23150",
                 "reassemble_bypass_fingerprint": True,
