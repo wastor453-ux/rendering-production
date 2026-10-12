@@ -4,6 +4,7 @@ import { SavingsTrap, SAVINGSTRAP_TOTAL } from "./videos/savings-trap/SavingsTra
 import { CompoundInterest } from "./videos/compound-interest/CompoundInterest";
 import { EmergencyFund } from "./videos/emergency-fund/EmergencyFund";
 import { BudgetRule } from "./videos/budget-rule/BudgetRule";
+import { EmergencyShield } from "./videos/emergency-shield/EmergencyShield";
 // DARK BRAIN REMOVED 2026-10-10: DemoVideo, StyleRefs, InflationRef retired (used src/theme.ts dark neon system)
 // See _retired/dark-brain/ for archived files.
 import { MoneyDyingVideo, MD_TOTAL, FPS as MD_FPS } from "./videos/moneydying/MoneyDying";
@@ -70,6 +71,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition id="CompoundInterest" component={CompoundInterest} durationInFrames={5400} fps={30} width={1920} height={1080} />
       <Composition id="EmergencyFund" component={EmergencyFund} durationInFrames={5400} fps={30} width={1920} height={1080} />
       <Composition id="BudgetRule" component={BudgetRule} durationInFrames={5400} fps={30} width={1920} height={1080} />
+      <Composition id="EmergencyShield" component={EmergencyShield} durationInFrames={3088} fps={30} width={1920} height={1080} />
     </>
   );
 };
