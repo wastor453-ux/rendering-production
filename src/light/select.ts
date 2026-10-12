@@ -177,3 +177,145 @@ export function resolveModeName(name: string): string {
   if (MODES.some((m) => m.id === name)) return name;
   return LEGACY_MAP[name] ?? "hero_typography";
 }
+
+
+// ============================================================================
+// BRAIN SYSTEM v2.0 — Visual Selection Engine
+// Decides WHICH visual/essential/animation goes WHERE
+// Updated 2026-10-12: Knows all 46 v2.0 essentials + timing rules
+// ============================================================================
+
+// V2.0 COMPONENT REGISTRY — maps semantic roles to new components
+export const V2_COMPONENTS = {
+  // UI Components (from components_v2.tsx)
+  kpi_card: "KPICard",                    // Large number + delta + sparkline
+  source_label: "SourceDateLabel",         // Source + date pill
+  chart_legend: "ChartLegend",            // Color dots + labels
+  annotation: "AnnotationCallout",        // Info box with pointer
+  ab_cards: "CompareABCARDS",            // A/B with "Better" badge
+  assumption_tag: "AssumptionTag",        // Pill tag
+  section_title: "SectionTitle",          // Lower third
+  checklist: "TakeawayChecklist",         // Green checkmarks
+  disclaimer: "DisclaimerStrip",          // Full-width legal
+
+  // Diagrams (from components_v2.tsx)
+  paycheck_flow: "PaycheckFlow",          // Income → expenses
+  mortgage_stack: "MortgageStack",        // P/I/T/I breakdown
+  rent_vs_buy: "RentVsBuy",              // Factor grid + VS
+  inflation_timeline: "InflationTimeline", // 3-stage timeline
+  fund_ladder: "FundLadder",             // 5-tier progression
+  calculator: "CalculatorCard",           // Inputs → results
+  risks_grid: "RisksGrid",               // 2×2 warnings
+  action_list: "ActionChecklist",         // Numbered steps
+
+  // Animations (from components_v2.tsx)
+  flow_arrows: "CashFlowArrows",          // Animated flow
+  debt_progress: "DebtProgress",         // Shrinking bar
+  timeline_marker: "TimelineMarker",     // Moving dot
+  highlight: "HighlightReveal",           // Spotlight
+} as const;
+
+// ANIMATION DECISION MAP — which animation for which scene type
+// From TIMING_RULES.md + reference images
+export const ANIMATION_MAP: Record<string, {
+  primary: string;      // Main animation
+  duration: [number, number]; // [min_frames, max_frames] at 30fps
+  secondary?: string;   // Follow-up animation
+  maxHold: number;      // Max seconds before next change
+}> = {
+  hook: {
+    primary: "typography_fade", duration: [12, 18],
+    secondary: "count_up", maxHold: 2,
+  },
+  problem: {
+    primary: "card_stagger", duration: [12, 24],
+    secondary: "highlight_pulse", maxHold: 3,
+  },
+  concept: {
+    primary: "icon_flow", duration: [15, 24],
+    secondary: "label_fade", maxHold: 3,
+  },
+  mechanism: {
+    primary: "flow_arrows", duration: [24, 36],
+    secondary: "node_highlight", maxHold: 3,
+  },
+  example: {
+    primary: "calculator_build", duration: [15, 24],
+    secondary: "result_reveal", maxHold: 4,
+  },
+  data_chart: {
+    primary: "line_draw", duration: [15, 30],
+    secondary: "endpoint_highlight", maxHold: 3,
+  },
+  comparison: {
+    primary: "ab_cards_slide", duration: [18, 24],
+    secondary: "badge_pop", maxHold: 3,
+  },
+  risks: {
+    primary: "grid_stagger", duration: [12, 24],
+    secondary: "icon_pulse", maxHold: 3,
+  },
+  actions: {
+    primary: "checklist_build", duration: [15, 30],
+    secondary: "number_pop", maxHold: 2,
+  },
+  close: {
+    primary: "takeaway_fade", duration: [18, 24],
+    maxHold: 3,
+  },
+};
+
+// TIMING ENFORCEMENT — from TIMING_RULES.md
+export const TIMING = {
+  MAX_STATIC_SECONDS: 4,        // NEVER exceed
+  BOREDOM_THRESHOLD: 7,          // Viewer leaves
+  MIN_CHANGES_PER_BEAT: 9,       // For 36s beat
+  FIRST_30S_SHOT_AVG: 1.77,      // Seconds per shot
+  ANIMATION_RANGE: [12, 36] as const, // Frames (0.4-1.2s)
+} as const;
+
+// VISUAL SELECTION — semantic role → v2.0 component
+export function selectV2Component(evidence: {
+  semantic_role?: string;
+  visual_verb?: string;
+  focal_object?: string;
+  comparison_state?: string;
+}): string {
+  const role = evidence.semantic_role || "";
+  const verb = evidence.visual_verb || "";
+
+  // Map semantic roles to v2.0 components
+  if (role === "comparison" || evidence.comparison_state === "A_vs_B") {
+    return V2_COMPONENTS.ab_cards;
+  }
+  if (role === "number" && verb.includes("count")) {
+    return V2_COMPONENTS.kpi_card;
+  }
+  if (verb.includes("calculate") || verb.includes("example")) {
+    return V2_COMPONENTS.calculator;
+  }
+  if (verb.includes("risk") || verb.includes("warning")) {
+    return V2_COMPONENTS.risks_grid;
+  }
+  if (verb.includes("step") || verb.includes("action")) {
+    return V2_COMPONENTS.action_list;
+  }
+  if (verb.includes("flow") || verb.includes("paycheck")) {
+    return V2_COMPONENTS.paycheck_flow;
+  }
+  if (focal_object?.includes("mortgage")) {
+    return V2_COMPONENTS.mortgage_stack;
+  }
+  if (verb.includes("timeline") || role === "timeline") {
+    return V2_COMPONENTS.timeline_marker;
+  }
+
+  // Default: KPI card for numbers, section title otherwise
+  return role === "number" ? V2_COMPONENTS.kpi_card : V2_COMPONENTS.section_title;
+}
+
+// BEAT PLANNER — ensures 9+ visual changes per 36s beat
+export function planBeatVisuals(beatDurationSeconds: number): number {
+  const minChanges = Math.ceil(beatDurationSeconds / TIMING.MAX_STATIC_SECONDS);
+  return Math.max(minChanges, 9); // Minimum 9 for 36s beat
+}
