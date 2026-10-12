@@ -62,9 +62,9 @@ def test_no_hardcoded_scenes():
         with open(path, 'r') as f:
             content = f.read()
 
-        # Check 1: Must import from ./light/
-        if 'from "./light/' not in content and "from './light/" not in content:
-            violations.append(f"{comp}: does not import from ./light/ components")
+        # Check 1: Must import from light/ (./light/ or ../../light/ for videos/)
+        if '/light/' not in content:
+            violations.append(f"{comp}: does not import from light/ components")
 
         # Check 2: Must reference visual_mode
         if "visual_mode" not in content:
