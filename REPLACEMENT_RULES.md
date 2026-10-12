@@ -180,3 +180,15 @@ Font: Inter. NEVER mix fonts.
 - [ ] Trust strip: source/date/units on data visuals
 - [ ] Mobile: readable at 1080p, 16px minimum
 - [ ] No hardcoded old colors (#5368F7, peach, etc.)
+
+---
+
+## RELATED FILES (v2.0 — all cross-linked)
+
+- **VISUAL_INDEX.md** — Master index of all rules files
+- **VISUAL_SYSTEM.md** — Production rules (colors, backgrounds, panels, motion)
+- **VISUAL_ESSENTIALS.md** — 46-item component catalog from 4 images
+- **TIMING_RULES.md** — Retention timing (max 4s static, 9 changes per beat)
+- **REPLACEMENT_RULES.md** — Step-by-step rebuild specifications
+
+*All files reference v2.0 only. No old visual styles.*
