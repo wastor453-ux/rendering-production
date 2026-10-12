@@ -68,6 +68,10 @@ COMPOSITIONS = {
                           tokens="design_tokens", audio="none", qa="verify_render",
                           total_frames=5400,
                           exemption=None),
+    "EmergencyFund": dict(role="production", brain="required", timeline="compiled_beats",
+                          tokens="design_tokens", audio="none", qa="verify_render",
+                          total_frames=5400,
+                          exemption=None),
     # --- test ---------------------------------------------------------------
 }
 

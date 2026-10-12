@@ -25,6 +25,7 @@ LEGACY_NO_VO_EXEMPT = {
     "fromscratch-light",
     "savings-trap",
     "compound-interest",  # Pipeline testing - VO to be added
+    "emergency-fund",  # Pipeline testing - VO to be added
 }
 
 class TestVideoVoiceover(unittest.TestCase):
