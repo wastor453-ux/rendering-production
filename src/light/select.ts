@@ -1,4 +1,4 @@
-// STEP 9 — semantic visual selection (VISUAL_BRAIN §2, §5).
+// STEP 9 — semantic visual selection (VISUAL_SYSTEM.md §2, §5).
 // Never beat.kind -> template. Evaluate the semantic evidence, then select.
 import schema from "../visual_mode_schema.json";
 
@@ -163,7 +163,7 @@ export function resolveVisualModeAuthority(
   };
 }
 
-/** Legacy mode compatibility aliases (VISUAL_BRAIN §4). */
+/** Legacy mode compatibility aliases (VISUAL_SYSTEM.md §4). */
 export const LEGACY_MAP: Record<string, string> = {
   headline: "hero_typography",
   number: "hero_number",
