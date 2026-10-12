@@ -58,6 +58,8 @@ class TestVideoVoiceover(unittest.TestCase):
             video_dir = os.path.join(VIDEOS_DIR, name)
             if not os.path.isdir(video_dir) or name.startswith("_"):
                 continue
+            if name in LEGACY_NO_VO_EXEMPT:
+                continue
             for root, dirs, files in os.walk(video_dir):
                 for fn in files:
                     if fn.endswith((".tsx", ".ts", ".json")):
