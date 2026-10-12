@@ -103,7 +103,7 @@ CANONICAL = {
     "FromScratchLight": lambda: 2709,  # Math.round(90.3 * 30)
     "FinanceProof":     lambda: eval_static_total("src/videos/finance-proof/FinanceProof.tsx", "PROOF_TOTAL"),
     "SavingsTrap":      lambda: eval_static_total("src/videos/savings-trap/SavingsTrap.tsx",
-    "CompoundInterest": lambda: 5400, "SAVINGSTRAP_TOTAL"),
+    "CompoundInterest": lambda: 5400,
 }
 
 
