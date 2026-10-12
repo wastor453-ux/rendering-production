@@ -80,6 +80,10 @@ COMPOSITIONS = {
                           tokens="design_tokens", audio="embedded", qa="verify_render",
                           total_frames=3088,
                           exemption=None),
+    "CreditScore": dict(role="production", brain="required", timeline="compiled_beats",
+                          tokens="design_tokens", audio="embedded", qa="verify_render",
+                          total_frames=3379,
+                          exemption=None),
     # --- test ---------------------------------------------------------------
 }
 
