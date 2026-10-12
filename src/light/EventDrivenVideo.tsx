@@ -318,7 +318,7 @@ export function EventDrivenVideo({
 
   return (
     <AbsoluteFill>
-      <Audio src={audioSrc} />
+      {audioSrc ? <Audio src={audioSrc} /> : null}
       <LightCanvas variant={backgroundVariant as any}>
         {activeEvents.map((event) => (
           <EventVisual key={event.event_id} event={event} frame={frame} />
