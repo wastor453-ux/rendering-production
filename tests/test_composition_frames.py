@@ -107,6 +107,7 @@ CANONICAL = {
     "BudgetRule": lambda: 5400,
     "EmergencyFund": lambda: 5400,
     "EmergencyShield": lambda: 3088,
+    "CreditScore": lambda: 3379,
 }
 
 
