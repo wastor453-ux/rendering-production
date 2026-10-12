@@ -81,8 +81,9 @@ def main():
     vo_files = find_video_vo_files(repo_root)
     
     if not vo_files:
-        print("No VO files found, skipping VO fill check")
-        return 0
+        print("FATAL: No VO files found. Missing required media is a hard failure.", file=sys.stderr)
+        print("Every video must have src/videos/{name}/audio/vo.wav", file=sys.stderr)
+        return 1
     
     print(f"Checking VO fill for {len(vo_files)} videos...")
     
