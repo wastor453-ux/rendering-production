@@ -6,8 +6,8 @@ This is the ONLY approved way to start a production render.
 
 Usage:
   python3 tools/dispatch_production.py \
-      --composition HousingBroke --start-frame 0 --end-frame 23150 \
-      --label "Q-004" [--dry-run]
+      --composition <CompositionName> --start-frame 0 --end-frame <N> \
+      --label "<label>" [--dry-run]
 
 Steps:
   1. Run .github/scripts/validate_dispatch.py — abort if ANY check fails.
@@ -105,7 +105,8 @@ def main():
     p.add_argument("--crf", type=int, default=18)
     p.add_argument("--with-audio", action="store_true", default=True)
     p.add_argument("--no-audio", dest="with_audio", action="store_false")
-    p.add_argument("--vo-file", default="public/audio/vo_housingbroke.wav")
+    p.add_argument("--vo-file", default=None,
+                   help="Path to voiceover file (required, no default - each video supplies its own)")
     p.add_argument("--bed-file", default="public/audio/bed.mp3")
     p.add_argument("--label", default="")
     p.add_argument("--resume-from-run-id", default="")
