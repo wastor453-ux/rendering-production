@@ -260,7 +260,7 @@ jobs:
           
           # AUDIO OWNERSHIP ENFORCEMENT (fail-closed, contract-driven)
           AUDIO_OWNERSHIP=$(python3 -c "
-          import sys
+          import sys, os
           sys.path.insert(0, '.github/scripts')
           from composition_contract import get_contract
           c = get_contract(os.environ['COMPOSITION'])
