@@ -1,187 +1,310 @@
-// Explanation modes: before/after, two-sided comparison, causal diagram,
-// causal loop, timeline, flow diagram.
+// explain.tsx v2.0 — Rebuilt from Money Mechanics + Motion Grammar images
+// 6 explanation modes with exact reference styles
+
 import React from "react";
 import { Easing, interpolate, useCurrentFrame } from "remotion";
 import { T, CLAMP, EXPO } from "./tokens";
-import { GlassCard, Label, entry } from "./primitives";
+import { GlassCard, entry } from "./primitives";
+import { LightCanvas } from "./primitives";
 
 const expo = Easing.bezier(...EXPO);
 
-export const BeforeAfter: React.FC<{ before: { label: string; value: string }; after: { label: string; value: string } }> = ({ before, after }) => {
+// === 1. BeforeAfter ===
+export const BeforeAfter: React.FC<{
+  before: { label: string; value: string };
+  after: { label: string; value: string };
+  title?: string;
+}> = ({ before, after, title }) => {
   const frame = useCurrentFrame();
-  const morph = interpolate(frame, [35, 70], [0, 1], { ...CLAMP, easing: expo });
-  const card = (s: { label: string; value: string }, tint: string, fg: string, active: boolean) => (
-    <GlassCard width={480} padding={44} style={{ opacity: active ? 1 : 0.55, transform: `scale(${active ? 1 : 0.96})` }}>
-      <Label text={s.label} />
-      <div style={{ fontFamily: T.font, fontWeight: 800, fontSize: 76, color: fg, marginTop: 12, fontVariantNumeric: "tabular-nums" }}>{s.value}</div>
+  const { opacity } = entry(frame, 0, 18);
+
+  return (
+    <LightCanvas variant="coolBlue">
+      <div style={{
+        position: "absolute", inset: 0, display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center", opacity, gap: 32,
+      }}>
+        {title && (
+          <div style={{ fontFamily: T.font, fontSize: 36, fontWeight: 800, color: T.ink }}>
+            {title}
+          </div>
+        )}
+        <div style={{ display: "flex", gap: 32, alignItems: "center" }}>
+          <GlassCard width={320} padding={36} style={{ textAlign: "center", opacity: 0.7 }}>
+            <div style={{ fontFamily: T.font, fontSize: 20, fontWeight: 600, color: T.inkMuted }}>
+              {before.label}
+            </div>
+            <div style={{ fontFamily: T.font, fontSize: 48, fontWeight: 800, color: T.inkMuted, marginTop: 12 }}>
+              {before.value}
+            </div>
+          </GlassCard>
+          <div style={{ fontSize: 48, color: T.primary }}>→</div>
+          <GlassCard width={320} padding={36} style={{ textAlign: "center", border: `2px solid ${T.primary}` }}>
+            <div style={{ fontFamily: T.font, fontSize: 20, fontWeight: 600, color: T.primary }}>
+              {after.label}
+            </div>
+            <div style={{ fontFamily: T.font, fontSize: 48, fontWeight: 800, color: T.primary, marginTop: 12 }}>
+              {after.value}
+            </div>
+          </GlassCard>
+        </div>
+      </div>
+    </LightCanvas>
+  );
+};
+
+// === 2. TwoSidedComparison — A/B Cards (Money Mechanics #3, #5) ===
+export const TwoSidedComparison: React.FC<{
+  left: { title: string; points: string[]; icon?: string };
+  right: { title: string; points: string[]; icon?: string };
+  vsLabel?: string;
+}> = ({ left, right, vsLabel = "VS" }) => {
+  const frame = useCurrentFrame();
+  const { opacity: opL, y: yL } = entry(frame, 0, 16);
+  const { opacity: opR, y: yR } = entry(frame, 10, 16);
+
+  const Card = ({ data, opacity, y, accent }: any) => (
+    <GlassCard width={380} padding={32} style={{ opacity, transform: `translateY(${y}px)` }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        {data.icon && <span style={{ fontSize: 36 }}>{data.icon}</span>}
+        <div style={{ fontFamily: T.font, fontSize: 26, fontWeight: 800, color: T.ink }}>
+          {data.title}
+        </div>
+      </div>
+      <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 12 }}>
+        {data.points.map((p: string, i: number) => (
+          <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+            <span style={{ color: accent, fontWeight: 700, fontSize: 20 }}>✓</span>
+            <span style={{ fontFamily: T.font, fontSize: 19, color: T.ink }}>{p}</span>
+          </div>
+        ))}
+      </div>
     </GlassCard>
   );
+
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 40, opacity: interpolate(frame, [0, 12], [0, 1], CLAMP) }}>
-      {card(before, T.negativeTint, T.negativeDeep, morph < 0.5)}
-      <div style={{ fontFamily: T.font, fontWeight: 800, fontSize: 54, color: T.primary,
-        transform: `translateX(${interpolate(morph, [0, 1], [-10, 10], CLAMP)}px)` }}>→</div>
-      {card(after, T.successTint, T.successDeep, morph >= 0.5)}
-    </div>
+    <LightCanvas variant="lavenderHorizon">
+      <div style={{
+        position: "absolute", inset: 0, display: "flex",
+        alignItems: "center", justifyContent: "center", gap: 24,
+      }}>
+        <Card data={left} opacity={opL} y={yL} accent={T.primary} />
+        <div style={{
+          width: 64, height: 64, borderRadius: "50%", background: T.fog,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontFamily: T.font, fontWeight: 800, fontSize: 20, color: T.primary,
+          flexShrink: 0,
+        }}>
+          {vsLabel}
+        </div>
+        <Card data={right} opacity={opR} y={yR} accent={T.teal} />
+      </div>
+    </LightCanvas>
   );
 };
 
-export const TwoSidedComparison: React.FC<{
-  left: { title: string; rows: [string, string][] }; right: { title: string; rows: [string, string][] };
-  impactAt?: number; impactRow?: number;
-}> = ({ left, right, impactAt, impactRow = 0 }) => {
+// === 3. CausalDiagram — Step Flow (Story System #4) ===
+export const CausalDiagram: React.FC<{
+  steps: { label: string; sub: string; icon?: string }[];
+  title?: string;
+}> = ({ steps, title }) => {
   const frame = useCurrentFrame();
-  const lp = interpolate(frame, [6, 24], [0, 1], { ...CLAMP, easing: expo });
-  const rp = interpolate(frame, [18, 36], [0, 1], { ...CLAMP, easing: expo });
-  // punch highlight on the impact row at the canonical frame (SFX-synced)
-  const ip = impactAt ?? 50;
-  const punch = interpolate(frame, [ip - 4, ip, ip + 12], [0, 1, 0], { ...CLAMP, easing: expo });
-  const side = (s: { title: string; rows: [string, string][] }, p: number, dir: number, accent: string, isRight: boolean) => (
-    <div style={{ opacity: p, transform: `translateX(${interpolate(p, [0, 1], [50 * dir, 0], CLAMP)}px)` }}>
-      <GlassCard width={560} padding={40}>
-        <div style={{ fontFamily: T.font, fontWeight: 800, fontSize: 38, color: T.ink, marginBottom: 20 }}>{s.title}</div>
-        {s.rows.map(([k, v], i) => {
-          const rowP = interpolate(frame, [26 + i * 8, 36 + i * 8], [0, 1], CLAMP);
-          const isPunch = isRight && i === impactRow && punch > 0;
-          return (
-            <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "13px 0",
-              borderBottom: `1px solid ${T.glassBorder}`, opacity: rowP,
-              background: isPunch ? `rgba(83,104,247,${0.10 * punch})` : "transparent",
-              borderRadius: 10, transform: isPunch ? `scale(${1 + 0.02 * punch})` : "scale(1)" }}>
-              <Label text={k} size={24} />
-              <div style={{ fontFamily: T.font, fontWeight: 800, fontSize: 28, color: accent, fontVariantNumeric: "tabular-nums" }}>{v}</div>
-            </div>
-          );
-        })}
-      </GlassCard>
-    </div>
-  );
-  return (
-    <div style={{ display: "flex", gap: 36, alignItems: "flex-start" }}>
-      {side(left, lp, -1, T.primaryDeep, false)}
-      {side(right, rp, 1, T.successDeep, true)}
-    </div>
-  );
-};
 
-const node = (x: number, y: number, label: string, sub: string, p: number, accent = T.primary) => (
-  <g key={label} opacity={p}>
-    <rect x={x - 150} y={y - 62} width={300} height={124} rx={20} fill="#fff" stroke={T.glassBorder} strokeWidth={1.5} />
-    <rect x={x - 150} y={y - 62} width={10} height={124} rx={5} fill={accent} />
-    <text x={x + 4} y={y - 8} textAnchor="middle" fontFamily={T.font} fontWeight={800} fontSize={30} fill={T.ink}>{label}</text>
-    <text x={x + 4} y={y + 28} textAnchor="middle" fontFamily={T.font} fontWeight={600} fontSize={22} fill={T.inkMuted}>{sub}</text>
-  </g>
-);
-const edge = (x1: number, y1: number, x2: number, y2: number, p: number) => (
-  <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={T.primary} strokeWidth={4} strokeLinecap="round"
-    strokeDasharray={400} strokeDashoffset={400 * (1 - p)} opacity={0.75} />
-);
-
-export const CausalDiagram: React.FC<{ steps: { label: string; sub: string }[]; impactAt?: number; impactNode?: number }> = ({ steps, impactAt, impactNode = 0 }) => {
-  const frame = useCurrentFrame();
-  const n = steps.length;
-  const xs = steps.map((_, i) => 240 + i * ((1440 - 480) / Math.max(1, n - 1)));
-  const y = 400;
-  // punch pulse on the impact node at the canonical frame (SFX-synced)
-  const ip = impactAt ?? 14;
-  const pulse = interpolate(frame, [ip - 5, ip, ip + 14], [0, 1, 0], { ...CLAMP, easing: expo });
   return (
-    <svg width={1680} height={800} viewBox="0 0 1680 800">
-      {steps.slice(0, -1).map((_, i) =>
-        edge(xs[i] + 150, y, xs[i + 1] - 150, y, interpolate(frame, [20 + i * 22, 34 + i * 22], [0, 1], { ...CLAMP, easing: expo }))
-      )}
-      {steps.map((s, i) => {
-        const p = interpolate(frame, [8 + i * 22, 20 + i * 22], [0, 1], { ...CLAMP, easing: expo });
-        const isPunch = i === impactNode && pulse > 0;
-        return (
-          <g key={s.label} opacity={p}>
-            <rect x={xs[i] - 150} y={y - 62} width={300} height={124} rx={20} fill="#fff" stroke={T.glassBorder} strokeWidth={1.5} />
-            <rect x={xs[i] - 150} y={y - 62} width={10} height={124} rx={5} fill={i === n - 1 ? T.negative : T.primary} />
-            {isPunch && (
-              <rect x={xs[i] - 150 - 14 * pulse} y={y - 62 - 14 * pulse} width={300 + 28 * pulse} height={124 + 28 * pulse}
-                rx={26} fill="none" stroke={T.primary} strokeWidth={3} opacity={0.8 * (1 - pulse * 0.35)} />
-            )}
-            <text x={xs[i] + 4} y={y - 8} textAnchor="middle" fontFamily={T.font} fontWeight={800} fontSize={30} fill={T.ink}>{s.label}</text>
-            <text x={xs[i] + 4} y={y + 28} textAnchor="middle" fontFamily={T.font} fontWeight={600} fontSize={22} fill={T.inkMuted}>{s.sub}</text>
-          </g>
-        );
-      })}
-    </svg>
+    <LightCanvas variant="glassAurora">
+      <div style={{
+        position: "absolute", inset: 0, display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center", gap: 40, padding: "0 60px",
+      }}>
+        {title && (
+          <div style={{ fontFamily: T.font, fontSize: 36, fontWeight: 800, color: T.ink }}>
+            {title}
+          </div>
+        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          {steps.map((s, i) => {
+            const { opacity, y } = entry(frame, i * 12, 16);
+            return (
+              <React.Fragment key={i}>
+                <GlassCard width={240} padding={28}
+                  style={{ textAlign: "center", opacity, transform: `translateY(${y}px)` }}>
+                  {s.icon && <div style={{ fontSize: 48 }}>{s.icon}</div>}
+                  <div style={{
+                    fontFamily: T.font, fontSize: 22, fontWeight: 700,
+                    color: T.ink, marginTop: 12,
+                  }}>
+                    {s.label}
+                  </div>
+                  <div style={{
+                    fontFamily: T.font, fontSize: 17, color: T.inkMuted, marginTop: 6,
+                  }}>
+                    {s.sub}
+                  </div>
+                </GlassCard>
+                {i < steps.length - 1 && (
+                  <div style={{ fontSize: 36, color: T.primary, flexShrink: 0 }}>→</div>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+      </div>
+    </LightCanvas>
   );
 };
 
-export const CausalLoop: React.FC<{ steps: { label: string; sub: string }[] }> = ({ steps }) => {
+// === 4. CausalLoop — Circular Flow ===
+export const CausalLoop: React.FC<{
+  steps: { label: string; sub: string }[];
+}> = ({ steps }) => {
   const frame = useCurrentFrame();
-  const cx = 840; const cy = 400; const R = 260;
-  const pos = (i: number) => {
-    const a = -Math.PI / 2 + (i / steps.length) * Math.PI * 2;
-    return [cx + R * Math.cos(a), cy + R * 1.05 * Math.sin(a)] as const;
-  };
-  const loopP = interpolate(frame, [8 + steps.length * 14, 26 + steps.length * 14], [0, 1], { ...CLAMP, easing: expo });
+  const { opacity } = entry(frame, 0, 20);
+
+  const R = 200; const CX = 400; const CY = 220;
+
   return (
-    <svg width={1680} height={800} viewBox="0 0 1680 800">
-      <ellipse cx={cx} cy={cy} rx={R} ry={R * 1.05} fill="none" stroke={T.primary} strokeWidth={4}
-        strokeDasharray={2200} strokeDashoffset={2200 * (1 - loopP)} opacity={0.6} />
-      {steps.map((s, i) => {
-        const [x, y] = pos(i);
-        return node(x, y, s.label, s.sub, interpolate(frame, [8 + i * 20, 20 + i * 20], [0, 1], { ...CLAMP, easing: expo }));
-      })}
-    </svg>
+    <LightCanvas variant="softOrb">
+      <div style={{
+        position: "absolute", inset: 0, display: "flex",
+        alignItems: "center", justifyContent: "center", opacity,
+      }}>
+        <svg width={800} height={440} viewBox="0 0 800 440">
+          {/* Circular arrow */}
+          <path
+            d={`M${CX + R},${CY} A${R},${R} 0 1,1 ${CX + R - 1},${CY - 1}`}
+            fill="none" stroke={T.primary} strokeWidth={4}
+            strokeDasharray="12 8" opacity={0.4}
+          />
+          {steps.map((s, i) => {
+            const angle = (i / steps.length) * 360 - 90;
+            const x = CX + R * Math.cos((angle * Math.PI) / 180);
+            const y = CY + R * Math.sin((angle * Math.PI) / 180);
+            const { opacity: op } = entry(frame, i * 10, 14);
+            return (
+              <g key={i} opacity={op}>
+                <circle cx={x} cy={y} r={52} fill="white"
+                  stroke={T.primary} strokeWidth={3} />
+                <text x={x} y={y - 6} textAnchor="middle"
+                  fontFamily={T.font} fontSize={17} fontWeight={700} fill={T.ink}>
+                  {s.label}
+                </text>
+                <text x={x} y={y + 18} textAnchor="middle"
+                  fontFamily={T.font} fontSize={14} fill={T.inkMuted}>
+                  {s.sub}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+    </LightCanvas>
   );
 };
 
-export const Timeline: React.FC<{ events: { year: string; label: string }[] }> = ({ events }) => {
+// === 5. Timeline — Horizontal Timeline (Motion Grammar #43) ===
+export const Timeline: React.FC<{
+  events: { year: string; label: string }[];
+  title?: string;
+}> = ({ events, title }) => {
   const frame = useCurrentFrame();
-  const draw = interpolate(frame, [8, 60], [0, 1], { ...CLAMP, easing: expo });
-  const n = events.length;
+
   return (
-    <svg width={1680} height={600} viewBox="0 0 1680 600">
-      <line x1={120} y1={300} x2={120 + 1440 * draw} y2={300} stroke={T.primary} strokeWidth={6} strokeLinecap="round" />
-      {events.map((e, i) => {
-        const x = 120 + (i / Math.max(1, n - 1)) * 1440;
-        const p = interpolate(frame, [14 + i * 14, 26 + i * 14], [0, 1], { ...CLAMP, easing: expo });
-        const above = i % 2 === 0;
-        return (
-          <g key={e.year} opacity={p}>
-            <circle cx={x} cy={300} r={13} fill={T.primaryDeep} stroke="#fff" strokeWidth={4} />
-            <line x1={x} y1={300} x2={x} y2={above ? 190 : 410} stroke={T.glassBorder} strokeWidth={2} />
-            <text x={x} y={above ? 150 : 470} textAnchor="middle" fontFamily={T.font} fontWeight={800} fontSize={30} fill={T.primaryDeep}>{e.year}</text>
-            <text x={x} y={above ? 118 : 502} textAnchor="middle" fontFamily={T.font} fontWeight={600} fontSize={23} fill={T.inkMuted}>{e.label}</text>
-          </g>
-        );
-      })}
-    </svg>
+    <LightCanvas variant="coolBlue">
+      <div style={{
+        position: "absolute", inset: 0, display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center", gap: 48, padding: "0 100px",
+      }}>
+        {title && (
+          <div style={{ fontFamily: T.font, fontSize: 36, fontWeight: 800, color: T.ink }}>
+            {title}
+          </div>
+        )}
+        <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+          {events.map((e, i) => {
+            const active = frame > 20 + i * 15;
+            const { opacity } = entry(frame, i * 15, 14);
+            return (
+              <React.Fragment key={i}>
+                <div style={{
+                  display: "flex", flexDirection: "column", alignItems: "center",
+                  gap: 12, opacity, minWidth: 140,
+                }}>
+                  <div style={{
+                    width: active ? 40 : 28, height: active ? 40 : 28,
+                    borderRadius: "50%", background: active ? T.primary : T.blueTint,
+                    border: active ? `4px solid ${T.cyan}` : "none",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "white", fontFamily: T.font, fontWeight: 700,
+                  }}>
+                    {active ? "✓" : ""}
+                  </div>
+                  <div style={{
+                    fontFamily: T.font, fontSize: 20, fontWeight: 700,
+                    color: active ? T.ink : T.inkMuted,
+                  }}>
+                    {e.year}
+                  </div>
+                  <div style={{
+                    fontFamily: T.font, fontSize: 17, color: T.inkMuted,
+                    textAlign: "center",
+                  }}>
+                    {e.label}
+                  </div>
+                </div>
+                {i < events.length - 1 && (
+                  <div style={{
+                    flex: 1, height: 4, borderRadius: 2, marginTop: 18,
+                    background: frame > 20 + i * 15 ? T.primary : T.blueTint,
+                  }} />
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+      </div>
+    </LightCanvas>
   );
 };
 
-export const FlowDiagram: React.FC<{ nodes: string[] }> = ({ nodes }) => {
+// === 6. FlowDiagram — Node Flow ===
+export const FlowDiagram: React.FC<{
+  nodes: string[]; title?: string;
+}> = ({ nodes, title }) => {
   const frame = useCurrentFrame();
-  const n = nodes.length;
-  const totalW = n * 300 + (n - 1) * 90;
-  const startX = (1680 - totalW) / 2;
+
   return (
-    <svg width={1680} height={500} viewBox="0 0 1680 500">
-      {nodes.slice(0, -1).map((_, i) => {
-        const x1 = startX + (i + 1) * 300 + i * 90 - 20;
-        const x2 = startX + (i + 1) * 300 + (i + 1) * 90 - 70;
-        const w = interpolate(frame, [24 + i * 20, 40 + i * 20], [0, 1], { ...CLAMP, easing: expo });
-        return (
-          <g key={i} opacity={w}>
-            <rect x={x1} y={228} width={(x2 - x1) * w} height={14} rx={7} fill={T.primary} opacity={0.5} />
-            <polygon points={`${x2},220 ${x2},262 ${x2 + 26},241`} fill={T.primary} />
-          </g>
-        );
-      })}
-      {nodes.map((nd, i) => {
-        const x = startX + i * 390;
-        const p = interpolate(frame, [8 + i * 20, 22 + i * 20], [0, 1], { ...CLAMP, easing: expo });
-        return (
-          <g key={nd} opacity={p} transform={`translate(0 ${interpolate(p, [0, 1], [30, 0], CLAMP)})`}>
-            <rect x={x} y={170} width={300} height={142} rx={22} fill="#fff" stroke={T.glassBorder} strokeWidth={1.5} />
-            <text x={x + 150} y={252} textAnchor="middle" fontFamily={T.font} fontWeight={800} fontSize={30} fill={T.ink}>{nd}</text>
-          </g>
-        );
-      })}
-    </svg>
+    <LightCanvas variant="dataAtmosphere">
+      <div style={{
+        position: "absolute", inset: 0, display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center", gap: 40,
+      }}>
+        {title && (
+          <div style={{ fontFamily: T.font, fontSize: 36, fontWeight: 800, color: T.ink }}>
+            {title}
+          </div>
+        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {nodes.map((n, i) => {
+            const { opacity, y } = entry(frame, i * 10, 14);
+            const colors = [T.primary, T.cyan, T.teal, T.lavender];
+            return (
+              <React.Fragment key={i}>
+                <div style={{
+                  background: colors[i % colors.length], borderRadius: 16,
+                  padding: "20px 32px", fontFamily: T.font, fontSize: 22,
+                  fontWeight: 700, color: "white",
+                  opacity, transform: `translateY(${y}px)`,
+                }}>
+                  {n}
+                </div>
+                {i < nodes.length - 1 && (
+                  <div style={{ fontSize: 32, color: T.primary }}>→</div>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+      </div>
+    </LightCanvas>
   );
 };
