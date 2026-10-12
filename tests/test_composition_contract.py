@@ -177,7 +177,7 @@ class TestBeatSchemaFailClosed(unittest.TestCase):
         beat_mode: "valid" (one schema-clean beat), "malformed" (not JSON).
         """
         repo = os.path.join(tmp, "demo-video")
-        os.makedirs(os.path.join(repo, "src", "compiled"))
+        os.makedirs(os.path.join(repo, "src", "videos", "production-beats", "data"))
         if schema_mode in ("vendored", "malformed"):
             sdir = os.path.join(repo, ".github", "schemas")
             os.makedirs(sdir)
@@ -194,7 +194,7 @@ class TestBeatSchemaFailClosed(unittest.TestCase):
                 os.path.join(REPO_ROOT, ".github", "schemas",
                              "EDITORIAL_BEAT_SCHEMA.json"),
                 os.path.join(tmp, "EDITORIAL_BEAT_SCHEMA.json"))
-        bpath = os.path.join(repo, "src", "compiled", "beat_timeline.json")
+        bpath = os.path.join(repo, "src", "videos", "production-beats", "data", "beat_timeline.json")
         if beat_mode == "valid":
             beat = {
                 "beat_id": "ok1", "start_time": 0, "end_time": 1,
