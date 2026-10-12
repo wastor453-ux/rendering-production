@@ -264,7 +264,12 @@ def check_beat_contract(composition, repo_root):
     except (json.JSONDecodeError, OSError) as e:
         errors.append(f"Beat file {beat_rel} unreadable: {e}")
         return errors
-    beats = doc.get("beats", doc if isinstance(doc, list) else [])
+    if isinstance(doc, dict):
+        beats = doc.get("beats", [])
+    elif isinstance(doc, list):
+        beats = doc
+    else:
+        beats = []
     if not isinstance(beats, list) or not beats:
         errors.append(f"Beat file {beat_rel} contains no beats")
         return errors
