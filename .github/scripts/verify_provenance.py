@@ -30,12 +30,28 @@ def file_hash(path):
 
 
 def main():
-    with open("src/videos/_active/manifest.json") as f:
-        video_id = json.load(f)["videoId"]
+    try:
+        with open("src/videos/_active/manifest.json") as f:
+            video_id = json.load(f)["videoId"]
+    except FileNotFoundError:
+        print("FATAL: Manifest not found: src/videos/_active/manifest.json", file=sys.stderr)
+        print("  (Prepare event-driven manifest step did not run or failed)", file=sys.stderr)
+        sys.exit(1)
+    except (json.JSONDecodeError, KeyError) as e:
+        print(f"FATAL: Invalid manifest: {e}", file=sys.stderr)
+        sys.exit(1)
 
     timeline_path = "src/videos/_active/timeline.json"
     alignment_path = f"src/videos/{video_id}/data/alignment.json"
     patterns_path = f"src/videos/{video_id}/data/semantic_patterns.json"
+
+    for p in [timeline_path, alignment_path, patterns_path]:
+        try:
+            with open(p, "rb") as f:
+                pass
+        except FileNotFoundError:
+            print(f"FATAL: Required file not found: {p}", file=sys.stderr)
+            sys.exit(1)
 
     with open(timeline_path) as f:
         tl = json.load(f)
