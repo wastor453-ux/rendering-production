@@ -69,6 +69,7 @@ export const RemotionRoot: React.FC = () => {
       />
       <Composition id="CompoundInterest" component={CompoundInterest} durationInFrames={5400} fps={30} width={1920} height={1080} />
       <Composition id="EmergencyFund" component={EmergencyFund} durationInFrames={5400} fps={30} width={1920} height={1080} />
+      <Composition id="BudgetRule" component={BudgetRule} durationInFrames={5400} fps={30} width={1920} height={1080} />
     </>
   );
 };
