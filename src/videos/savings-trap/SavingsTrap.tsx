@@ -83,9 +83,10 @@ export const SavingsTrap: React.FC = () => {
   const frame = useCurrentFrame();
   const time = frame / FPS;
 
-  const beat = (beatDoc as any).beats.find(
+  const beats = Array.isArray(beatDoc) ? beatDoc : (beatDoc as any).beats;
+  const beat = beats.find(
     (b: Beat) => time >= b.start_time && time < b.end_time
-  ) ?? (beatDoc as any).beats[0];
+  ) ?? beats[0];
 
   return (
     <AbsoluteFill>
