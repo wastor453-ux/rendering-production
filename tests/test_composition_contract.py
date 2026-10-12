@@ -151,7 +151,7 @@ class TestBeatContractGate(unittest.TestCase):
         buf = _io.StringIO()
         with _contextlib.redirect_stdout(buf):
             p3 = check_beat_contract("SavingsTrap", REPO_ROOT)
-        self.assertIn("Provenance: src/videos/production-beats/data/beat_timeline.json "
+        self.assertIn("Provenance: src/videos/savings-trap/data/beat_timeline.json "
                       "[checked-in]", buf.getvalue())
         self.assertEqual(len(p3), 0, f"P3Rehearsal violations changed: {p3}")
         self.assertEqual(p3.provenance["provenance"], "checked-in")
