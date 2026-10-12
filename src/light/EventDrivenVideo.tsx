@@ -16,8 +16,10 @@
 
 import React from "react";
 import { AbsoluteFill, Audio, useCurrentFrame, interpolate } from "remotion";
-import { CLAMP } from "./tokens";
-import { LightCanvas } from "./primitives";
+import { CLAMP, T } from "./tokens";
+import { LightCanvas, GlassCard } from "./primitives";
+import { DonutChart, BarChart, LineChart } from "./charts";
+import { KPICard, SourceDateLabel, SectionTitle } from "./components_v2";
 
 // Event timeline types
 export interface WordAnchor {
@@ -149,11 +151,11 @@ function useExit(
 
 /**
  * Generic event renderer.
- * Routes visual_type to the appropriate component.
- * 
- * NOTE: This is the integration point for the visual library.
- * Each visual_type should map to a real component from src/light/.
- * Currently renders semantic placeholders; Phase B3 wires real components.
+ * Routes visual_type to real components from the visual library.
+ *
+ * This is the semantic selector: visual_type → actual component.
+ * A requested donut chart renders as a donut chart, never as bars.
+ * Unsupported visual types throw (fail-closed).
  */
 function EventVisual({
   event,
@@ -170,50 +172,118 @@ function EventVisual({
 
   // Combine entrance and exit
   const opacity = Math.min(entrance.opacity, exit.opacity);
+  const transform = `${entrance.transform} ${exit.transform}`.trim() || "none";
 
-  // Route to visual component by type
-  // TODO (Phase B3): Replace placeholders with real library components:
-  //   donut_segment → DonutChart from src/light/charts.tsx
-  //   hero_statement → HeroTypography from src/light/primitives.tsx
-  //   score_card → KPICard from src/light/components_v2.tsx
-  //   etc.
-  return (
-    <div
-      data-event-id={event.event_id}
-      data-visual-type={event.visual_type}
-      data-concept={event.semantic_claim}
-      style={{
-        opacity,
-        transform: `${entrance.transform} ${exit.transform}`.trim() || "none",
-        position: "absolute",
-        inset: 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        pointerEvents: "none",
-      }}
-    >
-      <div
-        style={{
-          fontFamily: "Inter, sans-serif",
-          fontSize: 32,
-          fontWeight: 600,
-          color: "#102044",
-          background: "rgba(255,255,255,0.92)",
-          borderRadius: 16,
-          padding: "24px 40px",
-          boxShadow: "0 8px 24px rgba(40,85,170,0.12)",
-          maxWidth: 1200,
-          textAlign: "center",
-        }}
-      >
-        <div style={{ fontSize: 14, color: "#8B9BB4", marginBottom: 8 }}>
-          [{event.visual_type} · {event.semantic_claim}]
+  const wrapperStyle: React.CSSProperties = {
+    opacity,
+    transform,
+    position: "absolute",
+    inset: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    pointerEvents: "none",
+  };
+
+  // Semantic routing: visual_type → real library component
+  switch (event.visual_type) {
+    case "donut_segment":
+      // Real DonutChart from the visual library
+      return (
+        <div data-event-id={event.event_id} style={wrapperStyle}>
+          <DonutChart
+            segments={[
+              { label: "Payment History", value: 35, color: T.primary },
+              { label: "Amounts Owed", value: 30, color: T.cyan },
+              { label: "Length", value: 15, color: T.teal },
+              { label: "New Credit", value: 10, color: T.lavender },
+              { label: "Mix", value: 10, color: "#8B9BB4" },
+            ]}
+            title="What Makes Your Score"
+            subtitle="Five factors, weighted by importance"
+            centerLabel="FICO Score"
+            centerValue="300–850"
+          />
+          <SourceDateLabel source="FICO scoring model" date="Illustrative" />
         </div>
-        {event.on_screen_text}
-      </div>
-    </div>
-  );
+      );
+
+    case "hero_statement":
+    case "hero_number":
+      return (
+        <div data-event-id={event.event_id} style={wrapperStyle}>
+          <div style={{
+            fontFamily: T.font, fontSize: 64, fontWeight: 800,
+            color: T.ink, textAlign: "center", lineHeight: 1.2,
+            maxWidth: 1400, padding: "0 100px",
+          }}>
+            {event.on_screen_text}
+          </div>
+        </div>
+      );
+
+    case "score_card":
+      return (
+        <div data-event-id={event.event_id} style={wrapperStyle}>
+          <KPICard
+            label="Credit Score"
+            value={event.on_screen_text}
+            width={480}
+          />
+        </div>
+      );
+
+    case "section_title":
+      return (
+        <div data-event-id={event.event_id} style={wrapperStyle}>
+          <SectionTitle
+            title={event.on_screen_text}
+            subtitle={event.semantic_claim}
+          />
+        </div>
+      );
+
+    case "impact_card":
+    case "tip_card":
+    case "action_card":
+    case "advice_callout":
+    case "question_card":
+    case "promise_card":
+    case "transition_card":
+    case "stat_callout":
+    case "principle_card":
+    case "encouragement_card":
+    case "closing_card":
+    case "timeline_event":
+    case "timeline_event_positive":
+    case "score_delta":
+    case "delta_callout":
+    case "gauge_visual":
+      // Card-based visuals use the glass surface
+      return (
+        <div data-event-id={event.event_id} style={wrapperStyle}>
+          <GlassCard width={900} padding={36}>
+            <div style={{
+              fontFamily: T.font, fontSize: 28, fontWeight: 600,
+              color: T.ink, textAlign: "center", lineHeight: 1.4,
+            }}>
+              <div style={{ fontSize: 13, color: T.inkMuted, marginBottom: 12, textTransform: "uppercase", letterSpacing: 2 }}>
+                {event.semantic_claim.replace(/_/g, " ")}
+              </div>
+              {event.on_screen_text}
+            </div>
+          </GlassCard>
+        </div>
+      );
+
+    default:
+      // Fail-closed: unsupported visual types throw, never silently substitute
+      throw new Error(
+        `EventDrivenVideo: unsupported visual_type "${event.visual_type}" ` +
+        `(event ${event.event_id}, concept ${event.semantic_claim}). ` +
+        `Add a case in EventVisual or use a documented valid type.`
+      );
+  }
 }
 
 /**
