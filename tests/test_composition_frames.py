@@ -104,6 +104,7 @@ CANONICAL = {
     "FinanceProof":     lambda: eval_static_total("src/videos/finance-proof/FinanceProof.tsx", "PROOF_TOTAL"),
     "SavingsTrap":      lambda: eval_static_total("src/videos/savings-trap/SavingsTrap.tsx", "SAVINGSTRAP_TOTAL"),
     "CompoundInterest": lambda: 5400,
+    "BudgetRule",
     "EmergencyFund": lambda: 5400,
 }
 
