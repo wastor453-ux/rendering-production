@@ -29,6 +29,8 @@ DELETED_COMPOSITIONS = {
     "PipeTestVideo", "HysaTest", "BankTestVideo", "CalibrationV0", "CalibrationV1",
     "CalibrationV2", "CalibrationV3", "ModeRegression", "VisualShowcase",
     "VisualCalibration", "H1Hook", "HousingBroke", "ChainTest",
+    # Test videos removed 2026-10-13 (Hamza: diagnostic fixtures, not production)
+    "FromScratch", "FromScratchLight", "MoneyDying",
 }
 
 def test_no_dangling_composition_references():

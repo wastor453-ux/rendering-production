@@ -25,10 +25,12 @@ Each event has:
 FAIL-CLOSED: Empty events list = exit 1. Missing alignment = exit 1.
 """
 
+import hashlib
 import json
 import sys
 import re
 from pathlib import Path
+import os
 
 
 FPS = 30
@@ -96,7 +98,8 @@ def generate_events(alignment_path, patterns):
     
     for pattern_def in patterns:
         pattern = pattern_def["pattern"]
-        word_idx, matched = find_word_anchor(words, pattern)
+        occurrence = pattern_def.get("occurrence", 1)
+        word_idx, matched = find_word_anchor(words, pattern, occurrence)
         
         if word_idx is None:
             continue
@@ -128,6 +131,40 @@ def generate_events(alignment_path, patterns):
     
     # Sort by start frame
     events.sort(key=lambda e: e["start_frame"])
+    
+    # F-06: Clip event durations to prevent overlap.
+    # Each event ends at min(start + 4s ceiling, next event start).
+    # This makes the "until next event or 4s max" comment actual behavior.
+    MAX_HOLD_FRAMES = int(4 * FPS)
+    for i in range(len(events)):
+        start = events[i]["start_frame"]
+        ceiling_end = start + MAX_HOLD_FRAMES
+        if i + 1 < len(events):
+            next_start = events[i + 1]["start_frame"]
+            events[i]["end_frame"] = min(ceiling_end, next_start)
+        else:
+            events[i]["end_frame"] = ceiling_end
+        # Fail closed: zero/negative duration means patterns are too dense
+        if events[i]["end_frame"] <= events[i]["start_frame"]:
+            raise RuntimeError(
+                f"FATAL: Event {events[i]['event_id']} has zero/negative duration "
+                f"(start={events[i]['start_frame']}, end={events[i]['end_frame']}). "
+                f"Semantic patterns are too dense — events must not overlap."
+            )
+    
+    # F-06: First event must cover from frame 0 (leading silence).
+    # ONLY extend if the first event is a safe opening type (hero/title/hook).
+    # Data types (gauge, delta, charts) must NOT be shown before their narration
+    # anchor — extending them would place semantic content on screen early.
+    # If the first event is a data type with a late anchor, the validator will
+    # fail (leading gap), which is correct — the patterns need a proper opening.
+    SAFE_OPENING_TYPES = {"hero_statement", "title_card", "hook", "opening", "kpi_card"}
+    if events and events[0]["start_frame"] > 0:
+        first_type = events[0].get("visual_type", "")
+        if first_type in SAFE_OPENING_TYPES:
+            events[0]["start_frame"] = 0
+            events[0]["end_frame"] = min(events[0]["end_frame"], MAX_HOLD_FRAMES)
+        # else: leave the gap; validator will fail closed (correct behavior)
     
     # Re-number in timeline order
     for i, e in enumerate(events):
@@ -172,9 +209,51 @@ def main():
                 file=sys.stderr
             )
     
+    # Provenance: record hashes of both inputs
+    def _sha256(path):
+        h = hashlib.sha256()
+        with open(path, "rb") as f:
+            for chunk in iter(lambda: f.read(8192), b""):
+                h.update(chunk)
+        return h.hexdigest()
+    
+    # Narration duration from alignment (last word end time)
+    with open(alignment_path) as af:
+        alignment_data = json.load(af)
+    words = alignment_data.get("words", [])
+    narration_duration_s = max((w.get("end", 0) for w in words), default=0)
+    narration_end_frame = int(narration_duration_s * FPS)
+    
+    # Clip last event to narration duration (cannot extend beyond audio)
+    if events:
+        last = events[-1]
+        if last["end_frame"] > narration_end_frame:
+            last["end_frame"] = narration_end_frame
+            # Ensure positive duration
+            if last["end_frame"] <= last["start_frame"]:
+                last["end_frame"] = last["start_frame"] + 1
+    
+    # F-15: Record VO hash for direct binding (not just via alignment)
+    # Must match run_pipeline.py's preference: data/vo.wav first, then audio/vo.wav
+    _video_dir = os.path.dirname(os.path.dirname(alignment_path))
+    vo_path = None
+    for _p in [os.path.join(_video_dir, "data", "vo.wav"),
+               os.path.join(_video_dir, "audio", "vo.wav")]:
+        if os.path.exists(_p):
+            vo_path = _p
+            break
+    vo_sha = _sha256(vo_path) if vo_path else None
     output = {
         "source": "generate_event_timeline.py",
-        "alignment_source": alignment_path,
+        "provenance": {
+            "alignment_source": alignment_path,
+            "alignment_sha256": _sha256(alignment_path),
+            "patterns_source": patterns_path,
+            "patterns_sha256": _sha256(patterns_path),
+            "vo_sha256": vo_sha,
+            "generator": "tools/generate_event_timeline.py",
+        },
+        "narration_duration_s": narration_duration_s,
         "fps": FPS,
         "event_count": len(events),
         "events": events,

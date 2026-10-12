@@ -1,0 +1,514 @@
+{
+  "patterns": [
+    {
+      "concept": "hook",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "losing you money",
+      "progression": "hold",
+      "semantic_role": "hook",
+      "visual_mode": "kinetic",
+      "visual_type": "hero_statement"
+    },
+    {
+      "concept": "setup",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "counting on you not noticing",
+      "progression": "hold",
+      "semantic_role": "setup",
+      "visual_mode": "editorial",
+      "visual_type": "tip_card"
+    },
+    {
+      "concept": "anchor_value",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "\\$10 ,000 sitting",
+      "progression": "count_up_to_value",
+      "semantic_role": "anchor_value",
+      "visual_mode": "data",
+      "visual_type": "score_card"
+    },
+    {
+      "concept": "consequence",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "quietly evaporate",
+      "progression": "hold",
+      "semantic_role": "consequence",
+      "visual_mode": "editorial",
+      "visual_type": "impact_card"
+    },
+    {
+      "concept": "data_point",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "0 .4 % interest",
+      "progression": "progress_bar_fill",
+      "semantic_role": "data_point",
+      "visual_mode": "data",
+      "visual_type": "gauge_visual"
+    },
+    {
+      "concept": "data_point",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "that's \\$40",
+      "progression": "count_up_to_value",
+      "semantic_role": "data_point",
+      "visual_mode": "data",
+      "visual_type": "score_delta"
+    },
+    {
+      "concept": "data_point",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "around 3%",
+      "progression": "progress_bar_fill",
+      "semantic_role": "data_point",
+      "visual_mode": "data",
+      "visual_type": "gauge_visual"
+    },
+    {
+      "concept": "data_point",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "loses \\$300",
+      "progression": "score_count_down",
+      "semantic_role": "data_point",
+      "visual_mode": "data",
+      "visual_type": "score_delta"
+    },
+    {
+      "concept": "consequence",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "down \\$260",
+      "progression": "score_count_down",
+      "semantic_role": "consequence",
+      "visual_mode": "data",
+      "visual_type": "delta_callout"
+    },
+    {
+      "concept": "reframe",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "it's the business model",
+      "progression": "hold",
+      "semantic_role": "reframe",
+      "visual_mode": "editorial",
+      "visual_type": "impact_card"
+    },
+    {
+      "concept": "contrast",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "6, 7, 8%",
+      "progression": "progress_bar_fill",
+      "semantic_role": "contrast",
+      "visual_mode": "data",
+      "visual_type": "stat_callout"
+    },
+    {
+      "concept": "detail",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "credit cards, mortgages",
+      "progression": "hold",
+      "semantic_role": "detail",
+      "visual_mode": "editorial",
+      "visual_type": "factor_card"
+    },
+    {
+      "concept": "objection",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "high yield savings accounts",
+      "progression": "hold",
+      "semantic_role": "objection",
+      "visual_mode": "editorial",
+      "visual_type": "question_card"
+    },
+    {
+      "concept": "data_point",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "might pay 4 %",
+      "progression": "progress_bar_fill",
+      "semantic_role": "data_point",
+      "visual_mode": "data",
+      "visual_type": "gauge_visual"
+    },
+    {
+      "concept": "warning",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "rates are temporary",
+      "progression": "hold",
+      "semantic_role": "warning",
+      "visual_mode": "editorial",
+      "visual_type": "impact_card"
+    },
+    {
+      "concept": "cause",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "Federal Reserve cuts rates",
+      "progression": "hold",
+      "semantic_role": "cause",
+      "visual_mode": "editorial",
+      "visual_type": "factor_card"
+    },
+    {
+      "concept": "cost",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "taxes your savings interest",
+      "progression": "hold",
+      "semantic_role": "cost",
+      "visual_mode": "editorial",
+      "visual_type": "stat_callout"
+    },
+    {
+      "concept": "data_point",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "that's \\$50",
+      "progression": "count_up_to_value",
+      "semantic_role": "data_point",
+      "visual_mode": "data",
+      "visual_type": "score_card"
+    },
+    {
+      "concept": "advice",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "emergency fund",
+      "progression": "check_reveal",
+      "semantic_role": "advice",
+      "visual_mode": "editorial",
+      "visual_type": "timeline_event_positive"
+    },
+    {
+      "concept": "warning",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "\\$30 ,000 \\$50 ,000 rot",
+      "progression": "score_count_down",
+      "semantic_role": "warning",
+      "visual_mode": "data",
+      "visual_type": "delta_callout"
+    },
+    {
+      "concept": "advice",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "3 to 6 months",
+      "progression": "marker_to_ideal",
+      "semantic_role": "advice",
+      "visual_mode": "editorial",
+      "visual_type": "timeline_event"
+    },
+    {
+      "concept": "metaphor",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "That's your shield",
+      "progression": "hold",
+      "semantic_role": "metaphor",
+      "visual_mode": "editorial",
+      "visual_type": "principle_card"
+    },
+    {
+      "concept": "data_point",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "10 % annually",
+      "progression": "progress_bar_fill",
+      "semantic_role": "data_point",
+      "visual_mode": "data",
+      "visual_type": "gauge_visual"
+    },
+    {
+      "concept": "data_point",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "7 % after",
+      "progression": "progress_bar_fill",
+      "semantic_role": "data_point",
+      "visual_mode": "data",
+      "visual_type": "gauge_visual"
+    },
+    {
+      "concept": "comparison",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "\\$22 ,000",
+      "progression": "count_up_to_value",
+      "semantic_role": "comparison",
+      "visual_mode": "data",
+      "visual_type": "score_delta"
+    },
+    {
+      "concept": "comparison",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "\\$77 ,000",
+      "progression": "count_up_to_value",
+      "semantic_role": "comparison",
+      "visual_mode": "data",
+      "visual_type": "score_delta"
+    },
+    {
+      "concept": "punchline",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "\\$55 ,000 difference",
+      "progression": "hold_with_pulse",
+      "semantic_role": "punchline",
+      "visual_mode": "data",
+      "visual_type": "delta_callout"
+    },
+    {
+      "concept": "takeaway",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "slow-motion losing",
+      "progression": "hold",
+      "semantic_role": "takeaway",
+      "visual_mode": "editorial",
+      "visual_type": "hero_statement"
+    },
+    {
+      "concept": "insight",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "wealthy already know this",
+      "progression": "hold",
+      "semantic_role": "insight",
+      "visual_mode": "editorial",
+      "visual_type": "principle_card"
+    },
+    {
+      "concept": "action",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "everything else is deployed",
+      "progression": "hold",
+      "semantic_role": "action",
+      "visual_mode": "editorial",
+      "visual_type": "action_card"
+    },
+    {
+      "concept": "close",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "Start today",
+      "progression": "check_reveal",
+      "semantic_role": "close",
+      "visual_mode": "editorial",
+      "visual_type": "closing_card"
+    },
+    {
+      "concept": "close",
+      "entrance": "fade_in",
+      "exit": "fade",
+      "pattern": "inflation takes another bite",
+      "progression": "hold",
+      "semantic_role": "close",
+      "visual_mode": "editorial",
+      "visual_type": "closing_card"
+    },
+    {
+      "pattern": "overwhelmingly in your favor",
+      "concept": "insight",
+      "visual_type": "principle_card",
+      "entrance": "fade_in",
+      "progression": "hold",
+      "exit": "fade",
+      "semantic_role": "insight",
+      "visual_mode": "editorial"
+    },
+    {
+      "pattern": "on \\$20 ,000 over 20 years",
+      "concept": "setup",
+      "visual_type": "stat_callout",
+      "entrance": "fade_in",
+      "progression": "hold",
+      "exit": "fade",
+      "semantic_role": "setup",
+      "visual_mode": "data"
+    },
+    {
+      "pattern": "profit off your inertia",
+      "concept": "reframe",
+      "visual_type": "impact_card",
+      "entrance": "fade_in",
+      "progression": "hold",
+      "exit": "fade",
+      "semantic_role": "reframe",
+      "visual_mode": "editorial"
+    },
+    {
+      "pattern": "whether you can afford not to",
+      "concept": "question",
+      "visual_type": "question_card",
+      "entrance": "fade_in",
+      "progression": "hold",
+      "exit": "fade",
+      "semantic_role": "question",
+      "visual_mode": "editorial"
+    },
+    {
+      "pattern": "money that dies",
+      "concept": "metaphor",
+      "visual_type": "impact_card",
+      "entrance": "fade_in",
+      "progression": "hold",
+      "exit": "fade",
+      "semantic_role": "metaphor",
+      "visual_mode": "editorial"
+    },
+    {
+      "pattern": "when you were 18",
+      "concept": "reframe",
+      "visual_type": "tip_card",
+      "entrance": "fade_in",
+      "progression": "hold",
+      "exit": "fade",
+      "semantic_role": "reframe",
+      "visual_mode": "editorial"
+    },
+    {
+      "pattern": "working as hard as I am",
+      "concept": "question",
+      "visual_type": "question_card",
+      "entrance": "fade_in",
+      "progression": "hold",
+      "exit": "fade",
+      "semantic_role": "question",
+      "visual_mode": "editorial"
+    },
+    {
+      "pattern": "broad market index funds",
+      "concept": "solution",
+      "visual_type": "tip_card",
+      "entrance": "fade_in",
+      "progression": "hold",
+      "exit": "fade",
+      "semantic_role": "solution",
+      "visual_mode": "editorial"
+    },
+    {
+      "pattern": "isn't whether you can afford to invest",
+      "concept": "reframe",
+      "visual_type": "question_card",
+      "entrance": "fade_in",
+      "progression": "hold",
+      "exit": "fade",
+      "semantic_role": "reframe",
+      "visual_mode": "editorial"
+    },
+    {
+      "pattern": "stop letting the default option",
+      "concept": "action",
+      "visual_type": "action_card",
+      "entrance": "fade_in",
+      "progression": "hold",
+      "exit": "fade",
+      "semantic_role": "action",
+      "visual_mode": "editorial"
+    },
+    {
+      "pattern": "every dollar beyond that safety net",
+      "concept": "action",
+      "visual_type": "action_card",
+      "entrance": "fade_in",
+      "progression": "hold",
+      "exit": "fade",
+      "semantic_role": "action",
+      "visual_mode": "editorial"
+    },
+    {
+      "pattern": "you still lost",
+      "concept": "consequence",
+      "visual_type": "impact_card",
+      "entrance": "fade_in",
+      "progression": "hold",
+      "exit": "fade",
+      "semantic_role": "consequence",
+      "visual_mode": "editorial"
+    },
+    {
+      "pattern": "pay you crumbs",
+      "concept": "reframe",
+      "visual_type": "impact_card",
+      "entrance": "fade_in",
+      "progression": "hold",
+      "exit": "fade",
+      "semantic_role": "reframe",
+      "visual_mode": "editorial"
+    },
+    {
+      "pattern": "collapse back toward",
+      "concept": "warning",
+      "visual_type": "delta_callout",
+      "entrance": "fade_in",
+      "progression": "score_count_down",
+      "exit": "fade",
+      "semantic_role": "warning",
+      "visual_mode": "data"
+    },
+    {
+      "pattern": "barely above 0",
+      "concept": "data_point",
+      "visual_type": "gauge_visual",
+      "entrance": "fade_in",
+      "progression": "progress_bar_fill",
+      "exit": "fade",
+      "semantic_role": "data_point",
+      "visual_mode": "data"
+    },
+    {
+      "pattern": "what should you actually do",
+      "concept": "transition",
+      "visual_type": "section_title",
+      "entrance": "fade_in",
+      "progression": "hold",
+      "exit": "fade",
+      "semantic_role": "transition",
+      "visual_mode": "editorial"
+    },
+    {
+      "pattern": "typical savings account right now",
+      "concept": "setup",
+      "visual_type": "tip_card",
+      "entrance": "fade_in",
+      "progression": "hold",
+      "exit": "fade",
+      "semantic_role": "setup",
+      "visual_mode": "editorial"
+    },
+    {
+      "pattern": "after inflation at 3 %",
+      "concept": "data_point",
+      "visual_type": "gauge_visual",
+      "entrance": "fade_in",
+      "progression": "progress_bar_fill",
+      "exit": "fade",
+      "semantic_role": "data_point",
+      "visual_mode": "data"
+    },
+    {
+      "pattern": "numbers don't lie",
+      "concept": "setup",
+      "visual_type": "section_title",
+      "entrance": "fade_in",
+      "progression": "hold",
+      "exit": "fade",
+      "semantic_role": "setup",
+      "visual_mode": "editorial"
+    }
+  ]
+}

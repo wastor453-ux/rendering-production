@@ -6,8 +6,8 @@ This is the ONLY approved way to start a production render.
 
 Usage:
   python3 tools/dispatch_production.py \
-      --composition <CompositionName> --start-frame 0 --end-frame <N> \
-      --label "<label>" [--dry-run]
+      --composition {composition-id} --start-frame 0 --end-frame 23150 \
+      --label "{label}" [--dry-run]
 
 Steps:
   1. Run .github/scripts/validate_dispatch.py — abort if ANY check fails.
@@ -31,7 +31,7 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = "wastor453-ux/rendering-production"
 BRANCH = "p4-4-ccdecbc-readiness"
 WORKFLOW = "render-production.yml"
-STATE_DIR = os.path.expanduser("~/workspace/crackit/demo-video/.production-state")
+STATE_DIR = os.path.expanduser("~/workspace/crackit/production/.production-state")
 
 sys.path.insert(0, "/opt/hatch/skills/skill-creator/bin")
 from dynamic_credentials import add_surrogate_to_request, read_json_response
@@ -98,6 +98,8 @@ def check_branch_pushed():
 def main():
     p = argparse.ArgumentParser(description="Errorless production dispatch")
     p.add_argument("--composition", required=True)
+    p.add_argument("--video-id", default="",
+                   help="Video ID (required for EventDriven composition)")
     p.add_argument("--start-frame", type=int, default=0)
     p.add_argument("--end-frame", type=int, required=True)
     p.add_argument("--chunk-size", type=int, default=600)
@@ -105,14 +107,18 @@ def main():
     p.add_argument("--crf", type=int, default=18)
     p.add_argument("--with-audio", action="store_true", default=True)
     p.add_argument("--no-audio", dest="with_audio", action="store_false")
-    p.add_argument("--vo-file", default=None,
-                   help="Path to voiceover file (required, no default - each video supplies its own)")
+    p.add_argument("--vo-file", default="{vo-file}")
     p.add_argument("--bed-file", default="public/audio/bed.mp3")
     p.add_argument("--label", default="")
     p.add_argument("--resume-from-run-id", default="")
     p.add_argument("--dry-run", action="store_true",
                    help="Validate only, do not dispatch")
     args = p.parse_args()
+
+    # GATE 0: reject placeholder defaults (fail-closed)
+    if args.vo_file == "{vo-file}":
+        print("ERROR: --vo-file is required (no default).", file=sys.stderr)
+        sys.exit(1)
 
     # GATE 1: pre-dispatch validation (catches input errors like wrong VO).
     if not run_validator(args):
@@ -131,6 +137,7 @@ def main():
     # Dispatch.
     inputs = {
         "composition": args.composition,
+        "video_id": args.video_id,
         "label": args.label or f"{args.composition} production",
         "start_frame": str(args.start_frame),
         "end_frame": str(args.end_frame),

@@ -7,6 +7,10 @@ on:
         description: 'Remotion composition ID'
         required: true
         default: 'SavingsTrap'
+      video_id:
+        description: 'Video ID for event-driven pipeline (e.g., credit-score). Required when composition=EventDriven.'
+        required: false
+        default: ''
       label:
         description: 'Human-readable label (display only, NOT used for artifact identity)'
         required: false
@@ -36,9 +40,8 @@ on:
         type: boolean
         default: true
       vo_file:
-        description: 'VO source (relative to repo root)'
-        required: false
-        default: 'public/audio/vo_p3.wav'
+        description: 'VO source — must match the source run (verified by SHA). Required.'
+        required: true
       bed_file:
         description: 'Music bed source (relative to repo root)'
         required: false
@@ -196,6 +199,185 @@ jobs:
             --registry "${REG}" --run-id "${JOB_ID}"
           python3 .github/scripts/pipeline_check.py \
             --stage S7_render --registry "${REG}" --run-id "${JOB_ID}"
+
+      - name: Prepare event-driven manifest
+        # For EventDriven composition: copy video-owned data to _active/
+        # This makes the generic composition render the selected video's data.
+        # No video-specific code in workflow; paths derived from video_id.
+        env:
+          COMPOSITION: ${{ inputs.composition }}
+          VIDEO_ID: ${{ inputs.video_id }}
+          WITH_AUDIO: ${{ inputs.with_audio }}
+        run: |
+          set -euo pipefail
+          if [ "$COMPOSITION" = "EventDriven" ]; then
+            if [ -z "$VIDEO_ID" ]; then
+              echo "FATAL: video_id is required when composition=EventDriven" >&2
+              exit 1
+            fi
+            # Validate video_id format (alphanumeric + hyphens only)
+            if ! echo "$VIDEO_ID" | grep -Eq '^[a-z0-9-]+$'; then
+              echo "FATAL: Invalid video_id format: $VIDEO_ID" >&2
+              exit 1
+            fi
+            SRC_DIR="src/videos/$VIDEO_ID"
+            if [ ! -d "$SRC_DIR" ]; then
+              echo "FATAL: Video directory not found: $SRC_DIR" >&2
+              exit 1
+            fi
+            TIMELINE_SRC="$SRC_DIR/data/event_timeline.json"
+            AUDIO_SRC="$SRC_DIR/audio/vo.wav"
+            if [ ! -f "$TIMELINE_SRC" ]; then
+              echo "FATAL: Timeline not found: $TIMELINE_SRC" >&2
+              exit 1
+            fi
+            if [ ! -f "$AUDIO_SRC" ]; then
+              echo "FATAL: Audio not found: $AUDIO_SRC" >&2
+              exit 1
+            fi
+            echo "Preparing manifest for video: $VIDEO_ID"
+            # Regenerate timeline from current VO (ensures freshness)
+            pip install faster-whisper huggingface-hub 2>&1 | tail -2
+            python3 tools/provision_whisper_model.py
+            python3 tools/run_pipeline.py --video "$VIDEO_ID"
+            mkdir -p src/videos/_active
+            cp "$TIMELINE_SRC" src/videos/_active/timeline.json
+            cp "$AUDIO_SRC" src/videos/_active/vo.wav
+            echo "{"videoId": "$VIDEO_ID"}" > src/videos/_active/manifest.json
+            # Package validated inputs for workers (with SHA256SUMS)
+            mkdir -p /tmp/validated-inputs
+            cp "$TIMELINE_SRC" /tmp/validated-inputs/timeline.json
+            cp "$AUDIO_SRC" /tmp/validated-inputs/vo.wav
+            cp "$SRC_DIR/data/alignment.json" /tmp/validated-inputs/alignment.json
+            cd /tmp/validated-inputs && sha256sum timeline.json vo.wav alignment.json > SHA256SUMS
+            cd -
+            echo "✅ Manifest prepared, validated inputs packaged"
+          else
+            echo "Skipping manifest preparation (composition: $COMPOSITION)"
+          fi
+          
+          # AUDIO OWNERSHIP ENFORCEMENT (fail-closed, contract-driven)
+          AUDIO_OWNERSHIP=$(python3 -c "
+          import sys
+          sys.path.insert(0, '.github/scripts')
+          from composition_contract import get_contract
+          c = get_contract(os.environ['COMPOSITION'])
+          print(c.get('audio_ownership', c.get('audio', 'unknown')) if c else 'unknown')
+          ")
+          echo "Audio ownership for $COMPOSITION: $AUDIO_OWNERSHIP"
+          if [ "$AUDIO_OWNERSHIP" = "embedded" ] && [ "$WITH_AUDIO" = "true" ]; then
+            echo "FATAL: $COMPOSITION uses embedded audio; with_audio must be false" >&2
+            exit 1
+          fi
+
+      - name: Upload validated render inputs
+        if: inputs.composition == 'EventDriven'
+        uses: actions/upload-artifact@v4
+        with:
+          name: validated-inputs-${{ needs.plan.outputs.job_identity }}
+          path: /tmp/validated-inputs/
+          retention-days: 7
+
+      - name: Mandatory production validation
+        # Enforces mandatory quality gates for ALL compositions.
+        # Every video passes the same global requirements:
+        # 1. Typography (mandatory role ranges) — ALWAYS
+        # 2. Timeline-specific validation:
+        #    - event_timeline: validate_timeline.py (timing, coverage, lifecycle)
+        #    - compiled_beats: existing S7 beat validation (already run above)
+        #    - fixed: no timeline file to validate (static composition)
+        # Fails the build if validation fails. No bypasses.
+        env:
+          COMPOSITION: ${{ inputs.composition }}
+        run: |
+          set -euo pipefail
+          # COMPOSITION from env (not interpolated)
+          # Get timeline type from composition contract
+          TIMELINE_TYPE=$(python3 -c "
+          import sys
+          sys.path.insert(0, '.github/scripts')
+          from composition_contract import get_contract
+          c = get_contract(os.environ['COMPOSITION'])
+          print(c.get('timeline', 'unknown') if c else 'unknown')
+          ")
+          echo "Composition $COMPOSITION uses timeline type: $TIMELINE_TYPE"
+          # MANDATORY: Typography validation for ALL compositions
+          echo "Validating typography (mandatory for all)..."
+          python3 tools/validate_typography.py --strict
+          
+          if [ "$TIMELINE_TYPE" = "event_timeline" ]; then
+            echo "Running event timeline validators..."
+            # Get timeline file: for EventDriven, use the prepared _active copy
+          # (ensures validated timeline == rendered timeline)
+          if [ "$COMPOSITION" = "EventDriven" ]; then
+            TIMELINE_FILE="src/videos/_active/timeline.json"
+          else
+            TIMELINE_FILE=$(python3 -c "
+            import sys
+            sys.path.insert(0, '.github/scripts')
+            from composition_contract import get_contract
+            c = get_contract(os.environ['COMPOSITION'])
+            print(c.get('timeline_file', '') if c else '')
+            ")
+          fi
+            if [ -z "$TIMELINE_FILE" ]; then
+              echo "FATAL: No timeline_file in contract for: $COMPOSITION" >&2
+              exit 1
+            fi
+            if [ ! -f "$TIMELINE_FILE" ]; then
+              echo "FATAL: Timeline file not found: $TIMELINE_FILE" >&2
+              exit 1
+            fi
+            echo "Validating timeline: $TIMELINE_FILE"
+            python3 tools/validate_timeline.py "$TIMELINE_FILE"
+            # PROVENANCE CHECK: Verify timeline was generated from current inputs
+            # Prevents stale timelines from passing validation
+            echo "Verifying timeline provenance..."
+            python3 << 'PYEOF2'
+            import json, hashlib, sys
+            # Get video_id from manifest
+            with open("src/videos/_active/manifest.json") as f:
+                video_id = json.load(f)["videoId"]
+            timeline_path = "src/videos/_active/timeline.json"
+            alignment_path = f"src/videos/{video_id}/data/alignment.json"
+            patterns_path = f"src/videos/{video_id}/data/semantic_patterns.json"
+            def file_hash(p):
+                h = hashlib.sha256()
+                with open(p, "rb") as f:
+                    for c in iter(lambda: f.read(8192), b""):
+                        h.update(c)
+                return h.hexdigest()
+            with open(timeline_path) as f:
+                tl = json.load(f)
+            prov = tl.get("provenance", {})
+            if not prov:
+                print("FATAL: Timeline has no provenance info (stale format)", file=sys.stderr)
+                sys.exit(1)
+            current_align = file_hash(alignment_path)
+            current_pat = file_hash(patterns_path)
+            if prov.get("alignment_sha256") != current_align:
+                print(f"FATAL: Timeline alignment hash mismatch (stale timeline)", file=sys.stderr)
+                print(f"  Expected: {current_align[:16]}...", file=sys.stderr)
+                print(f"  Found: {prov.get('alignment_sha256', 'none')[:16]}...", file=sys.stderr)
+                sys.exit(1)
+            if prov.get("patterns_sha256") != current_pat:
+                print(f"FATAL: Timeline patterns hash mismatch (stale timeline)", file=sys.stderr)
+                sys.exit(1)
+            print("✅ Timeline provenance verified (fresh)")
+            PYEOF2
+            echo "Validating typography..."
+            python3 tools/validate_typography.py --strict
+            echo "✅ Event timeline validation passed"
+          elif [ "$TIMELINE_TYPE" = "compiled_beats" ]; then
+            echo "Beat timeline already validated by S7 gate above"
+          elif [ "$TIMELINE_TYPE" = "fixed" ]; then
+            echo "Fixed timeline: no file to validate (static composition)"
+          else
+            echo "FATAL: Unknown timeline type: $TIMELINE_TYPE" >&2
+            exit 1
+          fi
+          echo "✅ Mandatory validation passed"
+          fi
 
       - name: Install ffmpeg (for audio guard)
         run: |
@@ -403,6 +585,36 @@ jobs:
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Download validated render inputs
+        if: inputs.composition == 'EventDriven'
+        uses: actions/download-artifact@v4
+        with:
+          name: validated-inputs-${{ needs.plan.outputs.job_identity }}
+          path: /tmp/validated-inputs/
+
+      - name: Prepare event-driven manifest (per-worker)
+        # Each worker prepares _active/ from the VALIDATED artifact (not checkout).
+        # Ensures all workers use identical validated data.
+        env:
+          COMPOSITION: ${{ inputs.composition }}
+          VIDEO_ID: ${{ inputs.video_id }}
+        run: |
+          set -euo pipefail
+          if [ "$COMPOSITION" = "EventDriven" ]; then
+            if [ ! -d /tmp/validated-inputs ]; then
+              echo "FATAL: Validated inputs artifact missing" >&2
+              exit 1
+            fi
+            cd /tmp/validated-inputs && sha256sum -c SHA256SUMS || {
+              echo "FATAL: Validated inputs hash mismatch" >&2; exit 1; }
+            cd -
+            mkdir -p src/videos/_active
+            cp /tmp/validated-inputs/timeline.json src/videos/_active/timeline.json
+            cp /tmp/validated-inputs/vo.wav src/videos/_active/vo.wav
+            echo "{"videoId": "$VIDEO_ID"}" > src/videos/_active/manifest.json
+            echo "✅ Worker prepared _active/ from validated artifact for $VIDEO_ID"
+          fi
 
       - name: Setup Node (with npm cache)
         uses: actions/setup-node@v4

@@ -60,7 +60,7 @@
   },
   {
    "pattern": "payment\\ history\\ is\\ 35",
-   "visual_type": "donut_segment",
+   "visual_type": "factor_card",
    "entrance": "donut_reveal",
    "progression": "label_count_up",
    "exit": "persist_dimmed",
@@ -76,7 +76,7 @@
   },
   {
    "pattern": "amounts\\ owed\\ is\\ 30",
-   "visual_type": "donut_segment",
+   "visual_type": "factor_card",
    "entrance": "donut_reveal",
    "progression": "label_count_up",
    "exit": "persist_dimmed",
@@ -92,7 +92,7 @@
   },
   {
    "pattern": "length\\ of\\ credit\\ history\\ is\\ 15",
-   "visual_type": "donut_segment",
+   "visual_type": "factor_card",
    "entrance": "donut_reveal",
    "progression": "label_count_up",
    "exit": "persist_dimmed",
@@ -108,7 +108,7 @@
   },
   {
    "pattern": "new\\ credit\\ is\\ 10",
-   "visual_type": "donut_segment",
+   "visual_type": "factor_card",
    "entrance": "donut_reveal",
    "progression": "label_count_up",
    "exit": "persist_dimmed",

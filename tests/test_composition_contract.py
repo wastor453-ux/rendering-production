@@ -85,7 +85,7 @@ class TestBeatContractGate(unittest.TestCase):
 
     def test_fixed_timeline_composition_skips(self):
         check_beat_contract = self._beat_gate()
-        self.assertEqual(check_beat_contract("FromScratchLight", REPO_ROOT), [])
+        self.assertEqual(check_beat_contract("FinanceProof", REPO_ROOT), [])
 
     def test_tampered_beat_fails_closed(self):
         schema = self._require_workspace_schema()
@@ -320,12 +320,12 @@ class TestRegistryCompleteness(unittest.TestCase):
     def test_duplicate_id_detected(self):
         dup_src = (
             'COMPOSITIONS = {\n'
-            '    "FromScratchLight": dict(role="production"),\n'
-            '    "FromScratchLight": dict(role="test"),\n'
+            '    "BudgetRule": dict(role="production"),\n'
+            '    "BudgetRule": dict(role="test"),\n'
             '}\n'
         )
         dups = find_duplicate_ids(dup_src)
-        self.assertEqual(dups, {"FromScratchLight": 2})
+        self.assertEqual(dups, {"BudgetRule": 2})
 
     def test_each_id_declared_once(self):
         # The real registry file: every id exactly once.
@@ -367,28 +367,37 @@ class TestDispatchGates(unittest.TestCase):
         self.assertTrue(errs)
 
     def test_production_cannot_claim_exemption(self):
-        saved = COMPOSITIONS["FromScratchLight"]["exemption"]
-        COMPOSITIONS["FromScratchLight"]["exemption"] = "bogus"
+        saved = COMPOSITIONS["BudgetRule"]["exemption"]
+        COMPOSITIONS["BudgetRule"]["exemption"] = "bogus"
         try:
-            errs = validate_for_dispatch("FromScratchLight", True)
+            errs = validate_for_dispatch("BudgetRule", True)
             self.assertTrue(errs)
             self.assertIn("cannot", errs[0])
         finally:
-            COMPOSITIONS["FromScratchLight"]["exemption"] = saved
+            COMPOSITIONS["BudgetRule"]["exemption"] = saved
 
     def test_embedded_audio_with_audio_false_rejected(self):
-        # Verified defect E1: FromScratchLight embeds <Audio>; a with_audio=false
+        # Verified defect E1: CreditScore embeds <Audio>; a with_audio=false
         # master would be labeled video_only while containing an audio stream.
-        errs = validate_for_dispatch("FromScratchLight", False)
+        errs = validate_for_dispatch("CreditScore", False)
         self.assertTrue(errs)
         self.assertIn("video_only", errs[0])
-        errs = validate_for_dispatch("MoneyDying", False)
-        self.assertTrue(errs)
 
     def test_all_registered_pass_with_audio_true(self):
-        for cid in COMPOSITIONS:
+        # F-16: Only production-role compositions may dispatch.
+        # Demo/test roles (e.g. FinanceProof) must be rejected.
+        # EventDriven requires video_id for dynamic duration — without it,
+        # it correctly fails closed (not a dispatch failure).
+        for cid, contract in COMPOSITIONS.items():
             errs = validate_for_dispatch(cid, True)
-            self.assertEqual(errs, [], f"{cid}: {errs}")
+            if cid == "EventDriven":
+                # Dynamic duration: needs video_id, fails closed without it
+                self.assertTrue(errs, f"{cid} should fail closed without video_id")
+                continue
+            if contract.get("role") == "production":
+                self.assertEqual(errs, [], f"{cid}: {errs}")
+            else:
+                self.assertTrue(errs, f"{cid} (role={contract.get('role')}) should be rejected")
 
     def test_exempt_test_compositions_pass(self):
         for cid in ("SavingsTrap",):
@@ -408,8 +417,17 @@ class TestDispatchGates(unittest.TestCase):
                 COMPOSITIONS["SavingsTrap"][field] = saved
 
     def test_valid_compositions_still_pass_after_hardening(self):
-        for cid in COMPOSITIONS:
-            self.assertEqual(validate_for_dispatch(cid, True), [], f"{cid}")
+        # F-16: Production roles pass; non-production roles are rejected.
+        # EventDriven needs video_id for dynamic duration — fails closed without it.
+        for cid, contract in COMPOSITIONS.items():
+            errs = validate_for_dispatch(cid, True)
+            if cid == "EventDriven":
+                self.assertTrue(errs, f"{cid} should fail closed without video_id")
+                continue
+            if contract.get("role") == "production":
+                self.assertEqual(errs, [], f"{cid}")
+            else:
+                self.assertTrue(errs, f"{cid} should be rejected")
 
 
 class TestPlanGate(unittest.TestCase):
@@ -422,7 +440,7 @@ class TestPlanGate(unittest.TestCase):
 
     def test_plan_accepts_registered(self):
         import plan
-        self.assertEqual(plan.validate_composition("FromScratchLight"), "FromScratchLight")
+        self.assertEqual(plan.validate_composition("BudgetRule"), "BudgetRule")
         self.assertEqual(plan.validate_composition("SavingsTrap"), "SavingsTrap")
 
     def test_plan_still_rejects_bad_format(self):

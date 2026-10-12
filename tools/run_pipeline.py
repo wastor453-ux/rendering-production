@@ -26,6 +26,7 @@ FAIL-CLOSED: Any stage failure stops the pipeline with exit 1.
 """
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
@@ -33,6 +34,16 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).parent.parent
+TOOLS_DIR = REPO_ROOT / "tools"
+
+
+def sha256_file(path):
+    """Compute SHA-256 hash of a file."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            h.update(chunk)
+    return h.hexdigest()
 TOOLS_DIR = REPO_ROOT / "tools"
 
 
@@ -98,8 +109,9 @@ def main():
     parser.add_argument("--video", required=True, help="Video ID (directory under src/videos/)")
     parser.add_argument("--skip-align", action="store_true",
                         help="Reuse cached alignment.json instead of re-aligning")
-    parser.add_argument("--venv", default=str(REPO_ROOT / ".venv" / "bin" / "python"),
-                        help="Python with faster-whisper (default: pipeline venv)")
+    parser.add_argument("--venv", default=sys.executable,
+                        help="Python with faster-whisper (default: same interpreter running the pipeline). "
+                             "F-04 fix: was .venv/bin/python which the workflow never creates.")
     args = parser.parse_args()
     
     video_id = args.video
@@ -120,11 +132,25 @@ def main():
     alignment_file = data_dir / "alignment.json"
     if args.skip_align and alignment_file.exists():
         print(f"\n⏭️  Skipping alignment (using cached {alignment_file})", file=sys.stderr)
-        # Validate cached alignment provenance
+        # Validate cached alignment provenance: VO hash must match
         with open(alignment_file) as f:
             cached = json.load(f)
-        print(f"   Cached: {cached.get('word_count', '?')} words", file=sys.stderr)
+        cached_hash = cached.get("source_sha256", "")  # align_vo.py writes source_sha256
+        current_hash = sha256_file(vo_file)
+        if cached_hash != current_hash:
+            print(f"❌ FATAL: Cached alignment source hash mismatch", file=sys.stderr)
+            print(f"   Cached: {cached_hash[:16]}...", file=sys.stderr)
+            print(f"   Current VO: {current_hash[:16]}...", file=sys.stderr)
+            print(f"   The VO file changed. Re-run without --skip-align.", file=sys.stderr)
+            sys.exit(1)
+        print(f"   Cached: {cached.get('word_count', '?')} words, hash verified ✅", file=sys.stderr)
     else:
+        # F-04: Fail closed if the alignment interpreter does not exist.
+        venv_py = Path(args.venv)
+        if not venv_py.exists():
+            print(f"❌ FATAL: Alignment Python not found: {args.venv}", file=sys.stderr)
+            print(f"   Install faster-whisper for this interpreter or pass --venv.", file=sys.stderr)
+            sys.exit(1)
         run_stage(
             "Align voiceover (faster-whisper)",
             [args.venv, str(TOOLS_DIR / "align_vo.py"),
@@ -143,6 +169,12 @@ def main():
     run_stage(
         "Validate event timeline (quality gates)",
         ["python3", str(TOOLS_DIR / "validate_timeline.py"), str(events_file)]
+    )
+    
+    # Stage 5: Validate typography
+    run_stage(
+        "Validate typography (readability gates)",
+        ["python3", str(TOOLS_DIR / "validate_typography.py"), "--strict"]
     )
     
     # Summary

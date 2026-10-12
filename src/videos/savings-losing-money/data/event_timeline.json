@@ -1,0 +1,916 @@
+{
+ "source": "generate_event_timeline.py",
+ "provenance": {
+  "alignment_source": "/home/hatch/workspace/crackit/production/src/videos/savings-losing-money/data/alignment.json",
+  "alignment_sha256": "cc56a6bc1eba89ae78c49377d5045bc37b2f7d5438952d4cf544e3fb0b437d7e",
+  "patterns_source": "/home/hatch/workspace/crackit/production/src/videos/savings-losing-money/data/semantic_patterns.json",
+  "patterns_sha256": "a36f83d1c93beb6c84897dcd2f329a3aef649625624d9e7da031c28ebaa7e0e1",
+  "vo_sha256": "c01144705e32dcea8040547579875bc04a023b7fb23971b526cd3272aabc82c9",
+  "generator": "tools/generate_event_timeline.py"
+ },
+ "narration_duration_s": 226.42,
+ "fps": 30,
+ "event_count": 50,
+ "events": [
+  {
+   "event_id": "evt_001",
+   "start_frame": 0,
+   "end_frame": 120,
+   "word_anchor": {
+    "word_index": 4,
+    "word": "losing",
+    "phrase": "losing you money",
+    "start_s": 1.46,
+    "end_s": 1.84
+   },
+   "semantic_claim": "hook",
+   "visual_type": "hero_statement",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "losing you money"
+  },
+  {
+   "event_id": "evt_002",
+   "start_frame": 146,
+   "end_frame": 266,
+   "word_anchor": {
+    "word_index": 14,
+    "word": "counting",
+    "phrase": "counting on you not noticing",
+    "start_s": 4.88,
+    "end_s": 5.22
+   },
+   "semantic_claim": "setup",
+   "visual_type": "tip_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "counting on you not noticing"
+  },
+  {
+   "event_id": "evt_003",
+   "start_frame": 286,
+   "end_frame": 336,
+   "word_anchor": {
+    "word_index": 26,
+    "word": "$10",
+    "phrase": "$10 ,000 sitting",
+    "start_s": 9.54,
+    "end_s": 9.84
+   },
+   "semantic_claim": "anchor_value",
+   "visual_type": "score_card",
+   "entrance": "fade_in",
+   "progression": "count_up_to_value",
+   "exit": "fade",
+   "on_screen_text": "$10 ,000 sitting"
+  },
+  {
+   "event_id": "evt_004",
+   "start_frame": 336,
+   "end_frame": 456,
+   "word_anchor": {
+    "word_index": 31,
+    "word": "typical",
+    "phrase": "typical savings account right now",
+    "start_s": 11.22,
+    "end_s": 11.5
+   },
+   "semantic_claim": "setup",
+   "visual_type": "tip_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "typical savings account right now"
+  },
+  {
+   "event_id": "evt_005",
+   "start_frame": 463,
+   "end_frame": 583,
+   "word_anchor": {
+    "word_index": 43,
+    "word": "quietly",
+    "phrase": "quietly evaporate",
+    "start_s": 15.46,
+    "end_s": 15.86
+   },
+   "semantic_claim": "consequence",
+   "visual_type": "impact_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "quietly evaporate"
+  },
+  {
+   "event_id": "evt_006",
+   "start_frame": 586,
+   "end_frame": 706,
+   "word_anchor": {
+    "word_index": 53,
+    "word": "numbers",
+    "phrase": "numbers don't lie",
+    "start_s": 19.56,
+    "end_s": 19.92
+   },
+   "semantic_claim": "setup",
+   "visual_type": "section_title",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "numbers don't lie"
+  },
+  {
+   "event_id": "evt_007",
+   "start_frame": 729,
+   "end_frame": 840,
+   "word_anchor": {
+    "word_index": 64,
+    "word": "0",
+    "phrase": "0 .4 % interest",
+    "start_s": 24.3,
+    "end_s": 24.76
+   },
+   "semantic_claim": "data_point",
+   "visual_type": "gauge_visual",
+   "entrance": "fade_in",
+   "progression": "progress_bar_fill",
+   "exit": "fade",
+   "on_screen_text": "0 .4 % interest"
+  },
+  {
+   "event_id": "evt_008",
+   "start_frame": 840,
+   "end_frame": 960,
+   "word_anchor": {
+    "word_index": 70,
+    "word": "that's",
+    "phrase": "that's $40",
+    "start_s": 28.02,
+    "end_s": 28.44
+   },
+   "semantic_claim": "data_point",
+   "visual_type": "score_delta",
+   "entrance": "fade_in",
+   "progression": "count_up_to_value",
+   "exit": "fade",
+   "on_screen_text": "that's $40"
+  },
+  {
+   "event_id": "evt_009",
+   "start_frame": 1031,
+   "end_frame": 1126,
+   "word_anchor": {
+    "word_index": 84,
+    "word": "around",
+    "phrase": "around 3%",
+    "start_s": 34.38,
+    "end_s": 34.7
+   },
+   "semantic_claim": "data_point",
+   "visual_type": "gauge_visual",
+   "entrance": "fade_in",
+   "progression": "progress_bar_fill",
+   "exit": "fade",
+   "on_screen_text": "around 3%"
+  },
+  {
+   "event_id": "evt_010",
+   "start_frame": 1126,
+   "end_frame": 1246,
+   "word_anchor": {
+    "word_index": 91,
+    "word": "loses",
+    "phrase": "loses $300",
+    "start_s": 37.54,
+    "end_s": 37.98
+   },
+   "semantic_claim": "data_point",
+   "visual_type": "score_delta",
+   "entrance": "fade_in",
+   "progression": "score_count_down",
+   "exit": "fade",
+   "on_screen_text": "loses $300"
+  },
+  {
+   "event_id": "evt_011",
+   "start_frame": 1359,
+   "end_frame": 1479,
+   "word_anchor": {
+    "word_index": 107,
+    "word": "down",
+    "phrase": "down $260",
+    "start_s": 45.3,
+    "end_s": 45.46
+   },
+   "semantic_claim": "consequence",
+   "visual_type": "delta_callout",
+   "entrance": "fade_in",
+   "progression": "score_count_down",
+   "exit": "fade",
+   "on_screen_text": "down $260"
+  },
+  {
+   "event_id": "evt_012",
+   "start_frame": 1524,
+   "end_frame": 1627,
+   "word_anchor": {
+    "word_index": 120,
+    "word": "you",
+    "phrase": "you still lost",
+    "start_s": 50.8,
+    "end_s": 50.9
+   },
+   "semantic_claim": "consequence",
+   "visual_type": "impact_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "you still lost"
+  },
+  {
+   "event_id": "evt_013",
+   "start_frame": 1627,
+   "end_frame": 1747,
+   "word_anchor": {
+    "word_index": 126,
+    "word": "it's",
+    "phrase": "it's the business model",
+    "start_s": 54.24,
+    "end_s": 54.44
+   },
+   "semantic_claim": "reframe",
+   "visual_type": "impact_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "it's the business model"
+  },
+  {
+   "event_id": "evt_014",
+   "start_frame": 1752,
+   "end_frame": 1806,
+   "word_anchor": {
+    "word_index": 139,
+    "word": "6,",
+    "phrase": "6, 7, 8%",
+    "start_s": 58.4,
+    "end_s": 58.62
+   },
+   "semantic_claim": "contrast",
+   "visual_type": "stat_callout",
+   "entrance": "fade_in",
+   "progression": "progress_bar_fill",
+   "exit": "fade",
+   "on_screen_text": "6, 7, 8%"
+  },
+  {
+   "event_id": "evt_015",
+   "start_frame": 1806,
+   "end_frame": 1926,
+   "word_anchor": {
+    "word_index": 142,
+    "word": "credit",
+    "phrase": "credit cards, mortgages",
+    "start_s": 60.22,
+    "end_s": 60.74
+   },
+   "semantic_claim": "detail",
+   "visual_type": "factor_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "credit cards, mortgages"
+  },
+  {
+   "event_id": "evt_016",
+   "start_frame": 1936,
+   "end_frame": 2056,
+   "word_anchor": {
+    "word_index": 151,
+    "word": "pay",
+    "phrase": "pay you crumbs",
+    "start_s": 64.56,
+    "end_s": 64.7
+   },
+   "semantic_claim": "reframe",
+   "visual_type": "impact_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "pay you crumbs"
+  },
+  {
+   "event_id": "evt_017",
+   "start_frame": 2079,
+   "end_frame": 2199,
+   "word_anchor": {
+    "word_index": 165,
+    "word": "high",
+    "phrase": "high yield savings accounts",
+    "start_s": 69.32,
+    "end_s": 69.56
+   },
+   "semantic_claim": "objection",
+   "visual_type": "question_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "high yield savings accounts"
+  },
+  {
+   "event_id": "evt_018",
+   "start_frame": 2272,
+   "end_frame": 2392,
+   "word_anchor": {
+    "word_index": 179,
+    "word": "might",
+    "phrase": "might pay 4 %",
+    "start_s": 75.74,
+    "end_s": 75.98
+   },
+   "semantic_claim": "data_point",
+   "visual_type": "gauge_visual",
+   "entrance": "fade_in",
+   "progression": "progress_bar_fill",
+   "exit": "fade",
+   "on_screen_text": "might pay 4 %"
+  },
+  {
+   "event_id": "evt_019",
+   "start_frame": 2439,
+   "end_frame": 2515,
+   "word_anchor": {
+    "word_index": 198,
+    "word": "rates",
+    "phrase": "rates are temporary",
+    "start_s": 81.32,
+    "end_s": 81.58
+   },
+   "semantic_claim": "warning",
+   "visual_type": "impact_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "rates are temporary"
+  },
+  {
+   "event_id": "evt_020",
+   "start_frame": 2515,
+   "end_frame": 2628,
+   "word_anchor": {
+    "word_index": 205,
+    "word": "Federal",
+    "phrase": "Federal Reserve cuts rates",
+    "start_s": 83.84,
+    "end_s": 84.16
+   },
+   "semantic_claim": "cause",
+   "visual_type": "factor_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "Federal Reserve cuts rates"
+  },
+  {
+   "event_id": "evt_021",
+   "start_frame": 2628,
+   "end_frame": 2746,
+   "word_anchor": {
+    "word_index": 217,
+    "word": "collapse",
+    "phrase": "collapse back toward",
+    "start_s": 87.6,
+    "end_s": 88.0
+   },
+   "semantic_claim": "warning",
+   "visual_type": "delta_callout",
+   "entrance": "fade_in",
+   "progression": "score_count_down",
+   "exit": "fade",
+   "on_screen_text": "collapse back toward"
+  },
+  {
+   "event_id": "evt_022",
+   "start_frame": 2746,
+   "end_frame": 2866,
+   "word_anchor": {
+    "word_index": 224,
+    "word": "after",
+    "phrase": "after inflation at 3 %",
+    "start_s": 91.56,
+    "end_s": 91.92
+   },
+   "semantic_claim": "data_point",
+   "visual_type": "gauge_visual",
+   "entrance": "fade_in",
+   "progression": "progress_bar_fill",
+   "exit": "fade",
+   "on_screen_text": "after inflation at 3 %"
+  },
+  {
+   "event_id": "evt_023",
+   "start_frame": 2871,
+   "end_frame": 2991,
+   "word_anchor": {
+    "word_index": 238,
+    "word": "taxes",
+    "phrase": "taxes your savings interest",
+    "start_s": 95.7,
+    "end_s": 96.26
+   },
+   "semantic_claim": "cost",
+   "visual_type": "stat_callout",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "taxes your savings interest"
+  },
+  {
+   "event_id": "evt_024",
+   "start_frame": 2995,
+   "end_frame": 3115,
+   "word_anchor": {
+    "word_index": 249,
+    "word": "barely",
+    "phrase": "barely above 0",
+    "start_s": 99.86,
+    "end_s": 100.18
+   },
+   "semantic_claim": "data_point",
+   "visual_type": "gauge_visual",
+   "entrance": "fade_in",
+   "progression": "progress_bar_fill",
+   "exit": "fade",
+   "on_screen_text": "barely above 0"
+  },
+  {
+   "event_id": "evt_025",
+   "start_frame": 3116,
+   "end_frame": 3236,
+   "word_anchor": {
+    "word_index": 259,
+    "word": "that's",
+    "phrase": "that's $50",
+    "start_s": 103.88,
+    "end_s": 104.22
+   },
+   "semantic_claim": "data_point",
+   "visual_type": "score_card",
+   "entrance": "fade_in",
+   "progression": "count_up_to_value",
+   "exit": "fade",
+   "on_screen_text": "that's $50"
+  },
+  {
+   "event_id": "evt_026",
+   "start_frame": 3354,
+   "end_frame": 3472,
+   "word_anchor": {
+    "word_index": 275,
+    "word": "what",
+    "phrase": "what should you actually do",
+    "start_s": 111.8,
+    "end_s": 111.94
+   },
+   "semantic_claim": "transition",
+   "visual_type": "section_title",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "what should you actually do"
+  },
+  {
+   "event_id": "evt_027",
+   "start_frame": 3472,
+   "end_frame": 3592,
+   "word_anchor": {
+    "word_index": 290,
+    "word": "emergency",
+    "phrase": "emergency fund",
+    "start_s": 115.74,
+    "end_s": 116.12
+   },
+   "semantic_claim": "advice",
+   "visual_type": "timeline_event_positive",
+   "entrance": "fade_in",
+   "progression": "check_reveal",
+   "exit": "fade",
+   "on_screen_text": "emergency fund"
+  },
+  {
+   "event_id": "evt_028",
+   "start_frame": 3657,
+   "end_frame": 3777,
+   "word_anchor": {
+    "word_index": 308,
+    "word": "$30",
+    "phrase": "$30 ,000 $50 ,000 rot",
+    "start_s": 121.9,
+    "end_s": 122.36
+   },
+   "semantic_claim": "warning",
+   "visual_type": "delta_callout",
+   "entrance": "fade_in",
+   "progression": "score_count_down",
+   "exit": "fade",
+   "on_screen_text": "$30 ,000 $50 ,000 rot"
+  },
+  {
+   "event_id": "evt_029",
+   "start_frame": 3825,
+   "end_frame": 3925,
+   "word_anchor": {
+    "word_index": 321,
+    "word": "3",
+    "phrase": "3 to 6 months",
+    "start_s": 127.5,
+    "end_s": 127.8
+   },
+   "semantic_claim": "advice",
+   "visual_type": "timeline_event",
+   "entrance": "fade_in",
+   "progression": "marker_to_ideal",
+   "exit": "fade",
+   "on_screen_text": "3 to 6 months"
+  },
+  {
+   "event_id": "evt_030",
+   "start_frame": 3925,
+   "end_frame": 4045,
+   "word_anchor": {
+    "word_index": 332,
+    "word": "That's",
+    "phrase": "That's your shield",
+    "start_s": 130.84,
+    "end_s": 131.08
+   },
+   "semantic_claim": "metaphor",
+   "visual_type": "principle_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "That's your shield"
+  },
+  {
+   "event_id": "evt_031",
+   "start_frame": 4144,
+   "end_frame": 4227,
+   "word_anchor": {
+    "word_index": 351,
+    "word": "broad",
+    "phrase": "broad market index funds",
+    "start_s": 138.14,
+    "end_s": 138.32
+   },
+   "semantic_claim": "solution",
+   "visual_type": "tip_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "broad market index funds"
+  },
+  {
+   "event_id": "evt_032",
+   "start_frame": 4227,
+   "end_frame": 4309,
+   "word_anchor": {
+    "word_index": 359,
+    "word": "10",
+    "phrase": "10 % annually",
+    "start_s": 140.9,
+    "end_s": 141.2
+   },
+   "semantic_claim": "data_point",
+   "visual_type": "gauge_visual",
+   "entrance": "fade_in",
+   "progression": "progress_bar_fill",
+   "exit": "fade",
+   "on_screen_text": "10 % annually"
+  },
+  {
+   "event_id": "evt_033",
+   "start_frame": 4309,
+   "end_frame": 4429,
+   "word_anchor": {
+    "word_index": 365,
+    "word": "7",
+    "phrase": "7 % after",
+    "start_s": 143.66,
+    "end_s": 144.02
+   },
+   "semantic_claim": "data_point",
+   "visual_type": "gauge_visual",
+   "entrance": "fade_in",
+   "progression": "progress_bar_fill",
+   "exit": "fade",
+   "on_screen_text": "7 % after"
+  },
+  {
+   "event_id": "evt_034",
+   "start_frame": 4488,
+   "end_frame": 4608,
+   "word_anchor": {
+    "word_index": 383,
+    "word": "overwhelmingly",
+    "phrase": "overwhelmingly in your favor",
+    "start_s": 149.6,
+    "end_s": 150.18
+   },
+   "semantic_claim": "insight",
+   "visual_type": "principle_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "overwhelmingly in your favor"
+  },
+  {
+   "event_id": "evt_035",
+   "start_frame": 4651,
+   "end_frame": 4771,
+   "word_anchor": {
+    "word_index": 397,
+    "word": "on",
+    "phrase": "on $20 ,000 over 20 years",
+    "start_s": 155.04,
+    "end_s": 155.34
+   },
+   "semantic_claim": "setup",
+   "visual_type": "stat_callout",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "on $20 ,000 over 20 years"
+  },
+  {
+   "event_id": "evt_036",
+   "start_frame": 4822,
+   "end_frame": 4905,
+   "word_anchor": {
+    "word_index": 415,
+    "word": "$22",
+    "phrase": "$22 ,000",
+    "start_s": 160.74,
+    "end_s": 161.3
+   },
+   "semantic_claim": "comparison",
+   "visual_type": "score_delta",
+   "entrance": "fade_in",
+   "progression": "count_up_to_value",
+   "exit": "fade",
+   "on_screen_text": "$22 ,000"
+  },
+  {
+   "event_id": "evt_037",
+   "start_frame": 4905,
+   "end_frame": 5025,
+   "word_anchor": {
+    "word_index": 420,
+    "word": "$77",
+    "phrase": "$77 ,000",
+    "start_s": 163.5,
+    "end_s": 164.02
+   },
+   "semantic_claim": "comparison",
+   "visual_type": "score_delta",
+   "entrance": "fade_in",
+   "progression": "count_up_to_value",
+   "exit": "fade",
+   "on_screen_text": "$77 ,000"
+  },
+  {
+   "event_id": "evt_038",
+   "start_frame": 5055,
+   "end_frame": 5169,
+   "word_anchor": {
+    "word_index": 428,
+    "word": "$55",
+    "phrase": "$55 ,000 difference",
+    "start_s": 168.52,
+    "end_s": 169.02
+   },
+   "semantic_claim": "punchline",
+   "visual_type": "delta_callout",
+   "entrance": "fade_in",
+   "progression": "hold_with_pulse",
+   "exit": "fade",
+   "on_screen_text": "$55 ,000 difference"
+  },
+  {
+   "event_id": "evt_039",
+   "start_frame": 5169,
+   "end_frame": 5289,
+   "word_anchor": {
+    "word_index": 438,
+    "word": "profit",
+    "phrase": "profit off your inertia",
+    "start_s": 172.3,
+    "end_s": 172.74
+   },
+   "semantic_claim": "reframe",
+   "visual_type": "impact_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "profit off your inertia"
+  },
+  {
+   "event_id": "evt_040",
+   "start_frame": 5364,
+   "end_frame": 5436,
+   "word_anchor": {
+    "word_index": 453,
+    "word": "isn't",
+    "phrase": "isn't whether you can afford to invest",
+    "start_s": 178.82,
+    "end_s": 179.24
+   },
+   "semantic_claim": "reframe",
+   "visual_type": "question_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "isn't whether you can afford to invest"
+  },
+  {
+   "event_id": "evt_041",
+   "start_frame": 5436,
+   "end_frame": 5556,
+   "word_anchor": {
+    "word_index": 461,
+    "word": "whether",
+    "phrase": "whether you can afford not to",
+    "start_s": 181.2,
+    "end_s": 181.4
+   },
+   "semantic_claim": "question",
+   "visual_type": "question_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "whether you can afford not to"
+  },
+  {
+   "event_id": "evt_042",
+   "start_frame": 5571,
+   "end_frame": 5691,
+   "word_anchor": {
+    "word_index": 475,
+    "word": "wealthy",
+    "phrase": "wealthy already know this",
+    "start_s": 185.72,
+    "end_s": 186.0
+   },
+   "semantic_claim": "insight",
+   "visual_type": "principle_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "wealthy already know this"
+  },
+  {
+   "event_id": "evt_043",
+   "start_frame": 5734,
+   "end_frame": 5854,
+   "word_anchor": {
+    "word_index": 492,
+    "word": "everything",
+    "phrase": "everything else is deployed",
+    "start_s": 191.14,
+    "end_s": 191.6
+   },
+   "semantic_claim": "action",
+   "visual_type": "action_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "everything else is deployed"
+  },
+  {
+   "event_id": "evt_044",
+   "start_frame": 5902,
+   "end_frame": 6022,
+   "word_anchor": {
+    "word_index": 508,
+    "word": "money",
+    "phrase": "money that dies",
+    "start_s": 196.76,
+    "end_s": 197.02
+   },
+   "semantic_claim": "metaphor",
+   "visual_type": "impact_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "money that dies"
+  },
+  {
+   "event_id": "evt_045",
+   "start_frame": 6062,
+   "end_frame": 6175,
+   "word_anchor": {
+    "word_index": 526,
+    "word": "stop",
+    "phrase": "stop letting the default option",
+    "start_s": 202.08,
+    "end_s": 202.32
+   },
+   "semantic_claim": "action",
+   "visual_type": "action_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "stop letting the default option"
+  },
+  {
+   "event_id": "evt_046",
+   "start_frame": 6175,
+   "end_frame": 6287,
+   "word_anchor": {
+    "word_index": 538,
+    "word": "when",
+    "phrase": "when you were 18",
+    "start_s": 205.86,
+    "end_s": 206.02
+   },
+   "semantic_claim": "reframe",
+   "visual_type": "tip_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "when you were 18"
+  },
+  {
+   "event_id": "evt_047",
+   "start_frame": 6287,
+   "end_frame": 6407,
+   "word_anchor": {
+    "word_index": 546,
+    "word": "Start",
+    "phrase": "Start today",
+    "start_s": 209.58,
+    "end_s": 209.88
+   },
+   "semantic_claim": "close",
+   "visual_type": "closing_card",
+   "entrance": "fade_in",
+   "progression": "check_reveal",
+   "exit": "fade",
+   "on_screen_text": "Start today"
+  },
+  {
+   "event_id": "evt_048",
+   "start_frame": 6445,
+   "end_frame": 6541,
+   "word_anchor": {
+    "word_index": 564,
+    "word": "every",
+    "phrase": "every dollar beyond that safety net",
+    "start_s": 214.86,
+    "end_s": 215.18
+   },
+   "semantic_claim": "action",
+   "visual_type": "action_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "every dollar beyond that safety net"
+  },
+  {
+   "event_id": "evt_049",
+   "start_frame": 6541,
+   "end_frame": 6661,
+   "word_anchor": {
+    "word_index": 574,
+    "word": "working",
+    "phrase": "working as hard as I am",
+    "start_s": 218.06,
+    "end_s": 218.4
+   },
+   "semantic_claim": "question",
+   "visual_type": "question_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "working as hard as I am"
+  },
+  {
+   "event_id": "evt_050",
+   "start_frame": 6745,
+   "end_frame": 6792,
+   "word_anchor": {
+    "word_index": 595,
+    "word": "inflation",
+    "phrase": "inflation takes another bite",
+    "start_s": 224.84,
+    "end_s": 225.34
+   },
+   "semantic_claim": "close",
+   "visual_type": "closing_card",
+   "entrance": "fade_in",
+   "progression": "hold",
+   "exit": "fade",
+   "on_screen_text": "inflation takes another bite"
+  }
+ ]
+}

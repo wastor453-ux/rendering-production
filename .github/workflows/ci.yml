@@ -36,11 +36,21 @@ jobs:
       - name: Run full test suite
         run: |
           set -euo pipefail
-          python3 -m unittest discover -s tests > /tmp/test_out.txt 2>&1 || true
+          # F-11: Preserve exit code (no || true). Fail on non-zero exit,
+          # not just on "FAILED" marker (crashes may not print it).
+          set +e
+          python3 -m unittest discover -s tests > /tmp/test_out.txt 2>&1
+          TEST_EXIT=$?
+          set -e
           grep -E "^(OK|FAILED|Ran)" /tmp/test_out.txt | head -5
-          if grep -q "^FAILED" /tmp/test_out.txt; then
+          if [ $TEST_EXIT -ne 0 ]; then
+            echo "=== TEST EXIT CODE: $TEST_EXIT ==="
             echo "=== FAILURES & ERRORS ==="
             grep -B2 -A10 "^\(FAIL\|ERROR\):" /tmp/test_out.txt | head -80
+            exit 1
+          fi
+          if grep -q "^FAILED" /tmp/test_out.txt; then
+            echo "=== FAILURES (marker) ==="
             exit 1
           fi
 

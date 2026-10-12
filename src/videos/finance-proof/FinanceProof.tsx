@@ -3,7 +3,7 @@
 //
 // ⚠️  FIXTURE MARKER (P4.4 B-11): This file contains SYNTHETIC/ILLUSTRATIVE data
 // for visual proof purposes only. It is NOT part of the production chain.
-// Production visuals (HousingBroke, MoneyDying) use validated payloads via
+// Production visuals use validated payloads via
 // PayloadValidator. Do not copy these values into production.
 import React from "react";
 import { Sequence, useCurrentFrame } from "remotion";

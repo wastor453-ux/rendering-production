@@ -62,7 +62,8 @@ def main():
                 with open(path) as f:
                     content = f.read()
                 # Check for sideways imports (../other-video/)
-                for m in re.finditer(r'from\s+["'](\.\./[^"']+)["']', content):
+                _pat = re.compile(r"from\s+['\"](\.\./[^'\"]+)['\"]")
+                for m in _pat.finditer(content):
                     imp = m.group(1)
                     if imp.startswith("../") and not imp.startswith("../../"):
                         fail(f"{path}: sideways import forbidden: {imp}")

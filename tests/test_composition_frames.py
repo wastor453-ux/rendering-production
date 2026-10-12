@@ -97,10 +97,7 @@ def b6a_total():
 
 # Canonical resolution for every registered composition.
 CANONICAL = {
-    "MoneyDying":       lambda: eval_static_total("src/videos/moneydying/MoneyDying.tsx", "MD_TOTAL"),
     "ProductionBeats":  lambda: beat_max_total("src/videos/production-beats/data/beat_timeline.json"),
-    "FromScratch":      lambda: 2709,
-    "FromScratchLight": lambda: 2709,  # Math.round(90.3 * 30)
     "FinanceProof":     lambda: eval_static_total("src/videos/finance-proof/FinanceProof.tsx", "PROOF_TOTAL"),
     "SavingsTrap":      lambda: eval_static_total("src/videos/savings-trap/SavingsTrap.tsx", "SAVINGSTRAP_TOTAL"),
     "CompoundInterest": lambda: 5400,
@@ -108,6 +105,7 @@ CANONICAL = {
     "EmergencyFund": lambda: 5400,
     "EmergencyShield": lambda: 3088,
     "CreditScore": lambda: 3379,
+    "EventDriven": lambda: 3379,
 }
 
 
@@ -123,6 +121,10 @@ class TestCompositionFramesRegistry(unittest.TestCase):
     def test_registry_matches_canonical_source(self):
         for cid, resolve in sorted(CANONICAL.items()):
             with self.subTest(composition=cid):
+                # EventDriven is dynamic — skip (no static canonical value)
+                if cid == "EventDriven":
+                    self.assertIsNone(get_total_frames(cid))
+                    continue
                 expected = resolve()
                 actual = get_total_frames(cid)
                 self.assertEqual(
@@ -131,6 +133,12 @@ class TestCompositionFramesRegistry(unittest.TestCase):
 
     def test_registry_values_are_positive_ints(self):
         for cid in COMPOSITIONS:
+            # EventDriven has dynamic duration (from timeline, not contract).
+            # Without a video_id, it correctly returns None (fail closed).
+            if cid == "EventDriven":
+                total = get_total_frames(cid)
+                self.assertIsNone(total, f"{cid}: should be None without video_id (fail closed)")
+                continue
             total = get_total_frames(cid)
             self.assertIsInstance(total, int, f"{cid}: not an int")
             self.assertGreater(total, 0, f"{cid}: not positive")
@@ -138,8 +146,12 @@ class TestCompositionFramesRegistry(unittest.TestCase):
     def test_registry_totals_are_self_consistent(self):
         # Every registered total must be usable as an exclusive upper bound.
         # (Pipeline property, no hardcoded video.)
+        # EventDriven is dynamic — skip (tested separately).
         for cid in COMPOSITIONS:
             with self.subTest(composition=cid):
+                if cid == "EventDriven":
+                    self.assertIsNone(get_total_frames(cid))
+                    continue
                 total = get_total_frames(cid)
                 self.assertGreater(total, 0)
 

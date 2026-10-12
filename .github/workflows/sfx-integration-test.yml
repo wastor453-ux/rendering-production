@@ -25,6 +25,20 @@ jobs:
           print(f"manifest OK: {len(m['assets'])} assets")
           PY
 
+      - name: Verify SFX inputs exist (F-14)
+        run: |
+          set -euo pipefail
+          # F-14: Fail closed if video-specific SFX files are missing.
+          # These are pipeline inputs, not repo files.
+          for f in assets/sfx/housingbroke_events.json assets/sfx/housingbroke_assetmap.json; do
+            if [ ! -f "$f" ]; then
+              echo "FATAL: SFX input missing: $f" >&2
+              echo "Provide via sfx_events_file pipeline input." >&2
+              exit 1
+            fi
+          done
+          echo "SFX inputs present"
+
       - name: Compile triggers
         run: |
           set -euo pipefail

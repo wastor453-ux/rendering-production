@@ -49,4 +49,5 @@ export const TYPE = {
   cardTitle: { min: 22, max: 28, weight: 600 },
   body: { min: 18, max: 22, weight: 400 },
   axis: { min: 16, max: 18, weight: 500 },
+  caption: { min: 14, max: 16, weight: 400 },
 } as const;

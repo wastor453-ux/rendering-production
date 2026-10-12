@@ -23,18 +23,12 @@ on:
         required: true
         type: string
       vo_file:
-        description: 'VO source — must match the source run (verified by SHA)'
-        required: false
-        default: 'public/audio/vo_p3.wav'
+        description: 'VO source — must match the source run (verified by SHA). Required.'
+        required: true
       bed_file:
         description: 'Music bed source — must match the source run (verified by SHA)'
         required: false
         default: 'public/audio/bed.mp3'
-      skip_audio_sha_check:
-        description: 'Bypass audio SHA verification (use when intentionally changing audio)'
-        required: false
-        type: boolean
-        default: false
   # C-14 FIX (2026-10-10): repository_dispatch makes reassembly a single API call.
   # POST /repos/{owner}/{repo}/dispatches with {"event_type":"reassemble","client_payload":{...}}
   # Inputs resolve from client_payload when workflow_dispatch inputs are absent.
@@ -63,9 +57,8 @@ jobs:
           REPO: ${{ github.repository }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE_RUN_ID: ${{ inputs.source_run_id || github.event.client_payload.source_run_id }}
-          VO_FILE: ${{ inputs.vo_file || github.event.client_payload.vo_file || 'public/audio/vo_p3.wav' }}
+          VO_FILE: ${{ inputs.vo_file || github.event.client_payload.vo_file }}
           BED_FILE: ${{ inputs.bed_file || github.event.client_payload.bed_file || 'public/audio/bed.mp3' }}
-          SKIP_AUDIO_SHA_CHECK: ${{ inputs.skip_audio_sha_check || github.event.client_payload.skip_audio_sha_check }}
         run: |
           set -euo pipefail
           python3 - <<'PY'
@@ -191,10 +184,9 @@ jobs:
           print(f"Chunk artifacts OK: {expected_count}")
 
           # 5. If with_audio, verify local audio files match the source run's SHAs.
-          # Bypass with skip_audio_sha_check=true when intentionally changing audio.
+          # NO BYPASS — SHA verification is mandatory.
           with_audio = bool(inputs_m.get("with_audio", False))
-          skip_sha = os.environ.get("SKIP_AUDIO_SHA_CHECK", "false").lower() == "true"
-          if with_audio and not skip_sha:
+          if with_audio:
               for label, env_key, sha_key in [("VO", "VO_FILE", "vo_sha256"),
                                               ("bed", "BED_FILE", "bed_sha256")]:
                   fpath = os.environ[env_key]
@@ -207,7 +199,10 @@ jobs:
                           h.update(b)
                   actual = h.hexdigest()
                   expected = inputs_m.get(sha_key, "")
-                  if expected and actual != expected:
+                  if not expected:
+                      print(f"FATAL: {label} SHA not provided in inputs — cannot verify {fpath}.", file=sys.stderr)
+                      sys.exit(1)
+                  if actual != expected:
                       print(f"FATAL: {label} SHA mismatch — {fpath} does not match source run. "
                             f"Provide the correct path via workflow inputs.", file=sys.stderr)
                       sys.exit(1)
@@ -249,10 +244,30 @@ jobs:
       START_FRAME: ${{ needs.validate-source.outputs.start_frame }}
       END_FRAME: ${{ needs.validate-source.outputs.end_frame }}
       WITH_AUDIO: ${{ needs.validate-source.outputs.with_audio }}
-      VO_FILE: ${{ inputs.vo_file || github.event.client_payload.vo_file || 'public/audio/vo_p3.wav' }}
+      VO_FILE: ${{ inputs.vo_file || github.event.client_payload.vo_file }}
       BED_FILE: ${{ inputs.bed_file || github.event.client_payload.bed_file || 'public/audio/bed.mp3' }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Composition blocker gate (F-09)
+        # Reassembly must not bypass the production blocker.
+        # A composition blocked after the source run must not be reassembled.
+        env:
+          COMPOSITION: ${{ needs.validate-source.outputs.composition }}
+        run: |
+          set -euo pipefail
+          BLOCKER=$(python3 -c "
+          import os, sys; sys.path.insert(0, '.github/scripts')
+          from composition_contract import is_blocked
+          b = is_blocked(os.environ['COMPOSITION'])
+          print(b if b else '')
+          ")
+          if [ -n "$BLOCKER" ]; then
+            echo "FATAL: Composition '$COMPOSITION' is blocked: $BLOCKER" >&2
+            echo "Reassembly refused for blocked composition." >&2
+            exit 1
+          fi
+          echo "✅ Composition '$COMPOSITION' not blocked"
 
       - name: Install ffmpeg (minimal)
         run: |
@@ -492,23 +507,26 @@ jobs:
           ffmpeg -y -f concat -safe 0 -i /tmp/assemble/concat.txt -c copy /tmp/master_video.mp4
           echo "video assembled: /tmp/master_video.mp4"
 
-      - name: Build concatenated VO (if needed)
+      - name: Verify VO file provided (F-14)
+        run: |
+          set -euo pipefail
+          if [ -z "$VO_FILE" ]; then
+            echo "FATAL: VO_FILE is empty — vo_file input is required" >&2
+            exit 1
+          fi
+
+      - name: Verify VO file exists (F-14)
         if: needs.validate-source.outputs.with_audio == 'true'
         run: |
           set -euo pipefail
-          # P4.4: If the VO file doesn't exist, try concatenating hb_p1..hb_p7.
-          # The 7 parts are in the repo; the 70MB concatenated file is built on-demand.
+          # F-14: No video-specific fallbacks (hb_p1..hb_p7 removed).
+          # The VO file must exist; fail closed if missing.
           if [ ! -f "$VO_FILE" ]; then
-            echo "VO file not found: $VO_FILE, trying hb_p1..hb_p7..."
-            for i in 1 2 3 4 5 6 7; do
-              [ -f "public/audio/hb_p${i}.wav" ] || { echo "FATAL: hb_p${i}.wav missing"; exit 1; }
-              echo "file '$PWD/public/audio/hb_p${i}.wav'"
-            done > /tmp/vo_concat.txt
-            ffmpeg -y -f concat -safe 0 -i /tmp/vo_concat.txt -c copy "$VO_FILE"
-            echo "Concatenated VO built: $VO_FILE"
-          else
-            echo "Using VO file: $VO_FILE"
+            echo "FATAL: VO file not found: $VO_FILE" >&2
+            echo "Provide the VO via vo_file input. No fallbacks." >&2
+            exit 1
           fi
+          echo "Using VO file: $VO_FILE"
 
       - name: Mux canonical audio (VO + music bed)
         if: needs.validate-source.outputs.with_audio == 'true'
@@ -564,7 +582,7 @@ jobs:
             [ "$A_STREAMS" -ge 1 ] || { echo "audio stream MISSING"; exit 1; }
             A_DUR=$(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 $MASTER)
             DIFF=$(echo "$V_DUR - $A_DUR" | bc | tr -d -)
-            python3 -c "import sys; sys.exit(0 if abs(float('$DIFF')) < 0.5 else 1)" \
+            DIFF="$DIFF" python3 -c "import os, sys; sys.exit(0 if abs(float(os.environ['DIFF'])) < 0.5 else 1)" \
               || { echo "a/v sync FAIL"; exit 1; }
           fi
           MASTER_SHA=$(sha256sum /tmp/master.mp4 | cut -d' ' -f1)

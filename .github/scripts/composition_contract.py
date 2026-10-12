@@ -18,7 +18,7 @@ Enforcement rules (used by validate_dispatch.py and plan.py):
   3. brain == "exempt" requires a non-empty exemption reason -> FAILS.
   4. audio == "embedded" with with_audio=false -> FAILS. A master labeled
      video_only must never contain an audio stream (verified defect E1:
-     MoneyDying.tsx embeds <Audio>; any production composition may).
+     A composition embedding <Audio>; any production composition may).
 
 This module has no dependencies beyond the standard library so it can be
 imported by dispatch-time scripts and by CI consistency tests.
@@ -38,21 +38,9 @@ import re
 COMPOSITIONS = {
     # --- legacy pipeline tests (pre-brain) ---------------------------------
     # --- production ---------------------------------------------------------
-    "MoneyDying":    dict(role="production", brain="required", timeline="fixed",
-                          tokens="design_tokens", audio="embedded", qa="verify_render",
-                          total_frames=2322,
-                          exemption=None),
     "ProductionBeats": dict(role="production", brain="required", timeline="compiled_beats",
                           tokens="design_tokens", audio="none", qa="verify_render",
                           total_frames=1820,
-                          exemption=None),
-    "FromScratch": dict(role="production", brain="required", timeline="compiled_beats",
-                          tokens="design_tokens", audio="embedded", qa="verify_render",
-                          total_frames=2709,
-                          exemption=None),
-    "FromScratchLight": dict(role="production", brain="required", timeline="compiled_beats",
-                          tokens="design_tokens", audio="embedded", qa="verify_render",
-                          total_frames=2709,
                           exemption=None),
     # --- rehearsal ----------------------------------------------------------
     # --- calibration --------------------------------------------------------
@@ -84,6 +72,19 @@ COMPOSITIONS = {
                           tokens="design_tokens", audio="embedded", qa="verify_render",
                           total_frames=3379,
                           exemption=None),
+    # Generic event-driven pipeline: video_id selects data via workflow manifest.
+    # No video-specific paths in contract. Timeline validated from manifest.
+    # audio_ownership: "embedded" = <Audio> in component, workflow must use with_audio=false
+    #                 "muxed" = workflow muxes via vo_file, component must NOT embed
+    "EventDriven": dict(role="production", brain="required", timeline="event_timeline",
+                          tokens="design_tokens", audio="embedded", audio_ownership="embedded",
+                          qa="verify_render",
+                          # F-08: total_frames is DYNAMIC for EventDriven.
+                          # get_total_frames() computes it from the video's
+                          # timeline (see below). NO FALLBACK — fails closed
+                          # if timeline is unavailable.
+                          total_frames=None,
+                          exemption=None),
     # --- test ---------------------------------------------------------------
 }
 
@@ -91,24 +92,59 @@ REQUIRED_FIELDS = {"role", "brain", "timeline", "tokens", "audio", "qa",
                    "exemption", "total_frames"}
 VALID_ROLES = {"production", "test", "demo", "calibration", "fixture", "rehearsal"}
 VALID_BRAIN = {"required", "exempt"}
-VALID_TIMELINE = {"compiled_beats", "fixed"}
+VALID_TIMELINE = {"compiled_beats", "fixed", "event_timeline"}
 VALID_TOKENS = {"design_tokens", "legacy"}
 VALID_AUDIO = {"embedded", "none"}
 VALID_QA = {"verify_render", "pytest", "manual", "none"}
 
+
+# Compositions blocked from production until they migrate to explicit Typography roles.
+LEGACY_TYPOGRAPHY_BLOCKED = frozenset([
+    "BudgetRule", "CompoundInterest", "EmergencyFund", "EmergencyShield",
+    "ProductionBeats", "SavingsTrap",
+])
+
+def is_blocked(composition_id):
+    if composition_id in LEGACY_TYPOGRAPHY_BLOCKED:
+        return "Legacy typography: must migrate to explicit Typography roles"
+    return None
 
 def get_contract(composition):
     """Return the contract dict for a composition id, or None if unregistered."""
     return COMPOSITIONS.get(composition)
 
 
-def get_total_frames(composition):
+def get_total_frames(composition, video_id=None):
     """Return the authoritative total frame count for a composition id.
+
+    For EventDriven, computes dynamically from the video's timeline
+    (F-08). video_id must be provided for EventDriven.
 
     Returns an int, or None if the composition is unregistered or its
     contract lacks a valid total_frames. Callers must treat None as
     "cannot validate" and fail closed.
     """
+    # F-08: EventDriven duration is dynamic (from timeline, not hardcoded)
+    if composition == "EventDriven" and video_id:
+        import json
+        import os
+        # Try the video's data timeline (checked-in, stable duration)
+        for path in [
+            f"src/videos/{video_id}/data/event_timeline.json",
+            "src/videos/_active/timeline.json",
+        ]:
+            if os.path.exists(path):
+                try:
+                    with open(path) as f:
+                        tl = json.load(f)
+                    events = tl.get("events", [])
+                    if events:
+                        max_end = max(e.get("end_frame", 0) for e in events)
+                        if max_end > 0:
+                            return int(max_end)
+                except (json.JSONDecodeError, OSError, KeyError):
+                    continue
+        # Fall through to contract fallback if timeline unreadable
     contract = get_contract(composition)
     if contract is None:
         return None
@@ -154,6 +190,15 @@ def validate_for_dispatch(composition, with_audio):
         errors.append(
             f"Composition '{composition}' has invalid role {contract['role']!r} "
             f"(must be one of {sorted(VALID_ROLES)})"
+        )
+
+    # F-16: Only role=production may be dispatched to the production workflow.
+    # Demo/test/calibration compositions must not reach production renders.
+    if contract["role"] != "production":
+        errors.append(
+            f"Composition '{composition}' has role={contract['role']!r}, not 'production'. "
+            f"Only production-role compositions may be dispatched. "
+            f"(FinanceProof is demo-role and must not render via production.)"
         )
 
     # Every policy field must hold a known value — a typo'd policy must never

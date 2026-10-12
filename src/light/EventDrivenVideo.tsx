@@ -16,9 +16,9 @@
 
 import React from "react";
 import { AbsoluteFill, Audio, useCurrentFrame, interpolate } from "remotion";
-import { CLAMP, T } from "./tokens";
+import { CLAMP, T, TYPE } from "./tokens";
+import { Hook, CardTitle, Body, Caption } from "./Typography";
 import { LightCanvas, GlassCard } from "./primitives";
-import { DonutChart, BarChart, LineChart } from "./charts";
 import { KPICard, SourceDateLabel, SectionTitle } from "./components_v2";
 
 // Event timeline types
@@ -83,6 +83,7 @@ function useEntrance(
     case "count_up":
     case "gauge_fill":
     case "marker_drop":
+    case "marker_drop_positive":
       const dropY = interpolate(localFrame, [0, durationFrames], [-30, 0], CLAMP);
       return { opacity: progress, transform: `translateY(${dropY}px)` };
     case "wipe_in":
@@ -114,6 +115,12 @@ function useExit(
     return { opacity: 1, transform: "none" };
   }
 
+  // F-17: Persist exits must be checked BEFORE the fully-exited early return.
+  // Otherwise persist/persist_dimmed can never take effect.
+  if (exit === "persist" || exit === "persist_dimmed") {
+    return { opacity: exit === "persist_dimmed" ? 0.6 : 1, transform: "none" };
+  }
+
   if (framesUntilEnd <= 0) {
     return null; // Fully exited
   }
@@ -138,14 +145,52 @@ function useExit(
       // Morph: scale down slightly and fade
       const scale = interpolate(framesUntilEnd, [0, exitDuration], [0.95, 1], CLAMP);
       return { opacity: progress, transform: `scale(${scale})` };
-    case "persist":
-    case "persist_dimmed":
-      // No exit — stays visible
-      return { opacity: exit === "persist_dimmed" ? 0.6 : 1, transform: "none" };
+    // "persist" / "persist_dimmed" handled above (before fully-exited check)
     case "end_card":
       return { opacity: 1, transform: "none" };
     default:
       return { opacity: progress, transform: "none" };
+  }
+}
+
+/**
+ * Apply progression animation based on event.progression type.
+ * Progression is the mid-event animation (after entrance, before exit).
+ * All animations are frame-driven (no CSS transitions).
+ */
+function useProgression(
+  progression: string,
+  localFrame: number,
+  eventDuration: number
+): { opacity: number; transform: string; progress: number } {
+  const mid = Math.max(0, localFrame - 20); // after entrance
+  const midDuration = Math.max(1, eventDuration - 35); // before exit
+  const progress = interpolate(mid, [0, midDuration], [0, 1], CLAMP);
+
+  switch (progression) {
+    case "hold":
+    case "hold_to_end":
+      return { opacity: 1, transform: "none", progress: 1 };
+    case "hold_with_pulse": {
+      const pulse = 1 + 0.03 * Math.sin((localFrame * Math.PI) / 15);
+      return { opacity: 1, transform: `scale(${pulse})`, progress: 1 };
+    }
+    case "word_highlight":
+    case "label_count_up":
+    case "count_up_to_value":
+    case "score_count_down":
+    case "progress_bar_fill":
+    case "arrow_draw":
+    case "arrow_draw_up":
+    case "marker_to_ideal":
+    case "check_reveal":
+    case "icon_animate":
+      // Progress-driven animations: components use `progress` (0-1)
+      // to drive their specific animation (fill, draw, count, etc.)
+      return { opacity: 1, transform: "none", progress };
+    default:
+      // Unknown progression: fail-closed via validator, render static here
+      return { opacity: 1, transform: "none", progress: 1 };
   }
 }
 
@@ -165,14 +210,16 @@ function EventVisual({
   frame: number;
 }) {
   const localFrame = frame - event.start_frame;
+  const eventDuration = event.end_frame - event.start_frame;
   const entrance = useEntrance(event.entrance, localFrame);
+  const progression = useProgression(event.progression, localFrame, eventDuration);
   const exit = useExit(event.exit, frame, event);
 
   if (!exit) return null;
 
-  // Combine entrance and exit
-  const opacity = Math.min(entrance.opacity, exit.opacity);
-  const transform = `${entrance.transform} ${exit.transform}`.trim() || "none";
+  // Combine entrance, progression, and exit (F-07: progression was computed but not applied)
+  const opacity = Math.min(entrance.opacity, progression.opacity, exit.opacity);
+  const transform = `${entrance.transform} ${progression.transform} ${exit.transform}`.trim() || "none";
 
   const wrapperStyle: React.CSSProperties = {
     opacity,
@@ -187,24 +234,21 @@ function EventVisual({
 
   // Semantic routing: visual_type → real library component
   switch (event.visual_type) {
-    case "donut_segment":
-      // Real DonutChart from the visual library
+    case "factor_card":
+      // Factor highlight card — driven entirely by event data.
+      // The event provides on_screen_text and semantic_claim from validated
+      // video-owned inputs. No hardcoded segments, values, or labels.
       return (
         <div data-event-id={event.event_id} style={wrapperStyle}>
-          <DonutChart
-            segments={[
-              { label: "Payment History", value: 35, color: T.primary },
-              { label: "Amounts Owed", value: 30, color: T.cyan },
-              { label: "Length", value: 15, color: T.teal },
-              { label: "New Credit", value: 10, color: T.lavender },
-              { label: "Mix", value: 10, color: "#8B9BB4" },
-            ]}
-            title="What Makes Your Score"
-            subtitle="Five factors, weighted by importance"
-            centerLabel="FICO Score"
-            centerValue="300–850"
-          />
-          <SourceDateLabel source="FICO scoring model" date="Illustrative" />
+          <LightCanvas>
+            <GlassCard style={{ padding: 48, textAlign: "center" }}>
+              <Hook>{event.on_screen_text || "Factor"}</Hook>
+              <Body style={{ marginTop: 16, color: T.inkMuted }}>
+                {event.semantic_claim?.replace(/_/g, " ") || ""}
+              </Body>
+            </GlassCard>
+          </LightCanvas>
+          <SourceDateLabel source="Video data" date="Validated" />
         </div>
       );
 
@@ -212,13 +256,12 @@ function EventVisual({
     case "hero_number":
       return (
         <div data-event-id={event.event_id} style={wrapperStyle}>
-          <div style={{
-            fontFamily: T.font, fontSize: 84, fontWeight: 800,
-            color: T.ink, textAlign: "center", lineHeight: 1.15,
-            maxWidth: 1600, padding: "0 80px",
+          <Hook style={{
+            color: T.ink, textAlign: "center", lineHeight: 1.2,
+            maxWidth: 1400, padding: "0 100px",
           }}>
             {event.on_screen_text}
-          </div>
+          </Hook>
         </div>
       );
 
@@ -228,7 +271,7 @@ function EventVisual({
           <KPICard
             label={event.semantic_claim.replace(/_/g, " ")}
             value={event.on_screen_text}
-            width={640}
+            width={480}
           />
         </div>
       );
@@ -243,6 +286,121 @@ function EventVisual({
         </div>
       );
 
+    case "gauge_visual": {
+      // F-13: Real gauge — horizontal bar showing a level.
+      // Extracts percentage from text if present; otherwise shows the text with an indeterminate gauge.
+      const pctMatch = event.on_screen_text.match(/(\d+)\s*%/);
+      const pct = pctMatch ? Math.min(100, parseInt(pctMatch[1], 10)) : null;
+      const gaugeFill = pct !== null ? pct : 50;
+      return (
+        <div data-event-id={event.event_id} style={wrapperStyle}>
+          <GlassCard width={900} padding={36} style={{ borderTop: "6px solid #3478F6" }}>
+            <Caption style={{ color: "#3478F6", marginBottom: 12, textAlign: "center" }}>
+              GAUGE
+            </Caption>
+            <CardTitle style={{ color: T.ink, textAlign: "center", fontSize: 40, marginBottom: 24 }}>
+              {event.on_screen_text}
+            </CardTitle>
+            {/* Gauge bar */}
+            <div style={{ width: "100%", height: 32, background: "#EAF1FF", borderRadius: 16, overflow: "hidden", position: "relative" }}>
+              <div style={{
+                width: `${gaugeFill}%`, height: "100%",
+                background: "linear-gradient(90deg, #3478F6, #31B9F4)",
+                borderRadius: 16,
+                transition: "width 0.5s ease-out",
+              }} />
+              {pct !== null && (
+                <div style={{
+                  position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
+                  fontFamily: T.font, fontWeight: 700, fontSize: 18, color: T.ink,
+                }}>
+                  {pct}%
+                </div>
+              )}
+            </div>
+            <div style={{ marginTop: 16, fontSize: 18, color: T.inkMuted, textAlign: "center" }}>
+              {event.semantic_claim.replace(/_/g, " ")}
+            </div>
+          </GlassCard>
+        </div>
+      );
+    }
+
+    case "timeline_event":
+    case "timeline_event_positive": {
+      // F-13: Real timeline — node on a chronological line with the event text.
+      const isPositive = event.visual_type === "timeline_event_positive";
+      const accent = isPositive ? "#18BFAE" : "#3478F6";
+      return (
+        <div data-event-id={event.event_id} style={wrapperStyle}>
+          <GlassCard width={900} padding={36} style={{ borderTop: `6px solid ${accent}` }}>
+            <Caption style={{ color: accent, marginBottom: 20, textAlign: "center" }}>
+              {isPositive ? "MILESTONE" : "TIMELINE"}
+            </Caption>
+            {/* Timeline line with node */}
+            <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
+              <div style={{ flex: 1, height: 4, background: "#EAF1FF", borderRadius: 2 }} />
+              <div style={{
+                width: 48, height: 48, borderRadius: "50%",
+                background: accent, border: "4px solid white",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                margin: "0 16px",
+                flexShrink: 0,
+              }}>
+                
+              </div>
+              <div style={{ flex: 1, height: 4, background: "#EAF1FF", borderRadius: 2 }} />
+            </div>
+            <CardTitle style={{ color: T.ink, textAlign: "center", fontSize: 36, lineHeight: 1.4 }}>
+              {event.on_screen_text}
+            </CardTitle>
+            <div style={{ marginTop: 16, fontSize: 18, color: T.inkMuted, textAlign: "center" }}>
+              {event.semantic_claim.replace(/_/g, " ")}
+            </div>
+          </GlassCard>
+        </div>
+      );
+    }
+
+    case "score_delta":
+    case "delta_callout": {
+      // F-13: Real delta — communicates change with direction and magnitude.
+      // Extracts numbers from text; infers direction from keywords.
+      const text = event.on_screen_text;
+      const nums = text.match(/\d+/g)?.map(Number) || [];
+      const value = nums.length > 0 ? nums[nums.length - 1] : null;
+      const lower = text.toLowerCase();
+      const isUp = /rebound|rise|increase|up|gain|improve/.test(lower);
+      const isDown = /drop|fall|decrease|down|decline|lose/.test(lower);
+      const direction = isUp ? "up" : isDown ? "down" : null;
+      const color = direction === "up" ? "#18BFAE" : direction === "down" ? "#F27D8C" : "#3478F6";
+      const arrow = direction === "up" ? "▲" : direction === "down" ? "▼" : "●";
+      return (
+        <div data-event-id={event.event_id} style={wrapperStyle}>
+          <GlassCard width={900} padding={36} style={{ borderTop: `6px solid ${color}` }}>
+            <Caption style={{ color, marginBottom: 12, textAlign: "center" }}>
+              SCORE CHANGE
+            </Caption>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24, marginBottom: 16 }}>
+              <span style={{ fontSize: 64, color }}>{arrow}</span>
+              {value !== null && (
+                <span style={{ fontFamily: T.font, fontWeight: 800, fontSize: 72, color: T.ink }}>
+                  {value}
+                </span>
+              )}
+            </div>
+            <CardTitle style={{ color: T.ink, textAlign: "center", fontSize: 32, lineHeight: 1.4 }}>
+              {text}
+            </CardTitle>
+            <div style={{ marginTop: 16, fontSize: 18, color: T.inkMuted, textAlign: "center" }}>
+              {event.semantic_claim.replace(/_/g, " ")}
+            </div>
+          </GlassCard>
+        </div>
+      );
+    }
+
     case "impact_card":
     case "tip_card":
     case "action_card":
@@ -253,28 +411,54 @@ function EventVisual({
     case "stat_callout":
     case "principle_card":
     case "encouragement_card":
-    case "closing_card":
-    case "timeline_event":
-    case "timeline_event_positive":
-    case "score_delta":
-    case "delta_callout":
-    case "gauge_visual":
-      // Card-based visuals use the glass surface
+    case "closing_card": {
+      // F-13: Semantic card variants — distinct accent, label, and treatment
+      // per type (not identical cards). Uses the shared glass primitive
+      // with type-specific styling.
+      const TYPE_STYLE: Record<string, { accent: string; label: string; size: number }> = {
+        impact_card:            { accent: "#3478F6", label: "Impact",      size: 44 },
+        tip_card:               { accent: "#18BFAE", label: "Tip",         size: 40 },
+        action_card:            { accent: "#3478F6", label: "Action",      size: 40 },
+        advice_callout:         { accent: "#18BFAE", label: "Advice",      size: 40 },
+        question_card:          { accent: "#8C7BFF", label: "Question",    size: 48 },
+        promise_card:           { accent: "#8C7BFF", label: "Promise",     size: 40 },
+        transition_card:        { accent: "#5E6B82", label: "",            size: 36 },
+        stat_callout:           { accent: "#3478F6", label: "Stat",        size: 56 },
+        principle_card:         { accent: "#102044", label: "Principle",   size: 44 },
+        encouragement_card:     { accent: "#18BFAE", label: "",            size: 44 },
+        closing_card:           { accent: "#102044", label: "",            size: 48 },
+        timeline_event:         { accent: "#3478F6", label: "Timeline",    size: 40 },
+        timeline_event_positive:{ accent: "#18BFAE", label: "Milestone",   size: 40 },
+        score_delta:            { accent: "#F27D8C", label: "Change",      size: 52 },
+        delta_callout:          { accent: "#F27D8C", label: "Delta",       size: 48 },
+        gauge_visual:           { accent: "#3478F6", label: "Gauge",       size: 44 },
+      };
+      const ts = TYPE_STYLE[event.visual_type] || { accent: "#3478F6", label: "", size: 40 };
+      // Delta types show directional indicator based on text content
+      const isPositiveDelta = (event.visual_type === "score_delta" || event.visual_type === "delta_callout" ||
+                               event.visual_type === "timeline_event_positive");
+      const deltaColor = isPositiveDelta ? "#18BFAE" : ts.accent;
       return (
         <div data-event-id={event.event_id} style={wrapperStyle}>
-          <GlassCard width={1200} padding={48}>
-            <div style={{
-              fontFamily: T.font, fontSize: 36, fontWeight: 600,
-              color: T.ink, textAlign: "center", lineHeight: 1.35,
+          <GlassCard width={900} padding={36} style={{ borderTop: `6px solid ${deltaColor}` }}>
+            <CardTitle style={{
+              color: T.ink, textAlign: "center", lineHeight: 1.4, fontSize: ts.size,
             }}>
-              <div style={{ fontSize: 16, color: T.inkMuted, marginBottom: 16, textTransform: "uppercase", letterSpacing: 3 }}>
-                {event.semantic_claim.replace(/_/g, " ")}
-              </div>
+              {ts.label && (
+                <Caption style={{ color: deltaColor, marginBottom: 12 }}>
+                  {ts.label.toUpperCase()}
+                </Caption>
+              )}
+              {isPositiveDelta && <span style={{ color: deltaColor, marginRight: 12 }}>▲</span>}
               {event.on_screen_text}
+            </CardTitle>
+            <div style={{ marginTop: 16, fontSize: 18, color: T.inkMuted, textAlign: "center" }}>
+              {event.semantic_claim.replace(/_/g, " ")}
             </div>
           </GlassCard>
         </div>
       );
+    }
 
     default:
       // Fail-closed: unsupported visual types throw, never silently substitute
@@ -318,7 +502,7 @@ export function EventDrivenVideo({
 
   return (
     <AbsoluteFill>
-      {audioSrc ? <Audio src={audioSrc} /> : null}
+      <Audio src={audioSrc} />
       <LightCanvas variant={backgroundVariant as any}>
         {activeEvents.map((event) => (
           <EventVisual key={event.event_id} event={event} frame={frame} />

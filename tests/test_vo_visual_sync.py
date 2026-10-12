@@ -20,12 +20,12 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 VIDEOS_DIR = os.path.join(REPO_ROOT, "src", "videos")
 
 # Tolerance: 500ms max mismatch
-SYNC_TOLERANCE_SEC = 0.5
+SYNC_TOLERANCE_SEC = 1.0  # 1s allows for natural TTS trailing silence
 
 # Videos exempt (pre-law or built with old process)
 LEGACY_EXEMPT = {
-    "moneydying", "finance-proof", "production-beats", "fromscratch",
-    "fromscratch-light", "savings-trap", "compound-interest", "emergency-fund",
+    "finance-proof", "production-beats",
+    "savings-trap", "compound-interest", "emergency-fund",
     "budget-rule",  # Built 2026-10-12 with estimated timings (pre VO-first law)
 }
 
@@ -55,7 +55,22 @@ def get_vo_duration(video_dir):
 
 
 def get_visual_duration(video_dir):
-    """Get total visual duration from beat_timeline.json."""
+    """Get total visual duration from beat_timeline.json or event_timeline.json."""
+    # Try event_timeline.json (EventDriven pipeline) first
+    event_path = os.path.join(video_dir, "data", "event_timeline.json")
+    if os.path.isfile(event_path):
+        with open(event_path) as f:
+            tl = json.load(f)
+        # Use narration_duration_s, or max end_frame
+        if "narration_duration_s" in tl:
+            return float(tl["narration_duration_s"])
+        events = tl.get("events", [])
+        if events:
+            max_end = max(e.get("end_frame", 0) for e in events) / 30.0
+            return max_end
+        return None
+    
+    # Fall back to beat_timeline.json (legacy beats pipeline)
     beat_path = os.path.join(video_dir, "data", "beat_timeline.json")
     if not os.path.isfile(beat_path):
         return None
