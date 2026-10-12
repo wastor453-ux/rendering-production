@@ -23,7 +23,7 @@ import re
 from typing import List, Dict, Any
 
 
-# Semantic role keywords (from VISUAL_BRAIN §2)
+# Semantic role keywords (from VISUAL_SYSTEM.md §2)
 ROLE_KEYWORDS = {
     "number": ["percent", "%", "dollar", "$", "million", "billion", "thousand",
                "increased", "decreased", "rose", "fell", "dropped", "grew"],
