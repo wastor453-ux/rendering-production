@@ -111,6 +111,12 @@ def main():
     words = []
     for segment in segments:
         for w in segment.words:
+            # Filter hallucinations: zero-duration or very low confidence
+            duration = w.end - w.start
+            if duration <= 0:
+                continue  # Hallucinated duplicate, not real speech
+            if w.probability < 0.3:
+                continue  # Too uncertain to trust
             words.append({
                 "word": w.word.strip(),
                 "start": round(w.start, 3),
