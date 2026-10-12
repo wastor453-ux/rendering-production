@@ -67,7 +67,6 @@ export const T = {
   negative: "#F27D8C",
   negativeTint: "#FFE2E2",
   negativeDeep: "#C45A6A",
-  accentPeach: "#F7C6B7",
 
   // === Glass (from ZIP panel recipe) ===
   glassFill: "rgba(255,255,255,0.90)",
