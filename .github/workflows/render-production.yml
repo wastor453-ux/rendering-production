@@ -276,7 +276,7 @@ jobs:
         if: inputs.composition == 'EventDriven'
         uses: actions/upload-artifact@v4
         with:
-          name: validated-inputs-${{ needs.plan.outputs.job_identity }}
+          name: validated-inputs-${{ steps.identity.outputs.job_identity }}
           path: /tmp/validated-inputs/
           retention-days: 7
 
