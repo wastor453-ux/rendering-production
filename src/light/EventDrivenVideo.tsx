@@ -213,9 +213,9 @@ function EventVisual({
       return (
         <div data-event-id={event.event_id} style={wrapperStyle}>
           <div style={{
-            fontFamily: T.font, fontSize: 64, fontWeight: 800,
-            color: T.ink, textAlign: "center", lineHeight: 1.2,
-            maxWidth: 1400, padding: "0 100px",
+            fontFamily: T.font, fontSize: 84, fontWeight: 800,
+            color: T.ink, textAlign: "center", lineHeight: 1.15,
+            maxWidth: 1600, padding: "0 80px",
           }}>
             {event.on_screen_text}
           </div>
@@ -228,7 +228,7 @@ function EventVisual({
           <KPICard
             label={event.semantic_claim.replace(/_/g, " ")}
             value={event.on_screen_text}
-            width={480}
+            width={640}
           />
         </div>
       );
@@ -262,12 +262,12 @@ function EventVisual({
       // Card-based visuals use the glass surface
       return (
         <div data-event-id={event.event_id} style={wrapperStyle}>
-          <GlassCard width={900} padding={36}>
+          <GlassCard width={1200} padding={48}>
             <div style={{
-              fontFamily: T.font, fontSize: 28, fontWeight: 600,
-              color: T.ink, textAlign: "center", lineHeight: 1.4,
+              fontFamily: T.font, fontSize: 36, fontWeight: 600,
+              color: T.ink, textAlign: "center", lineHeight: 1.35,
             }}>
-              <div style={{ fontSize: 13, color: T.inkMuted, marginBottom: 12, textTransform: "uppercase", letterSpacing: 2 }}>
+              <div style={{ fontSize: 16, color: T.inkMuted, marginBottom: 16, textTransform: "uppercase", letterSpacing: 3 }}>
                 {event.semantic_claim.replace(/_/g, " ")}
               </div>
               {event.on_screen_text}
