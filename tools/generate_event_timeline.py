@@ -36,8 +36,20 @@ FPS = 30
 # Semantic phrase patterns mapped to visual treatments.
 # Each pattern has: regex, visual_type, entrance, progression, exit
 # Ordered by specificity (most specific first).
+# Semantic phrase patterns mapped to visual treatments.
+# Each pattern has: regex, visual_type, entrance, progression, exit
+# Ordered by specificity (most specific first).
+# Covers the full narration: ~40 semantic units across 5 scenes.
 SEMANTIC_PATTERNS = [
-    # Hook: impact statements
+    # === HOOK: thesis and impacts ===
+    {
+        "pattern": r"three.?digit number",
+        "visual_type": "hero_number",
+        "entrance": "count_up",
+        "progression": "hold_emphasis",
+        "exit": "morph_to_next",
+        "concept": "score_definition",
+    },
     {
         "pattern": r"controls your financial life",
         "visual_type": "hero_statement",
@@ -47,7 +59,7 @@ SEMANTIC_PATTERNS = [
         "concept": "core_thesis",
     },
     {
-        "pattern": r"mortgage",
+        "pattern": r"approved for a mortgage",
         "visual_type": "impact_card",
         "entrance": "pop_in",
         "progression": "hold_with_pulse",
@@ -55,7 +67,7 @@ SEMANTIC_PATTERNS = [
         "concept": "housing_impact",
     },
     {
-        "pattern": r"interest rate",
+        "pattern": r"what interest rate you pay",
         "visual_type": "impact_card",
         "entrance": "pop_in",
         "progression": "hold_with_pulse",
@@ -63,16 +75,40 @@ SEMANTIC_PATTERNS = [
         "concept": "rate_impact",
     },
     {
-        "pattern": r"apartment",
+        "pattern": r"whether you get that apartment",
         "visual_type": "impact_card",
         "entrance": "pop_in",
         "progression": "hold_with_pulse",
-        "exit": "wipe_to_factors",
+        "exit": "fade_with_next",
         "concept": "rental_impact",
     },
-    # Factors: each factor gets a chart segment
     {
-        "pattern": r"payment history.*thirty-five percent",
+        "pattern": r"no idea how it.?s calculated",
+        "visual_type": "question_card",
+        "entrance": "slide_in",
+        "progression": "hold",
+        "exit": "wipe_to_factors",
+        "concept": "knowledge_gap",
+    },
+    {
+        "pattern": r"what moves your score",
+        "visual_type": "promise_card",
+        "entrance": "slide_in",
+        "progression": "hold",
+        "exit": "wipe_to_factors",
+        "concept": "video_promise",
+    },
+    # === FACTORS ===
+    {
+        "pattern": r"five factors",
+        "visual_type": "section_title",
+        "entrance": "fade_in",
+        "progression": "hold",
+        "exit": "morph_to_chart",
+        "concept": "factors_intro",
+    },
+    {
+        "pattern": r"payment history is 35",
         "visual_type": "donut_segment",
         "entrance": "donut_reveal",
         "progression": "label_count_up",
@@ -80,7 +116,15 @@ SEMANTIC_PATTERNS = [
         "concept": "factor_payment",
     },
     {
-        "pattern": r"amounts owed.*thirty percent",
+        "pattern": r"pay every bill on time",
+        "visual_type": "advice_callout",
+        "entrance": "callout_in",
+        "progression": "hold",
+        "exit": "fade",
+        "concept": "advice_payment",
+    },
+    {
+        "pattern": r"amounts owed is 30",
         "visual_type": "donut_segment",
         "entrance": "donut_reveal",
         "progression": "label_count_up",
@@ -88,7 +132,15 @@ SEMANTIC_PATTERNS = [
         "concept": "factor_amounts",
     },
     {
-        "pattern": r"length of credit history.*fifteen percent",
+        "pattern": r"below 30.*of your limits",
+        "visual_type": "gauge_visual",
+        "entrance": "gauge_fill",
+        "progression": "marker_to_ideal",
+        "exit": "fade",
+        "concept": "advice_utilization",
+    },
+    {
+        "pattern": r"length of credit history is 15",
         "visual_type": "donut_segment",
         "entrance": "donut_reveal",
         "progression": "label_count_up",
@@ -96,7 +148,15 @@ SEMANTIC_PATTERNS = [
         "concept": "factor_length",
     },
     {
-        "pattern": r"new credit.*ten percent",
+        "pattern": r"don.?t close your oldest card",
+        "visual_type": "advice_callout",
+        "entrance": "callout_in",
+        "progression": "hold",
+        "exit": "fade",
+        "concept": "advice_length",
+    },
+    {
+        "pattern": r"new credit is 10",
         "visual_type": "donut_segment",
         "entrance": "donut_reveal",
         "progression": "label_count_up",
@@ -104,16 +164,24 @@ SEMANTIC_PATTERNS = [
         "concept": "factor_new",
     },
     {
-        "pattern": r"credit mix.*ten percent",
-        "visual_type": "donut_segment",
-        "entrance": "donut_reveal",
-        "progression": "label_count_up",
+        "pattern": r"hard inquiry dings",
+        "visual_type": "advice_callout",
+        "entrance": "callout_in",
+        "progression": "hold",
         "exit": "morph_to_example",
-        "concept": "factor_mix",
+        "concept": "advice_inquiry",
     },
-    # Example: score journey with cause/effect
+    # === EXAMPLE ===
     {
-        "pattern": r"seven hundred twenty",
+        "pattern": r"see this in action",
+        "visual_type": "transition_card",
+        "entrance": "wipe_in",
+        "progression": "hold",
+        "exit": "morph_to_story",
+        "concept": "example_transition",
+    },
+    {
+        "pattern": r"sarah has a 720",
         "visual_type": "score_card",
         "entrance": "slide_in",
         "progression": "count_up_to_value",
@@ -121,7 +189,7 @@ SEMANTIC_PATTERNS = [
         "concept": "sarah_start",
     },
     {
-        "pattern": r"misses one.*payment.*thirty days",
+        "pattern": r"misses one.*payment.*30 days",
         "visual_type": "timeline_event",
         "entrance": "marker_drop",
         "progression": "score_count_down",
@@ -129,7 +197,7 @@ SEMANTIC_PATTERNS = [
         "concept": "sarah_miss",
     },
     {
-        "pattern": r"drops to six hundred eighty",
+        "pattern": r"drops to 680",
         "visual_type": "score_delta",
         "entrance": "delta_badge",
         "progression": "arrow_draw",
@@ -137,7 +205,15 @@ SEMANTIC_PATTERNS = [
         "concept": "sarah_drop1",
     },
     {
-        "pattern": r"maxes out.*ninety percent",
+        "pattern": r"40.?point hit",
+        "visual_type": "delta_callout",
+        "entrance": "pop_in",
+        "progression": "hold",
+        "exit": "fade",
+        "concept": "sarah_hit1",
+    },
+    {
+        "pattern": r"maxes out.*90.*utilization",
         "visual_type": "timeline_event",
         "entrance": "marker_drop",
         "progression": "score_count_down",
@@ -145,16 +221,144 @@ SEMANTIC_PATTERNS = [
         "concept": "sarah_max",
     },
     {
-        "pattern": r"rebounds to seven hundred ten",
+        "pattern": r"another 30 points.*to 650",
+        "visual_type": "score_delta",
+        "entrance": "delta_badge",
+        "progression": "arrow_draw",
+        "exit": "persist",
+        "concept": "sarah_drop2",
+    },
+    {
+        "pattern": r"pays everything on time for six months",
+        "visual_type": "timeline_event_positive",
+        "entrance": "marker_drop_positive",
+        "progression": "progress_bar_fill",
+        "exit": "persist",
+        "concept": "sarah_recovery_actions",
+    },
+    {
+        "pattern": r"rebounds to 710",
         "visual_type": "score_delta",
         "entrance": "delta_badge_positive",
         "progression": "arrow_draw_up",
         "exit": "morph_to_tips",
         "concept": "sarah_recovery",
     },
+    # === TIPS ===
+    {
+        "pattern": r"five proven ways",
+        "visual_type": "section_title",
+        "entrance": "fade_in",
+        "progression": "hold",
+        "exit": "morph_to_list",
+        "concept": "tips_intro",
+    },
+    {
+        "pattern": r"one,? set up auto pay",
+        "visual_type": "tip_card",
+        "entrance": "slide_in",
+        "progression": "check_reveal",
+        "exit": "persist_dimmed",
+        "concept": "tip_autopay",
+    },
+    {
+        "pattern": r"two,? pay down balances",
+        "visual_type": "tip_card",
+        "entrance": "slide_in",
+        "progression": "check_reveal",
+        "exit": "persist_dimmed",
+        "concept": "tip_balances",
+    },
+    {
+        "pattern": r"three,? don.?t close old cards",
+        "visual_type": "tip_card",
+        "entrance": "slide_in",
+        "progression": "check_reveal",
+        "exit": "persist_dimmed",
+        "concept": "tip_keep_cards",
+    },
+    {
+        "pattern": r"four,? limit hard inquiries",
+        "visual_type": "tip_card",
+        "entrance": "slide_in",
+        "progression": "check_reveal",
+        "exit": "persist_dimmed",
+        "concept": "tip_inquiries",
+    },
+    {
+        "pattern": r"five,? check your reports",
+        "visual_type": "tip_card",
+        "entrance": "slide_in",
+        "progression": "check_reveal",
+        "exit": "morph_to_action",
+        "concept": "tip_reports",
+    },
+    {
+        "pattern": r"one in five reports has a mistake",
+        "visual_type": "stat_callout",
+        "entrance": "pop_in",
+        "progression": "hold",
+        "exit": "fade",
+        "concept": "tip_stat",
+    },
+    # === ACTION ===
+    {
+        "pattern": r"action plan starts today",
+        "visual_type": "section_title",
+        "entrance": "fade_in",
+        "progression": "hold",
+        "exit": "morph_to_steps",
+        "concept": "action_intro",
+    },
+    {
+        "pattern": r"step one,? pull your free.*reports",
+        "visual_type": "action_card",
+        "entrance": "slide_in",
+        "progression": "icon_animate",
+        "exit": "persist",
+        "concept": "step_reports",
+    },
+    {
+        "pattern": r"step two,? set up auto pay",
+        "visual_type": "action_card",
+        "entrance": "slide_in",
+        "progression": "icon_animate",
+        "exit": "persist",
+        "concept": "step_autopay",
+    },
+    {
+        "pattern": r"step three,? pick your highest utilization",
+        "visual_type": "action_card",
+        "entrance": "slide_in",
+        "progression": "icon_animate",
+        "exit": "persist",
+        "concept": "step_payment",
+    },
+    {
+        "pattern": r"reward consistency over time",
+        "visual_type": "principle_card",
+        "entrance": "fade_in",
+        "progression": "hold",
+        "exit": "morph_to_close",
+        "concept": "principle_consistency",
+    },
+    {
+        "pattern": r"small actions repeated monthly",
+        "visual_type": "encouragement_card",
+        "entrance": "fade_in",
+        "progression": "hold",
+        "exit": "morph_to_close",
+        "concept": "encouragement",
+    },
+    {
+        "pattern": r"future self.*thank you",
+        "visual_type": "closing_card",
+        "entrance": "fade_in",
+        "progression": "hold_to_end",
+        "exit": "end_card",
+        "concept": "closing",
+    },
 ]
-
-
 def find_word_anchor(words, pattern, occurrence=1):
     """
     Find the word index anchoring a phrase pattern.
