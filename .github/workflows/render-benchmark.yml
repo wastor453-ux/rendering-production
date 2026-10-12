@@ -6,7 +6,7 @@ on:
       composition:
         description: 'Composition to benchmark'
         required: true
-        default: 'P3Rehearsal'
+        default: 'SavingsTrap'
       frames:
         description: 'Number of frames for benchmark (e.g. 300 = 10s)'
         required: false

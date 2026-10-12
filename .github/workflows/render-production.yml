@@ -6,7 +6,7 @@ on:
       composition:
         description: 'Remotion composition ID'
         required: true
-        default: 'P3Rehearsal'
+        default: 'SavingsTrap'
       label:
         description: 'Human-readable label (display only, NOT used for artifact identity)'
         required: false

@@ -14,7 +14,7 @@ on:
       composition:
         description: 'Remotion composition ID'
         required: true
-        default: 'P3Rehearsal'
+        default: 'SavingsTrap'
       start_frame:
         description: 'First frame (inclusive)'
         required: true
