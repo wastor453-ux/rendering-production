@@ -1,0 +1,4100 @@
+{
+  "scenes": [
+    {
+      "scene_id": "hook",
+      "voice_start": 0.0,
+      "voice_end": 17.958,
+      "words": [
+        {
+          "word": "Your",
+          "start": 0.0,
+          "end": 0.227
+        },
+        {
+          "word": "credit",
+          "start": 0.227,
+          "end": 0.566
+        },
+        {
+          "word": "score",
+          "start": 0.566,
+          "end": 0.85
+        },
+        {
+          "word": "is",
+          "start": 0.85,
+          "end": 0.963
+        },
+        {
+          "word": "a",
+          "start": 0.963,
+          "end": 1.02
+        },
+        {
+          "word": "three-digit",
+          "start": 1.02,
+          "end": 1.586
+        },
+        {
+          "word": "number",
+          "start": 1.586,
+          "end": 1.926
+        },
+        {
+          "word": "that",
+          "start": 1.926,
+          "end": 2.153
+        },
+        {
+          "word": "controls",
+          "start": 2.153,
+          "end": 2.606
+        },
+        {
+          "word": "your",
+          "start": 2.606,
+          "end": 2.832
+        },
+        {
+          "word": "financial",
+          "start": 2.832,
+          "end": 3.342
+        },
+        {
+          "word": "life.",
+          "start": 3.342,
+          "end": 4.022
+        },
+        {
+          "word": "It",
+          "start": 4.022,
+          "end": 4.135
+        },
+        {
+          "word": "decides",
+          "start": 4.135,
+          "end": 4.532
+        },
+        {
+          "word": "if",
+          "start": 4.532,
+          "end": 4.645
+        },
+        {
+          "word": "you",
+          "start": 4.645,
+          "end": 4.815
+        },
+        {
+          "word": "get",
+          "start": 4.815,
+          "end": 4.985
+        },
+        {
+          "word": "approved",
+          "start": 4.985,
+          "end": 5.438
+        },
+        {
+          "word": "for",
+          "start": 5.438,
+          "end": 5.608
+        },
+        {
+          "word": "a",
+          "start": 5.608,
+          "end": 5.665
+        },
+        {
+          "word": "mortgage,",
+          "start": 5.665,
+          "end": 6.345
+        },
+        {
+          "word": "what",
+          "start": 6.345,
+          "end": 6.571
+        },
+        {
+          "word": "interest",
+          "start": 6.571,
+          "end": 7.025
+        },
+        {
+          "word": "rate",
+          "start": 7.025,
+          "end": 7.251
+        },
+        {
+          "word": "you",
+          "start": 7.251,
+          "end": 7.421
+        },
+        {
+          "word": "pay,",
+          "start": 7.421,
+          "end": 7.818
+        },
+        {
+          "word": "even",
+          "start": 7.818,
+          "end": 8.044
+        },
+        {
+          "word": "whether",
+          "start": 8.044,
+          "end": 8.441
+        },
+        {
+          "word": "you",
+          "start": 8.441,
+          "end": 8.611
+        },
+        {
+          "word": "get",
+          "start": 8.611,
+          "end": 8.781
+        },
+        {
+          "word": "that",
+          "start": 8.781,
+          "end": 9.007
+        },
+        {
+          "word": "apartment.",
+          "start": 9.007,
+          "end": 9.97
+        },
+        {
+          "word": "Yet",
+          "start": 9.97,
+          "end": 10.14
+        },
+        {
+          "word": "most",
+          "start": 10.14,
+          "end": 10.367
+        },
+        {
+          "word": "people",
+          "start": 10.367,
+          "end": 10.707
+        },
+        {
+          "word": "have",
+          "start": 10.707,
+          "end": 10.933
+        },
+        {
+          "word": "no",
+          "start": 10.933,
+          "end": 11.047
+        },
+        {
+          "word": "idea",
+          "start": 11.047,
+          "end": 11.273
+        },
+        {
+          "word": "how",
+          "start": 11.273,
+          "end": 11.443
+        },
+        {
+          "word": "it's",
+          "start": 11.443,
+          "end": 11.613
+        },
+        {
+          "word": "calculated.",
+          "start": 11.613,
+          "end": 12.633
+        },
+        {
+          "word": "In",
+          "start": 12.633,
+          "end": 12.746
+        },
+        {
+          "word": "the",
+          "start": 12.746,
+          "end": 12.916
+        },
+        {
+          "word": "next",
+          "start": 12.916,
+          "end": 13.143
+        },
+        {
+          "word": "three",
+          "start": 13.143,
+          "end": 13.426
+        },
+        {
+          "word": "minutes,",
+          "start": 13.426,
+          "end": 14.049
+        },
+        {
+          "word": "you'll",
+          "start": 14.049,
+          "end": 14.332
+        },
+        {
+          "word": "understand",
+          "start": 14.332,
+          "end": 14.899
+        },
+        {
+          "word": "exactly",
+          "start": 14.899,
+          "end": 15.295
+        },
+        {
+          "word": "what",
+          "start": 15.295,
+          "end": 15.522
+        },
+        {
+          "word": "moves",
+          "start": 15.522,
+          "end": 15.805
+        },
+        {
+          "word": "your",
+          "start": 15.805,
+          "end": 16.032
+        },
+        {
+          "word": "score",
+          "start": 16.032,
+          "end": 16.315
+        },
+        {
+          "word": "and",
+          "start": 16.315,
+          "end": 16.485
+        },
+        {
+          "word": "how",
+          "start": 16.485,
+          "end": 16.655
+        },
+        {
+          "word": "to",
+          "start": 16.655,
+          "end": 16.768
+        },
+        {
+          "word": "improve",
+          "start": 16.768,
+          "end": 17.165
+        },
+        {
+          "word": "it",
+          "start": 17.165,
+          "end": 17.278
+        },
+        {
+          "word": "fast.",
+          "start": 17.278,
+          "end": 17.958
+        }
+      ]
+    },
+    {
+      "scene_id": "factors",
+      "voice_start": 18.75,
+      "voice_end": 41.132999999999996,
+      "words": [
+        {
+          "word": "Your",
+          "start": 18.75,
+          "end": 18.939
+        },
+        {
+          "word": "FICO",
+          "start": 18.939,
+          "end": 19.128
+        },
+        {
+          "word": "score",
+          "start": 19.128,
+          "end": 19.364
+        },
+        {
+          "word": "has",
+          "start": 19.364,
+          "end": 19.506
+        },
+        {
+          "word": "five",
+          "start": 19.506,
+          "end": 19.694
+        },
+        {
+          "word": "factors.",
+          "start": 19.694,
+          "end": 20.403
+        },
+        {
+          "word": "Payment",
+          "start": 20.403,
+          "end": 20.733
+        },
+        {
+          "word": "history",
+          "start": 20.733,
+          "end": 21.064
+        },
+        {
+          "word": "is",
+          "start": 21.064,
+          "end": 21.158
+        },
+        {
+          "word": "thirty-five",
+          "start": 21.158,
+          "end": 21.631
+        },
+        {
+          "word": "percent,",
+          "start": 21.631,
+          "end": 22.15
+        },
+        {
+          "word": "the",
+          "start": 22.15,
+          "end": 22.292
+        },
+        {
+          "word": "biggest",
+          "start": 22.292,
+          "end": 22.622
+        },
+        {
+          "word": "slice.",
+          "start": 22.622,
+          "end": 23.236
+        },
+        {
+          "word": "Pay",
+          "start": 23.236,
+          "end": 23.378
+        },
+        {
+          "word": "every",
+          "start": 23.378,
+          "end": 23.614
+        },
+        {
+          "word": "bill",
+          "start": 23.614,
+          "end": 23.803
+        },
+        {
+          "word": "on",
+          "start": 23.803,
+          "end": 23.897
+        },
+        {
+          "word": "time,",
+          "start": 23.897,
+          "end": 24.275
+        },
+        {
+          "word": "every",
+          "start": 24.275,
+          "end": 24.511
+        },
+        {
+          "word": "time.",
+          "start": 24.511,
+          "end": 25.078
+        },
+        {
+          "word": "Amounts",
+          "start": 25.078,
+          "end": 25.408
+        },
+        {
+          "word": "owed",
+          "start": 25.408,
+          "end": 25.597
+        },
+        {
+          "word": "is",
+          "start": 25.597,
+          "end": 25.692
+        },
+        {
+          "word": "thirty",
+          "start": 25.692,
+          "end": 25.975
+        },
+        {
+          "word": "percent,",
+          "start": 25.975,
+          "end": 26.494
+        },
+        {
+          "word": "keep",
+          "start": 26.494,
+          "end": 26.683
+        },
+        {
+          "word": "credit",
+          "start": 26.683,
+          "end": 26.967
+        },
+        {
+          "word": "card",
+          "start": 26.967,
+          "end": 27.155
+        },
+        {
+          "word": "balances",
+          "start": 27.155,
+          "end": 27.533
+        },
+        {
+          "word": "below",
+          "start": 27.533,
+          "end": 27.769
+        },
+        {
+          "word": "thirty",
+          "start": 27.769,
+          "end": 28.053
+        },
+        {
+          "word": "percent",
+          "start": 28.053,
+          "end": 28.383
+        },
+        {
+          "word": "of",
+          "start": 28.383,
+          "end": 28.478
+        },
+        {
+          "word": "your",
+          "start": 28.478,
+          "end": 28.667
+        },
+        {
+          "word": "limits,",
+          "start": 28.667,
+          "end": 29.139
+        },
+        {
+          "word": "under",
+          "start": 29.139,
+          "end": 29.375
+        },
+        {
+          "word": "ten",
+          "start": 29.375,
+          "end": 29.517
+        },
+        {
+          "word": "percent",
+          "start": 29.517,
+          "end": 29.847
+        },
+        {
+          "word": "is",
+          "start": 29.847,
+          "end": 29.941
+        },
+        {
+          "word": "ideal.",
+          "start": 29.941,
+          "end": 30.555
+        },
+        {
+          "word": "Length",
+          "start": 30.555,
+          "end": 30.839
+        },
+        {
+          "word": "of",
+          "start": 30.839,
+          "end": 30.933
+        },
+        {
+          "word": "credit",
+          "start": 30.933,
+          "end": 31.216
+        },
+        {
+          "word": "history",
+          "start": 31.216,
+          "end": 31.547
+        },
+        {
+          "word": "is",
+          "start": 31.547,
+          "end": 31.641
+        },
+        {
+          "word": "fifteen",
+          "start": 31.641,
+          "end": 31.972
+        },
+        {
+          "word": "percent,",
+          "start": 31.972,
+          "end": 32.491
+        },
+        {
+          "word": "older",
+          "start": 32.491,
+          "end": 32.728
+        },
+        {
+          "word": "accounts",
+          "start": 32.728,
+          "end": 33.105
+        },
+        {
+          "word": "help,",
+          "start": 33.105,
+          "end": 33.483
+        },
+        {
+          "word": "so",
+          "start": 33.483,
+          "end": 33.578
+        },
+        {
+          "word": "don't",
+          "start": 33.578,
+          "end": 33.766
+        },
+        {
+          "word": "close",
+          "start": 33.766,
+          "end": 34.003
+        },
+        {
+          "word": "your",
+          "start": 34.003,
+          "end": 34.191
+        },
+        {
+          "word": "oldest",
+          "start": 34.191,
+          "end": 34.475
+        },
+        {
+          "word": "card.",
+          "start": 34.475,
+          "end": 35.041
+        },
+        {
+          "word": "New",
+          "start": 35.041,
+          "end": 35.183
+        },
+        {
+          "word": "credit",
+          "start": 35.183,
+          "end": 35.466
+        },
+        {
+          "word": "is",
+          "start": 35.466,
+          "end": 35.561
+        },
+        {
+          "word": "ten",
+          "start": 35.561,
+          "end": 35.703
+        },
+        {
+          "word": "percent,",
+          "start": 35.703,
+          "end": 36.222
+        },
+        {
+          "word": "each",
+          "start": 36.222,
+          "end": 36.411
+        },
+        {
+          "word": "hard",
+          "start": 36.411,
+          "end": 36.6
+        },
+        {
+          "word": "inquiry",
+          "start": 36.6,
+          "end": 36.93
+        },
+        {
+          "word": "dings",
+          "start": 36.93,
+          "end": 37.166
+        },
+        {
+          "word": "you",
+          "start": 37.166,
+          "end": 37.308
+        },
+        {
+          "word": "slightly.",
+          "start": 37.308,
+          "end": 38.064
+        },
+        {
+          "word": "Credit",
+          "start": 38.064,
+          "end": 38.347
+        },
+        {
+          "word": "mix",
+          "start": 38.347,
+          "end": 38.489
+        },
+        {
+          "word": "is",
+          "start": 38.489,
+          "end": 38.583
+        },
+        {
+          "word": "ten",
+          "start": 38.583,
+          "end": 38.725
+        },
+        {
+          "word": "percent,",
+          "start": 38.725,
+          "end": 39.244
+        },
+        {
+          "word": "having",
+          "start": 39.244,
+          "end": 39.527
+        },
+        {
+          "word": "different",
+          "start": 39.527,
+          "end": 39.952
+        },
+        {
+          "word": "types",
+          "start": 39.952,
+          "end": 40.189
+        },
+        {
+          "word": "helps",
+          "start": 40.189,
+          "end": 40.425
+        },
+        {
+          "word": "a",
+          "start": 40.425,
+          "end": 40.472
+        },
+        {
+          "word": "little.",
+          "start": 40.472,
+          "end": 41.133
+        }
+      ]
+    },
+    {
+      "scene_id": "example",
+      "voice_start": 41.975,
+      "voice_end": 64.253,
+      "words": [
+        {
+          "word": "Let's",
+          "start": 41.975,
+          "end": 42.165
+        },
+        {
+          "word": "see",
+          "start": 42.165,
+          "end": 42.308
+        },
+        {
+          "word": "this",
+          "start": 42.308,
+          "end": 42.498
+        },
+        {
+          "word": "in",
+          "start": 42.498,
+          "end": 42.593
+        },
+        {
+          "word": "action.",
+          "start": 42.593,
+          "end": 43.258
+        },
+        {
+          "word": "Sarah",
+          "start": 43.258,
+          "end": 43.495
+        },
+        {
+          "word": "has",
+          "start": 43.495,
+          "end": 43.638
+        },
+        {
+          "word": "a",
+          "start": 43.638,
+          "end": 43.685
+        },
+        {
+          "word": "seven",
+          "start": 43.685,
+          "end": 43.923
+        },
+        {
+          "word": "hundred",
+          "start": 43.923,
+          "end": 44.255
+        },
+        {
+          "word": "twenty",
+          "start": 44.255,
+          "end": 44.54
+        },
+        {
+          "word": "score.",
+          "start": 44.54,
+          "end": 45.158
+        },
+        {
+          "word": "She",
+          "start": 45.158,
+          "end": 45.3
+        },
+        {
+          "word": "misses",
+          "start": 45.3,
+          "end": 45.585
+        },
+        {
+          "word": "one",
+          "start": 45.585,
+          "end": 45.728
+        },
+        {
+          "word": "credit",
+          "start": 45.728,
+          "end": 46.013
+        },
+        {
+          "word": "card",
+          "start": 46.013,
+          "end": 46.203
+        },
+        {
+          "word": "payment",
+          "start": 46.203,
+          "end": 46.535
+        },
+        {
+          "word": "by",
+          "start": 46.535,
+          "end": 46.63
+        },
+        {
+          "word": "thirty",
+          "start": 46.63,
+          "end": 46.915
+        },
+        {
+          "word": "days.",
+          "start": 46.915,
+          "end": 47.485
+        },
+        {
+          "word": "Her",
+          "start": 47.485,
+          "end": 47.628
+        },
+        {
+          "word": "score",
+          "start": 47.628,
+          "end": 47.865
+        },
+        {
+          "word": "drops",
+          "start": 47.865,
+          "end": 48.103
+        },
+        {
+          "word": "to",
+          "start": 48.103,
+          "end": 48.198
+        },
+        {
+          "word": "six",
+          "start": 48.198,
+          "end": 48.34
+        },
+        {
+          "word": "hundred",
+          "start": 48.34,
+          "end": 48.673
+        },
+        {
+          "word": "eighty,",
+          "start": 48.673,
+          "end": 49.148
+        },
+        {
+          "word": "a",
+          "start": 49.148,
+          "end": 49.195
+        },
+        {
+          "word": "forty",
+          "start": 49.195,
+          "end": 49.433
+        },
+        {
+          "word": "point",
+          "start": 49.433,
+          "end": 49.67
+        },
+        {
+          "word": "hit.",
+          "start": 49.67,
+          "end": 50.193
+        },
+        {
+          "word": "She",
+          "start": 50.193,
+          "end": 50.335
+        },
+        {
+          "word": "also",
+          "start": 50.335,
+          "end": 50.525
+        },
+        {
+          "word": "maxes",
+          "start": 50.525,
+          "end": 50.763
+        },
+        {
+          "word": "out",
+          "start": 50.763,
+          "end": 50.905
+        },
+        {
+          "word": "a",
+          "start": 50.905,
+          "end": 50.953
+        },
+        {
+          "word": "card",
+          "start": 50.953,
+          "end": 51.143
+        },
+        {
+          "word": "at",
+          "start": 51.143,
+          "end": 51.238
+        },
+        {
+          "word": "ninety",
+          "start": 51.238,
+          "end": 51.523
+        },
+        {
+          "word": "percent",
+          "start": 51.523,
+          "end": 51.855
+        },
+        {
+          "word": "utilization.",
+          "start": 51.855,
+          "end": 52.758
+        },
+        {
+          "word": "Down",
+          "start": 52.758,
+          "end": 52.948
+        },
+        {
+          "word": "another",
+          "start": 52.948,
+          "end": 53.28
+        },
+        {
+          "word": "thirty",
+          "start": 53.28,
+          "end": 53.565
+        },
+        {
+          "word": "points",
+          "start": 53.565,
+          "end": 53.85
+        },
+        {
+          "word": "to",
+          "start": 53.85,
+          "end": 53.945
+        },
+        {
+          "word": "six",
+          "start": 53.945,
+          "end": 54.088
+        },
+        {
+          "word": "hundred",
+          "start": 54.088,
+          "end": 54.42
+        },
+        {
+          "word": "fifty.",
+          "start": 54.42,
+          "end": 55.038
+        },
+        {
+          "word": "But",
+          "start": 55.038,
+          "end": 55.18
+        },
+        {
+          "word": "then",
+          "start": 55.18,
+          "end": 55.37
+        },
+        {
+          "word": "she",
+          "start": 55.37,
+          "end": 55.513
+        },
+        {
+          "word": "pays",
+          "start": 55.513,
+          "end": 55.703
+        },
+        {
+          "word": "everything",
+          "start": 55.703,
+          "end": 56.178
+        },
+        {
+          "word": "on",
+          "start": 56.178,
+          "end": 56.273
+        },
+        {
+          "word": "time",
+          "start": 56.273,
+          "end": 56.463
+        },
+        {
+          "word": "for",
+          "start": 56.463,
+          "end": 56.605
+        },
+        {
+          "word": "six",
+          "start": 56.605,
+          "end": 56.748
+        },
+        {
+          "word": "months",
+          "start": 56.748,
+          "end": 57.033
+        },
+        {
+          "word": "and",
+          "start": 57.033,
+          "end": 57.175
+        },
+        {
+          "word": "drops",
+          "start": 57.175,
+          "end": 57.413
+        },
+        {
+          "word": "utilization",
+          "start": 57.413,
+          "end": 57.935
+        },
+        {
+          "word": "to",
+          "start": 57.935,
+          "end": 58.03
+        },
+        {
+          "word": "fifteen",
+          "start": 58.03,
+          "end": 58.363
+        },
+        {
+          "word": "percent.",
+          "start": 58.363,
+          "end": 59.075
+        },
+        {
+          "word": "Her",
+          "start": 59.075,
+          "end": 59.218
+        },
+        {
+          "word": "score",
+          "start": 59.218,
+          "end": 59.455
+        },
+        {
+          "word": "rebounds",
+          "start": 59.455,
+          "end": 59.835
+        },
+        {
+          "word": "to",
+          "start": 59.835,
+          "end": 59.93
+        },
+        {
+          "word": "seven",
+          "start": 59.93,
+          "end": 60.168
+        },
+        {
+          "word": "hundred",
+          "start": 60.168,
+          "end": 60.5
+        },
+        {
+          "word": "ten.",
+          "start": 60.5,
+          "end": 61.023
+        },
+        {
+          "word": "Payment",
+          "start": 61.023,
+          "end": 61.355
+        },
+        {
+          "word": "history",
+          "start": 61.355,
+          "end": 61.688
+        },
+        {
+          "word": "and",
+          "start": 61.688,
+          "end": 61.83
+        },
+        {
+          "word": "utilization",
+          "start": 61.83,
+          "end": 62.353
+        },
+        {
+          "word": "drive",
+          "start": 62.353,
+          "end": 62.59
+        },
+        {
+          "word": "seventy",
+          "start": 62.59,
+          "end": 62.923
+        },
+        {
+          "word": "percent",
+          "start": 62.923,
+          "end": 63.255
+        },
+        {
+          "word": "of",
+          "start": 63.255,
+          "end": 63.35
+        },
+        {
+          "word": "the",
+          "start": 63.35,
+          "end": 63.493
+        },
+        {
+          "word": "movement.",
+          "start": 63.493,
+          "end": 64.253
+        }
+      ]
+    },
+    {
+      "scene_id": "tips",
+      "voice_start": 65.401,
+      "voice_end": 89.12,
+      "words": [
+        {
+          "word": "Here",
+          "start": 65.401,
+          "end": 65.619
+        },
+        {
+          "word": "are",
+          "start": 65.619,
+          "end": 65.782
+        },
+        {
+          "word": "five",
+          "start": 65.782,
+          "end": 65.999
+        },
+        {
+          "word": "proven",
+          "start": 65.999,
+          "end": 66.326
+        },
+        {
+          "word": "ways",
+          "start": 66.326,
+          "end": 66.543
+        },
+        {
+          "word": "to",
+          "start": 66.543,
+          "end": 66.652
+        },
+        {
+          "word": "boost",
+          "start": 66.652,
+          "end": 66.924
+        },
+        {
+          "word": "your",
+          "start": 66.924,
+          "end": 67.142
+        },
+        {
+          "word": "score.",
+          "start": 67.142,
+          "end": 67.849
+        },
+        {
+          "word": "One,",
+          "start": 67.849,
+          "end": 68.23
+        },
+        {
+          "word": "set",
+          "start": 68.23,
+          "end": 68.393
+        },
+        {
+          "word": "up",
+          "start": 68.393,
+          "end": 68.502
+        },
+        {
+          "word": "autopay",
+          "start": 68.502,
+          "end": 68.883
+        },
+        {
+          "word": "for",
+          "start": 68.883,
+          "end": 69.046
+        },
+        {
+          "word": "minimum",
+          "start": 69.046,
+          "end": 69.427
+        },
+        {
+          "word": "payments,",
+          "start": 69.427,
+          "end": 70.08
+        },
+        {
+          "word": "never",
+          "start": 70.08,
+          "end": 70.352
+        },
+        {
+          "word": "miss",
+          "start": 70.352,
+          "end": 70.569
+        },
+        {
+          "word": "a",
+          "start": 70.569,
+          "end": 70.624
+        },
+        {
+          "word": "due",
+          "start": 70.624,
+          "end": 70.787
+        },
+        {
+          "word": "date",
+          "start": 70.787,
+          "end": 71.004
+        },
+        {
+          "word": "again.",
+          "start": 71.004,
+          "end": 71.712
+        },
+        {
+          "word": "Two,",
+          "start": 71.712,
+          "end": 72.092
+        },
+        {
+          "word": "pay",
+          "start": 72.092,
+          "end": 72.256
+        },
+        {
+          "word": "down",
+          "start": 72.256,
+          "end": 72.473
+        },
+        {
+          "word": "balances",
+          "start": 72.473,
+          "end": 72.908
+        },
+        {
+          "word": "to",
+          "start": 72.908,
+          "end": 73.017
+        },
+        {
+          "word": "under",
+          "start": 73.017,
+          "end": 73.289
+        },
+        {
+          "word": "thirty",
+          "start": 73.289,
+          "end": 73.616
+        },
+        {
+          "word": "percent,",
+          "start": 73.616,
+          "end": 74.214
+        },
+        {
+          "word": "then",
+          "start": 74.214,
+          "end": 74.432
+        },
+        {
+          "word": "under",
+          "start": 74.432,
+          "end": 74.704
+        },
+        {
+          "word": "ten",
+          "start": 74.704,
+          "end": 74.867
+        },
+        {
+          "word": "percent",
+          "start": 74.867,
+          "end": 75.248
+        },
+        {
+          "word": "for",
+          "start": 75.248,
+          "end": 75.411
+        },
+        {
+          "word": "maximum",
+          "start": 75.411,
+          "end": 75.792
+        },
+        {
+          "word": "impact.",
+          "start": 75.792,
+          "end": 76.553
+        },
+        {
+          "word": "Three,",
+          "start": 76.553,
+          "end": 77.043
+        },
+        {
+          "word": "don't",
+          "start": 77.043,
+          "end": 77.261
+        },
+        {
+          "word": "close",
+          "start": 77.261,
+          "end": 77.533
+        },
+        {
+          "word": "old",
+          "start": 77.533,
+          "end": 77.696
+        },
+        {
+          "word": "cards,",
+          "start": 77.696,
+          "end": 78.185
+        },
+        {
+          "word": "the",
+          "start": 78.185,
+          "end": 78.349
+        },
+        {
+          "word": "age",
+          "start": 78.349,
+          "end": 78.512
+        },
+        {
+          "word": "helps",
+          "start": 78.512,
+          "end": 78.784
+        },
+        {
+          "word": "your",
+          "start": 78.784,
+          "end": 79.001
+        },
+        {
+          "word": "length",
+          "start": 79.001,
+          "end": 79.328
+        },
+        {
+          "word": "of",
+          "start": 79.328,
+          "end": 79.437
+        },
+        {
+          "word": "history.",
+          "start": 79.437,
+          "end": 80.253
+        },
+        {
+          "word": "Four,",
+          "start": 80.253,
+          "end": 80.688
+        },
+        {
+          "word": "limit",
+          "start": 80.688,
+          "end": 80.96
+        },
+        {
+          "word": "hard",
+          "start": 80.96,
+          "end": 81.177
+        },
+        {
+          "word": "inquiries",
+          "start": 81.177,
+          "end": 81.667
+        },
+        {
+          "word": "to",
+          "start": 81.667,
+          "end": 81.776
+        },
+        {
+          "word": "one",
+          "start": 81.776,
+          "end": 81.939
+        },
+        {
+          "word": "or",
+          "start": 81.939,
+          "end": 82.048
+        },
+        {
+          "word": "two",
+          "start": 82.048,
+          "end": 82.211
+        },
+        {
+          "word": "per",
+          "start": 82.211,
+          "end": 82.374
+        },
+        {
+          "word": "year.",
+          "start": 82.374,
+          "end": 83.027
+        },
+        {
+          "word": "Five,",
+          "start": 83.027,
+          "end": 83.462
+        },
+        {
+          "word": "check",
+          "start": 83.462,
+          "end": 83.734
+        },
+        {
+          "word": "your",
+          "start": 83.734,
+          "end": 83.952
+        },
+        {
+          "word": "reports",
+          "start": 83.952,
+          "end": 84.333
+        },
+        {
+          "word": "free",
+          "start": 84.333,
+          "end": 84.55
+        },
+        {
+          "word": "at",
+          "start": 84.55,
+          "end": 84.659
+        },
+        {
+          "word": "Annual",
+          "start": 84.659,
+          "end": 84.985
+        },
+        {
+          "word": "Credit",
+          "start": 84.985,
+          "end": 85.312
+        },
+        {
+          "word": "Report",
+          "start": 85.312,
+          "end": 85.638
+        },
+        {
+          "word": "dot",
+          "start": 85.638,
+          "end": 85.802
+        },
+        {
+          "word": "com",
+          "start": 85.802,
+          "end": 85.965
+        },
+        {
+          "word": "and",
+          "start": 85.965,
+          "end": 86.128
+        },
+        {
+          "word": "dispute",
+          "start": 86.128,
+          "end": 86.509
+        },
+        {
+          "word": "any",
+          "start": 86.509,
+          "end": 86.672
+        },
+        {
+          "word": "errors,",
+          "start": 86.672,
+          "end": 87.216
+        },
+        {
+          "word": "one",
+          "start": 87.216,
+          "end": 87.379
+        },
+        {
+          "word": "in",
+          "start": 87.379,
+          "end": 87.488
+        },
+        {
+          "word": "five",
+          "start": 87.488,
+          "end": 87.706
+        },
+        {
+          "word": "reports",
+          "start": 87.706,
+          "end": 88.086
+        },
+        {
+          "word": "has",
+          "start": 88.086,
+          "end": 88.25
+        },
+        {
+          "word": "a",
+          "start": 88.25,
+          "end": 88.304
+        },
+        {
+          "word": "mistake.",
+          "start": 88.304,
+          "end": 89.12
+        }
+      ]
+    },
+    {
+      "scene_id": "action",
+      "voice_start": 90.203,
+      "voice_end": 111.77900000000001,
+      "words": [
+        {
+          "word": "Your",
+          "start": 90.203,
+          "end": 90.409
+        },
+        {
+          "word": "action",
+          "start": 90.409,
+          "end": 90.718
+        },
+        {
+          "word": "plan",
+          "start": 90.718,
+          "end": 90.924
+        },
+        {
+          "word": "starts",
+          "start": 90.924,
+          "end": 91.233
+        },
+        {
+          "word": "today.",
+          "start": 91.233,
+          "end": 91.902
+        },
+        {
+          "word": "Step",
+          "start": 91.902,
+          "end": 92.108
+        },
+        {
+          "word": "one,",
+          "start": 92.108,
+          "end": 92.469
+        },
+        {
+          "word": "pull",
+          "start": 92.469,
+          "end": 92.675
+        },
+        {
+          "word": "your",
+          "start": 92.675,
+          "end": 92.881
+        },
+        {
+          "word": "free",
+          "start": 92.881,
+          "end": 93.087
+        },
+        {
+          "word": "credit",
+          "start": 93.087,
+          "end": 93.396
+        },
+        {
+          "word": "reports",
+          "start": 93.396,
+          "end": 93.756
+        },
+        {
+          "word": "and",
+          "start": 93.756,
+          "end": 93.911
+        },
+        {
+          "word": "check",
+          "start": 93.911,
+          "end": 94.168
+        },
+        {
+          "word": "for",
+          "start": 94.168,
+          "end": 94.323
+        },
+        {
+          "word": "errors.",
+          "start": 94.323,
+          "end": 95.043
+        },
+        {
+          "word": "Step",
+          "start": 95.043,
+          "end": 95.249
+        },
+        {
+          "word": "two,",
+          "start": 95.249,
+          "end": 95.61
+        },
+        {
+          "word": "set",
+          "start": 95.61,
+          "end": 95.764
+        },
+        {
+          "word": "up",
+          "start": 95.764,
+          "end": 95.867
+        },
+        {
+          "word": "autopay",
+          "start": 95.867,
+          "end": 96.228
+        },
+        {
+          "word": "on",
+          "start": 96.228,
+          "end": 96.331
+        },
+        {
+          "word": "every",
+          "start": 96.331,
+          "end": 96.588
+        },
+        {
+          "word": "account",
+          "start": 96.588,
+          "end": 96.949
+        },
+        {
+          "word": "right",
+          "start": 96.949,
+          "end": 97.206
+        },
+        {
+          "word": "now.",
+          "start": 97.206,
+          "end": 97.773
+        },
+        {
+          "word": "Step",
+          "start": 97.773,
+          "end": 97.979
+        },
+        {
+          "word": "three,",
+          "start": 97.979,
+          "end": 98.442
+        },
+        {
+          "word": "pick",
+          "start": 98.442,
+          "end": 98.648
+        },
+        {
+          "word": "your",
+          "start": 98.648,
+          "end": 98.854
+        },
+        {
+          "word": "highest",
+          "start": 98.854,
+          "end": 99.214
+        },
+        {
+          "word": "utilization",
+          "start": 99.214,
+          "end": 99.781
+        },
+        {
+          "word": "card",
+          "start": 99.781,
+          "end": 99.987
+        },
+        {
+          "word": "and",
+          "start": 99.987,
+          "end": 100.141
+        },
+        {
+          "word": "make",
+          "start": 100.141,
+          "end": 100.347
+        },
+        {
+          "word": "an",
+          "start": 100.347,
+          "end": 100.45
+        },
+        {
+          "word": "extra",
+          "start": 100.45,
+          "end": 100.708
+        },
+        {
+          "word": "payment",
+          "start": 100.708,
+          "end": 101.068
+        },
+        {
+          "word": "this",
+          "start": 101.068,
+          "end": 101.274
+        },
+        {
+          "word": "week.",
+          "start": 101.274,
+          "end": 101.892
+        },
+        {
+          "word": "Remember,",
+          "start": 101.892,
+          "end": 102.51
+        },
+        {
+          "word": "credit",
+          "start": 102.51,
+          "end": 102.819
+        },
+        {
+          "word": "scores",
+          "start": 102.819,
+          "end": 103.128
+        },
+        {
+          "word": "reward",
+          "start": 103.128,
+          "end": 103.437
+        },
+        {
+          "word": "consistency",
+          "start": 103.437,
+          "end": 104.003
+        },
+        {
+          "word": "over",
+          "start": 104.003,
+          "end": 104.209
+        },
+        {
+          "word": "time.",
+          "start": 104.209,
+          "end": 104.827
+        },
+        {
+          "word": "Small",
+          "start": 104.827,
+          "end": 105.085
+        },
+        {
+          "word": "actions,",
+          "start": 105.085,
+          "end": 105.651
+        },
+        {
+          "word": "repeated",
+          "start": 105.651,
+          "end": 106.063
+        },
+        {
+          "word": "monthly,",
+          "start": 106.063,
+          "end": 106.63
+        },
+        {
+          "word": "build",
+          "start": 106.63,
+          "end": 106.887
+        },
+        {
+          "word": "an",
+          "start": 106.887,
+          "end": 106.99
+        },
+        {
+          "word": "excellent",
+          "start": 106.99,
+          "end": 107.454
+        },
+        {
+          "word": "score.",
+          "start": 107.454,
+          "end": 108.123
+        },
+        {
+          "word": "Your",
+          "start": 108.123,
+          "end": 108.329
+        },
+        {
+          "word": "future",
+          "start": 108.329,
+          "end": 108.638
+        },
+        {
+          "word": "self,",
+          "start": 108.638,
+          "end": 109.05
+        },
+        {
+          "word": "getting",
+          "start": 109.05,
+          "end": 109.41
+        },
+        {
+          "word": "approved",
+          "start": 109.41,
+          "end": 109.822
+        },
+        {
+          "word": "at",
+          "start": 109.822,
+          "end": 109.925
+        },
+        {
+          "word": "the",
+          "start": 109.925,
+          "end": 110.08
+        },
+        {
+          "word": "best",
+          "start": 110.08,
+          "end": 110.286
+        },
+        {
+          "word": "rates,",
+          "start": 110.286,
+          "end": 110.749
+        },
+        {
+          "word": "will",
+          "start": 110.749,
+          "end": 110.955
+        },
+        {
+          "word": "thank",
+          "start": 110.955,
+          "end": 111.213
+        },
+        {
+          "word": "you.",
+          "start": 111.213,
+          "end": 111.779
+        }
+      ]
+    }
+  ],
+  "all_words": [
+    {
+      "word": "Your",
+      "start": 0.0,
+      "end": 0.227,
+      "scene_id": "hook"
+    },
+    {
+      "word": "credit",
+      "start": 0.227,
+      "end": 0.566,
+      "scene_id": "hook"
+    },
+    {
+      "word": "score",
+      "start": 0.566,
+      "end": 0.85,
+      "scene_id": "hook"
+    },
+    {
+      "word": "is",
+      "start": 0.85,
+      "end": 0.963,
+      "scene_id": "hook"
+    },
+    {
+      "word": "a",
+      "start": 0.963,
+      "end": 1.02,
+      "scene_id": "hook"
+    },
+    {
+      "word": "three-digit",
+      "start": 1.02,
+      "end": 1.586,
+      "scene_id": "hook"
+    },
+    {
+      "word": "number",
+      "start": 1.586,
+      "end": 1.926,
+      "scene_id": "hook"
+    },
+    {
+      "word": "that",
+      "start": 1.926,
+      "end": 2.153,
+      "scene_id": "hook"
+    },
+    {
+      "word": "controls",
+      "start": 2.153,
+      "end": 2.606,
+      "scene_id": "hook"
+    },
+    {
+      "word": "your",
+      "start": 2.606,
+      "end": 2.832,
+      "scene_id": "hook"
+    },
+    {
+      "word": "financial",
+      "start": 2.832,
+      "end": 3.342,
+      "scene_id": "hook"
+    },
+    {
+      "word": "life.",
+      "start": 3.342,
+      "end": 4.022,
+      "scene_id": "hook"
+    },
+    {
+      "word": "It",
+      "start": 4.022,
+      "end": 4.135,
+      "scene_id": "hook"
+    },
+    {
+      "word": "decides",
+      "start": 4.135,
+      "end": 4.532,
+      "scene_id": "hook"
+    },
+    {
+      "word": "if",
+      "start": 4.532,
+      "end": 4.645,
+      "scene_id": "hook"
+    },
+    {
+      "word": "you",
+      "start": 4.645,
+      "end": 4.815,
+      "scene_id": "hook"
+    },
+    {
+      "word": "get",
+      "start": 4.815,
+      "end": 4.985,
+      "scene_id": "hook"
+    },
+    {
+      "word": "approved",
+      "start": 4.985,
+      "end": 5.438,
+      "scene_id": "hook"
+    },
+    {
+      "word": "for",
+      "start": 5.438,
+      "end": 5.608,
+      "scene_id": "hook"
+    },
+    {
+      "word": "a",
+      "start": 5.608,
+      "end": 5.665,
+      "scene_id": "hook"
+    },
+    {
+      "word": "mortgage,",
+      "start": 5.665,
+      "end": 6.345,
+      "scene_id": "hook"
+    },
+    {
+      "word": "what",
+      "start": 6.345,
+      "end": 6.571,
+      "scene_id": "hook"
+    },
+    {
+      "word": "interest",
+      "start": 6.571,
+      "end": 7.025,
+      "scene_id": "hook"
+    },
+    {
+      "word": "rate",
+      "start": 7.025,
+      "end": 7.251,
+      "scene_id": "hook"
+    },
+    {
+      "word": "you",
+      "start": 7.251,
+      "end": 7.421,
+      "scene_id": "hook"
+    },
+    {
+      "word": "pay,",
+      "start": 7.421,
+      "end": 7.818,
+      "scene_id": "hook"
+    },
+    {
+      "word": "even",
+      "start": 7.818,
+      "end": 8.044,
+      "scene_id": "hook"
+    },
+    {
+      "word": "whether",
+      "start": 8.044,
+      "end": 8.441,
+      "scene_id": "hook"
+    },
+    {
+      "word": "you",
+      "start": 8.441,
+      "end": 8.611,
+      "scene_id": "hook"
+    },
+    {
+      "word": "get",
+      "start": 8.611,
+      "end": 8.781,
+      "scene_id": "hook"
+    },
+    {
+      "word": "that",
+      "start": 8.781,
+      "end": 9.007,
+      "scene_id": "hook"
+    },
+    {
+      "word": "apartment.",
+      "start": 9.007,
+      "end": 9.97,
+      "scene_id": "hook"
+    },
+    {
+      "word": "Yet",
+      "start": 9.97,
+      "end": 10.14,
+      "scene_id": "hook"
+    },
+    {
+      "word": "most",
+      "start": 10.14,
+      "end": 10.367,
+      "scene_id": "hook"
+    },
+    {
+      "word": "people",
+      "start": 10.367,
+      "end": 10.707,
+      "scene_id": "hook"
+    },
+    {
+      "word": "have",
+      "start": 10.707,
+      "end": 10.933,
+      "scene_id": "hook"
+    },
+    {
+      "word": "no",
+      "start": 10.933,
+      "end": 11.047,
+      "scene_id": "hook"
+    },
+    {
+      "word": "idea",
+      "start": 11.047,
+      "end": 11.273,
+      "scene_id": "hook"
+    },
+    {
+      "word": "how",
+      "start": 11.273,
+      "end": 11.443,
+      "scene_id": "hook"
+    },
+    {
+      "word": "it's",
+      "start": 11.443,
+      "end": 11.613,
+      "scene_id": "hook"
+    },
+    {
+      "word": "calculated.",
+      "start": 11.613,
+      "end": 12.633,
+      "scene_id": "hook"
+    },
+    {
+      "word": "In",
+      "start": 12.633,
+      "end": 12.746,
+      "scene_id": "hook"
+    },
+    {
+      "word": "the",
+      "start": 12.746,
+      "end": 12.916,
+      "scene_id": "hook"
+    },
+    {
+      "word": "next",
+      "start": 12.916,
+      "end": 13.143,
+      "scene_id": "hook"
+    },
+    {
+      "word": "three",
+      "start": 13.143,
+      "end": 13.426,
+      "scene_id": "hook"
+    },
+    {
+      "word": "minutes,",
+      "start": 13.426,
+      "end": 14.049,
+      "scene_id": "hook"
+    },
+    {
+      "word": "you'll",
+      "start": 14.049,
+      "end": 14.332,
+      "scene_id": "hook"
+    },
+    {
+      "word": "understand",
+      "start": 14.332,
+      "end": 14.899,
+      "scene_id": "hook"
+    },
+    {
+      "word": "exactly",
+      "start": 14.899,
+      "end": 15.295,
+      "scene_id": "hook"
+    },
+    {
+      "word": "what",
+      "start": 15.295,
+      "end": 15.522,
+      "scene_id": "hook"
+    },
+    {
+      "word": "moves",
+      "start": 15.522,
+      "end": 15.805,
+      "scene_id": "hook"
+    },
+    {
+      "word": "your",
+      "start": 15.805,
+      "end": 16.032,
+      "scene_id": "hook"
+    },
+    {
+      "word": "score",
+      "start": 16.032,
+      "end": 16.315,
+      "scene_id": "hook"
+    },
+    {
+      "word": "and",
+      "start": 16.315,
+      "end": 16.485,
+      "scene_id": "hook"
+    },
+    {
+      "word": "how",
+      "start": 16.485,
+      "end": 16.655,
+      "scene_id": "hook"
+    },
+    {
+      "word": "to",
+      "start": 16.655,
+      "end": 16.768,
+      "scene_id": "hook"
+    },
+    {
+      "word": "improve",
+      "start": 16.768,
+      "end": 17.165,
+      "scene_id": "hook"
+    },
+    {
+      "word": "it",
+      "start": 17.165,
+      "end": 17.278,
+      "scene_id": "hook"
+    },
+    {
+      "word": "fast.",
+      "start": 17.278,
+      "end": 17.958,
+      "scene_id": "hook"
+    },
+    {
+      "word": "Your",
+      "start": 18.75,
+      "end": 18.939,
+      "scene_id": "factors"
+    },
+    {
+      "word": "FICO",
+      "start": 18.939,
+      "end": 19.128,
+      "scene_id": "factors"
+    },
+    {
+      "word": "score",
+      "start": 19.128,
+      "end": 19.364,
+      "scene_id": "factors"
+    },
+    {
+      "word": "has",
+      "start": 19.364,
+      "end": 19.506,
+      "scene_id": "factors"
+    },
+    {
+      "word": "five",
+      "start": 19.506,
+      "end": 19.694,
+      "scene_id": "factors"
+    },
+    {
+      "word": "factors.",
+      "start": 19.694,
+      "end": 20.403,
+      "scene_id": "factors"
+    },
+    {
+      "word": "Payment",
+      "start": 20.403,
+      "end": 20.733,
+      "scene_id": "factors"
+    },
+    {
+      "word": "history",
+      "start": 20.733,
+      "end": 21.064,
+      "scene_id": "factors"
+    },
+    {
+      "word": "is",
+      "start": 21.064,
+      "end": 21.158,
+      "scene_id": "factors"
+    },
+    {
+      "word": "thirty-five",
+      "start": 21.158,
+      "end": 21.631,
+      "scene_id": "factors"
+    },
+    {
+      "word": "percent,",
+      "start": 21.631,
+      "end": 22.15,
+      "scene_id": "factors"
+    },
+    {
+      "word": "the",
+      "start": 22.15,
+      "end": 22.292,
+      "scene_id": "factors"
+    },
+    {
+      "word": "biggest",
+      "start": 22.292,
+      "end": 22.622,
+      "scene_id": "factors"
+    },
+    {
+      "word": "slice.",
+      "start": 22.622,
+      "end": 23.236,
+      "scene_id": "factors"
+    },
+    {
+      "word": "Pay",
+      "start": 23.236,
+      "end": 23.378,
+      "scene_id": "factors"
+    },
+    {
+      "word": "every",
+      "start": 23.378,
+      "end": 23.614,
+      "scene_id": "factors"
+    },
+    {
+      "word": "bill",
+      "start": 23.614,
+      "end": 23.803,
+      "scene_id": "factors"
+    },
+    {
+      "word": "on",
+      "start": 23.803,
+      "end": 23.897,
+      "scene_id": "factors"
+    },
+    {
+      "word": "time,",
+      "start": 23.897,
+      "end": 24.275,
+      "scene_id": "factors"
+    },
+    {
+      "word": "every",
+      "start": 24.275,
+      "end": 24.511,
+      "scene_id": "factors"
+    },
+    {
+      "word": "time.",
+      "start": 24.511,
+      "end": 25.078,
+      "scene_id": "factors"
+    },
+    {
+      "word": "Amounts",
+      "start": 25.078,
+      "end": 25.408,
+      "scene_id": "factors"
+    },
+    {
+      "word": "owed",
+      "start": 25.408,
+      "end": 25.597,
+      "scene_id": "factors"
+    },
+    {
+      "word": "is",
+      "start": 25.597,
+      "end": 25.692,
+      "scene_id": "factors"
+    },
+    {
+      "word": "thirty",
+      "start": 25.692,
+      "end": 25.975,
+      "scene_id": "factors"
+    },
+    {
+      "word": "percent,",
+      "start": 25.975,
+      "end": 26.494,
+      "scene_id": "factors"
+    },
+    {
+      "word": "keep",
+      "start": 26.494,
+      "end": 26.683,
+      "scene_id": "factors"
+    },
+    {
+      "word": "credit",
+      "start": 26.683,
+      "end": 26.967,
+      "scene_id": "factors"
+    },
+    {
+      "word": "card",
+      "start": 26.967,
+      "end": 27.155,
+      "scene_id": "factors"
+    },
+    {
+      "word": "balances",
+      "start": 27.155,
+      "end": 27.533,
+      "scene_id": "factors"
+    },
+    {
+      "word": "below",
+      "start": 27.533,
+      "end": 27.769,
+      "scene_id": "factors"
+    },
+    {
+      "word": "thirty",
+      "start": 27.769,
+      "end": 28.053,
+      "scene_id": "factors"
+    },
+    {
+      "word": "percent",
+      "start": 28.053,
+      "end": 28.383,
+      "scene_id": "factors"
+    },
+    {
+      "word": "of",
+      "start": 28.383,
+      "end": 28.478,
+      "scene_id": "factors"
+    },
+    {
+      "word": "your",
+      "start": 28.478,
+      "end": 28.667,
+      "scene_id": "factors"
+    },
+    {
+      "word": "limits,",
+      "start": 28.667,
+      "end": 29.139,
+      "scene_id": "factors"
+    },
+    {
+      "word": "under",
+      "start": 29.139,
+      "end": 29.375,
+      "scene_id": "factors"
+    },
+    {
+      "word": "ten",
+      "start": 29.375,
+      "end": 29.517,
+      "scene_id": "factors"
+    },
+    {
+      "word": "percent",
+      "start": 29.517,
+      "end": 29.847,
+      "scene_id": "factors"
+    },
+    {
+      "word": "is",
+      "start": 29.847,
+      "end": 29.941,
+      "scene_id": "factors"
+    },
+    {
+      "word": "ideal.",
+      "start": 29.941,
+      "end": 30.555,
+      "scene_id": "factors"
+    },
+    {
+      "word": "Length",
+      "start": 30.555,
+      "end": 30.839,
+      "scene_id": "factors"
+    },
+    {
+      "word": "of",
+      "start": 30.839,
+      "end": 30.933,
+      "scene_id": "factors"
+    },
+    {
+      "word": "credit",
+      "start": 30.933,
+      "end": 31.216,
+      "scene_id": "factors"
+    },
+    {
+      "word": "history",
+      "start": 31.216,
+      "end": 31.547,
+      "scene_id": "factors"
+    },
+    {
+      "word": "is",
+      "start": 31.547,
+      "end": 31.641,
+      "scene_id": "factors"
+    },
+    {
+      "word": "fifteen",
+      "start": 31.641,
+      "end": 31.972,
+      "scene_id": "factors"
+    },
+    {
+      "word": "percent,",
+      "start": 31.972,
+      "end": 32.491,
+      "scene_id": "factors"
+    },
+    {
+      "word": "older",
+      "start": 32.491,
+      "end": 32.728,
+      "scene_id": "factors"
+    },
+    {
+      "word": "accounts",
+      "start": 32.728,
+      "end": 33.105,
+      "scene_id": "factors"
+    },
+    {
+      "word": "help,",
+      "start": 33.105,
+      "end": 33.483,
+      "scene_id": "factors"
+    },
+    {
+      "word": "so",
+      "start": 33.483,
+      "end": 33.578,
+      "scene_id": "factors"
+    },
+    {
+      "word": "don't",
+      "start": 33.578,
+      "end": 33.766,
+      "scene_id": "factors"
+    },
+    {
+      "word": "close",
+      "start": 33.766,
+      "end": 34.003,
+      "scene_id": "factors"
+    },
+    {
+      "word": "your",
+      "start": 34.003,
+      "end": 34.191,
+      "scene_id": "factors"
+    },
+    {
+      "word": "oldest",
+      "start": 34.191,
+      "end": 34.475,
+      "scene_id": "factors"
+    },
+    {
+      "word": "card.",
+      "start": 34.475,
+      "end": 35.041,
+      "scene_id": "factors"
+    },
+    {
+      "word": "New",
+      "start": 35.041,
+      "end": 35.183,
+      "scene_id": "factors"
+    },
+    {
+      "word": "credit",
+      "start": 35.183,
+      "end": 35.466,
+      "scene_id": "factors"
+    },
+    {
+      "word": "is",
+      "start": 35.466,
+      "end": 35.561,
+      "scene_id": "factors"
+    },
+    {
+      "word": "ten",
+      "start": 35.561,
+      "end": 35.703,
+      "scene_id": "factors"
+    },
+    {
+      "word": "percent,",
+      "start": 35.703,
+      "end": 36.222,
+      "scene_id": "factors"
+    },
+    {
+      "word": "each",
+      "start": 36.222,
+      "end": 36.411,
+      "scene_id": "factors"
+    },
+    {
+      "word": "hard",
+      "start": 36.411,
+      "end": 36.6,
+      "scene_id": "factors"
+    },
+    {
+      "word": "inquiry",
+      "start": 36.6,
+      "end": 36.93,
+      "scene_id": "factors"
+    },
+    {
+      "word": "dings",
+      "start": 36.93,
+      "end": 37.166,
+      "scene_id": "factors"
+    },
+    {
+      "word": "you",
+      "start": 37.166,
+      "end": 37.308,
+      "scene_id": "factors"
+    },
+    {
+      "word": "slightly.",
+      "start": 37.308,
+      "end": 38.064,
+      "scene_id": "factors"
+    },
+    {
+      "word": "Credit",
+      "start": 38.064,
+      "end": 38.347,
+      "scene_id": "factors"
+    },
+    {
+      "word": "mix",
+      "start": 38.347,
+      "end": 38.489,
+      "scene_id": "factors"
+    },
+    {
+      "word": "is",
+      "start": 38.489,
+      "end": 38.583,
+      "scene_id": "factors"
+    },
+    {
+      "word": "ten",
+      "start": 38.583,
+      "end": 38.725,
+      "scene_id": "factors"
+    },
+    {
+      "word": "percent,",
+      "start": 38.725,
+      "end": 39.244,
+      "scene_id": "factors"
+    },
+    {
+      "word": "having",
+      "start": 39.244,
+      "end": 39.527,
+      "scene_id": "factors"
+    },
+    {
+      "word": "different",
+      "start": 39.527,
+      "end": 39.952,
+      "scene_id": "factors"
+    },
+    {
+      "word": "types",
+      "start": 39.952,
+      "end": 40.189,
+      "scene_id": "factors"
+    },
+    {
+      "word": "helps",
+      "start": 40.189,
+      "end": 40.425,
+      "scene_id": "factors"
+    },
+    {
+      "word": "a",
+      "start": 40.425,
+      "end": 40.472,
+      "scene_id": "factors"
+    },
+    {
+      "word": "little.",
+      "start": 40.472,
+      "end": 41.133,
+      "scene_id": "factors"
+    },
+    {
+      "word": "Let's",
+      "start": 41.975,
+      "end": 42.165,
+      "scene_id": "example"
+    },
+    {
+      "word": "see",
+      "start": 42.165,
+      "end": 42.308,
+      "scene_id": "example"
+    },
+    {
+      "word": "this",
+      "start": 42.308,
+      "end": 42.498,
+      "scene_id": "example"
+    },
+    {
+      "word": "in",
+      "start": 42.498,
+      "end": 42.593,
+      "scene_id": "example"
+    },
+    {
+      "word": "action.",
+      "start": 42.593,
+      "end": 43.258,
+      "scene_id": "example"
+    },
+    {
+      "word": "Sarah",
+      "start": 43.258,
+      "end": 43.495,
+      "scene_id": "example"
+    },
+    {
+      "word": "has",
+      "start": 43.495,
+      "end": 43.638,
+      "scene_id": "example"
+    },
+    {
+      "word": "a",
+      "start": 43.638,
+      "end": 43.685,
+      "scene_id": "example"
+    },
+    {
+      "word": "seven",
+      "start": 43.685,
+      "end": 43.923,
+      "scene_id": "example"
+    },
+    {
+      "word": "hundred",
+      "start": 43.923,
+      "end": 44.255,
+      "scene_id": "example"
+    },
+    {
+      "word": "twenty",
+      "start": 44.255,
+      "end": 44.54,
+      "scene_id": "example"
+    },
+    {
+      "word": "score.",
+      "start": 44.54,
+      "end": 45.158,
+      "scene_id": "example"
+    },
+    {
+      "word": "She",
+      "start": 45.158,
+      "end": 45.3,
+      "scene_id": "example"
+    },
+    {
+      "word": "misses",
+      "start": 45.3,
+      "end": 45.585,
+      "scene_id": "example"
+    },
+    {
+      "word": "one",
+      "start": 45.585,
+      "end": 45.728,
+      "scene_id": "example"
+    },
+    {
+      "word": "credit",
+      "start": 45.728,
+      "end": 46.013,
+      "scene_id": "example"
+    },
+    {
+      "word": "card",
+      "start": 46.013,
+      "end": 46.203,
+      "scene_id": "example"
+    },
+    {
+      "word": "payment",
+      "start": 46.203,
+      "end": 46.535,
+      "scene_id": "example"
+    },
+    {
+      "word": "by",
+      "start": 46.535,
+      "end": 46.63,
+      "scene_id": "example"
+    },
+    {
+      "word": "thirty",
+      "start": 46.63,
+      "end": 46.915,
+      "scene_id": "example"
+    },
+    {
+      "word": "days.",
+      "start": 46.915,
+      "end": 47.485,
+      "scene_id": "example"
+    },
+    {
+      "word": "Her",
+      "start": 47.485,
+      "end": 47.628,
+      "scene_id": "example"
+    },
+    {
+      "word": "score",
+      "start": 47.628,
+      "end": 47.865,
+      "scene_id": "example"
+    },
+    {
+      "word": "drops",
+      "start": 47.865,
+      "end": 48.103,
+      "scene_id": "example"
+    },
+    {
+      "word": "to",
+      "start": 48.103,
+      "end": 48.198,
+      "scene_id": "example"
+    },
+    {
+      "word": "six",
+      "start": 48.198,
+      "end": 48.34,
+      "scene_id": "example"
+    },
+    {
+      "word": "hundred",
+      "start": 48.34,
+      "end": 48.673,
+      "scene_id": "example"
+    },
+    {
+      "word": "eighty,",
+      "start": 48.673,
+      "end": 49.148,
+      "scene_id": "example"
+    },
+    {
+      "word": "a",
+      "start": 49.148,
+      "end": 49.195,
+      "scene_id": "example"
+    },
+    {
+      "word": "forty",
+      "start": 49.195,
+      "end": 49.433,
+      "scene_id": "example"
+    },
+    {
+      "word": "point",
+      "start": 49.433,
+      "end": 49.67,
+      "scene_id": "example"
+    },
+    {
+      "word": "hit.",
+      "start": 49.67,
+      "end": 50.193,
+      "scene_id": "example"
+    },
+    {
+      "word": "She",
+      "start": 50.193,
+      "end": 50.335,
+      "scene_id": "example"
+    },
+    {
+      "word": "also",
+      "start": 50.335,
+      "end": 50.525,
+      "scene_id": "example"
+    },
+    {
+      "word": "maxes",
+      "start": 50.525,
+      "end": 50.763,
+      "scene_id": "example"
+    },
+    {
+      "word": "out",
+      "start": 50.763,
+      "end": 50.905,
+      "scene_id": "example"
+    },
+    {
+      "word": "a",
+      "start": 50.905,
+      "end": 50.953,
+      "scene_id": "example"
+    },
+    {
+      "word": "card",
+      "start": 50.953,
+      "end": 51.143,
+      "scene_id": "example"
+    },
+    {
+      "word": "at",
+      "start": 51.143,
+      "end": 51.238,
+      "scene_id": "example"
+    },
+    {
+      "word": "ninety",
+      "start": 51.238,
+      "end": 51.523,
+      "scene_id": "example"
+    },
+    {
+      "word": "percent",
+      "start": 51.523,
+      "end": 51.855,
+      "scene_id": "example"
+    },
+    {
+      "word": "utilization.",
+      "start": 51.855,
+      "end": 52.758,
+      "scene_id": "example"
+    },
+    {
+      "word": "Down",
+      "start": 52.758,
+      "end": 52.948,
+      "scene_id": "example"
+    },
+    {
+      "word": "another",
+      "start": 52.948,
+      "end": 53.28,
+      "scene_id": "example"
+    },
+    {
+      "word": "thirty",
+      "start": 53.28,
+      "end": 53.565,
+      "scene_id": "example"
+    },
+    {
+      "word": "points",
+      "start": 53.565,
+      "end": 53.85,
+      "scene_id": "example"
+    },
+    {
+      "word": "to",
+      "start": 53.85,
+      "end": 53.945,
+      "scene_id": "example"
+    },
+    {
+      "word": "six",
+      "start": 53.945,
+      "end": 54.088,
+      "scene_id": "example"
+    },
+    {
+      "word": "hundred",
+      "start": 54.088,
+      "end": 54.42,
+      "scene_id": "example"
+    },
+    {
+      "word": "fifty.",
+      "start": 54.42,
+      "end": 55.038,
+      "scene_id": "example"
+    },
+    {
+      "word": "But",
+      "start": 55.038,
+      "end": 55.18,
+      "scene_id": "example"
+    },
+    {
+      "word": "then",
+      "start": 55.18,
+      "end": 55.37,
+      "scene_id": "example"
+    },
+    {
+      "word": "she",
+      "start": 55.37,
+      "end": 55.513,
+      "scene_id": "example"
+    },
+    {
+      "word": "pays",
+      "start": 55.513,
+      "end": 55.703,
+      "scene_id": "example"
+    },
+    {
+      "word": "everything",
+      "start": 55.703,
+      "end": 56.178,
+      "scene_id": "example"
+    },
+    {
+      "word": "on",
+      "start": 56.178,
+      "end": 56.273,
+      "scene_id": "example"
+    },
+    {
+      "word": "time",
+      "start": 56.273,
+      "end": 56.463,
+      "scene_id": "example"
+    },
+    {
+      "word": "for",
+      "start": 56.463,
+      "end": 56.605,
+      "scene_id": "example"
+    },
+    {
+      "word": "six",
+      "start": 56.605,
+      "end": 56.748,
+      "scene_id": "example"
+    },
+    {
+      "word": "months",
+      "start": 56.748,
+      "end": 57.033,
+      "scene_id": "example"
+    },
+    {
+      "word": "and",
+      "start": 57.033,
+      "end": 57.175,
+      "scene_id": "example"
+    },
+    {
+      "word": "drops",
+      "start": 57.175,
+      "end": 57.413,
+      "scene_id": "example"
+    },
+    {
+      "word": "utilization",
+      "start": 57.413,
+      "end": 57.935,
+      "scene_id": "example"
+    },
+    {
+      "word": "to",
+      "start": 57.935,
+      "end": 58.03,
+      "scene_id": "example"
+    },
+    {
+      "word": "fifteen",
+      "start": 58.03,
+      "end": 58.363,
+      "scene_id": "example"
+    },
+    {
+      "word": "percent.",
+      "start": 58.363,
+      "end": 59.075,
+      "scene_id": "example"
+    },
+    {
+      "word": "Her",
+      "start": 59.075,
+      "end": 59.218,
+      "scene_id": "example"
+    },
+    {
+      "word": "score",
+      "start": 59.218,
+      "end": 59.455,
+      "scene_id": "example"
+    },
+    {
+      "word": "rebounds",
+      "start": 59.455,
+      "end": 59.835,
+      "scene_id": "example"
+    },
+    {
+      "word": "to",
+      "start": 59.835,
+      "end": 59.93,
+      "scene_id": "example"
+    },
+    {
+      "word": "seven",
+      "start": 59.93,
+      "end": 60.168,
+      "scene_id": "example"
+    },
+    {
+      "word": "hundred",
+      "start": 60.168,
+      "end": 60.5,
+      "scene_id": "example"
+    },
+    {
+      "word": "ten.",
+      "start": 60.5,
+      "end": 61.023,
+      "scene_id": "example"
+    },
+    {
+      "word": "Payment",
+      "start": 61.023,
+      "end": 61.355,
+      "scene_id": "example"
+    },
+    {
+      "word": "history",
+      "start": 61.355,
+      "end": 61.688,
+      "scene_id": "example"
+    },
+    {
+      "word": "and",
+      "start": 61.688,
+      "end": 61.83,
+      "scene_id": "example"
+    },
+    {
+      "word": "utilization",
+      "start": 61.83,
+      "end": 62.353,
+      "scene_id": "example"
+    },
+    {
+      "word": "drive",
+      "start": 62.353,
+      "end": 62.59,
+      "scene_id": "example"
+    },
+    {
+      "word": "seventy",
+      "start": 62.59,
+      "end": 62.923,
+      "scene_id": "example"
+    },
+    {
+      "word": "percent",
+      "start": 62.923,
+      "end": 63.255,
+      "scene_id": "example"
+    },
+    {
+      "word": "of",
+      "start": 63.255,
+      "end": 63.35,
+      "scene_id": "example"
+    },
+    {
+      "word": "the",
+      "start": 63.35,
+      "end": 63.493,
+      "scene_id": "example"
+    },
+    {
+      "word": "movement.",
+      "start": 63.493,
+      "end": 64.253,
+      "scene_id": "example"
+    },
+    {
+      "word": "Here",
+      "start": 65.401,
+      "end": 65.619,
+      "scene_id": "tips"
+    },
+    {
+      "word": "are",
+      "start": 65.619,
+      "end": 65.782,
+      "scene_id": "tips"
+    },
+    {
+      "word": "five",
+      "start": 65.782,
+      "end": 65.999,
+      "scene_id": "tips"
+    },
+    {
+      "word": "proven",
+      "start": 65.999,
+      "end": 66.326,
+      "scene_id": "tips"
+    },
+    {
+      "word": "ways",
+      "start": 66.326,
+      "end": 66.543,
+      "scene_id": "tips"
+    },
+    {
+      "word": "to",
+      "start": 66.543,
+      "end": 66.652,
+      "scene_id": "tips"
+    },
+    {
+      "word": "boost",
+      "start": 66.652,
+      "end": 66.924,
+      "scene_id": "tips"
+    },
+    {
+      "word": "your",
+      "start": 66.924,
+      "end": 67.142,
+      "scene_id": "tips"
+    },
+    {
+      "word": "score.",
+      "start": 67.142,
+      "end": 67.849,
+      "scene_id": "tips"
+    },
+    {
+      "word": "One,",
+      "start": 67.849,
+      "end": 68.23,
+      "scene_id": "tips"
+    },
+    {
+      "word": "set",
+      "start": 68.23,
+      "end": 68.393,
+      "scene_id": "tips"
+    },
+    {
+      "word": "up",
+      "start": 68.393,
+      "end": 68.502,
+      "scene_id": "tips"
+    },
+    {
+      "word": "autopay",
+      "start": 68.502,
+      "end": 68.883,
+      "scene_id": "tips"
+    },
+    {
+      "word": "for",
+      "start": 68.883,
+      "end": 69.046,
+      "scene_id": "tips"
+    },
+    {
+      "word": "minimum",
+      "start": 69.046,
+      "end": 69.427,
+      "scene_id": "tips"
+    },
+    {
+      "word": "payments,",
+      "start": 69.427,
+      "end": 70.08,
+      "scene_id": "tips"
+    },
+    {
+      "word": "never",
+      "start": 70.08,
+      "end": 70.352,
+      "scene_id": "tips"
+    },
+    {
+      "word": "miss",
+      "start": 70.352,
+      "end": 70.569,
+      "scene_id": "tips"
+    },
+    {
+      "word": "a",
+      "start": 70.569,
+      "end": 70.624,
+      "scene_id": "tips"
+    },
+    {
+      "word": "due",
+      "start": 70.624,
+      "end": 70.787,
+      "scene_id": "tips"
+    },
+    {
+      "word": "date",
+      "start": 70.787,
+      "end": 71.004,
+      "scene_id": "tips"
+    },
+    {
+      "word": "again.",
+      "start": 71.004,
+      "end": 71.712,
+      "scene_id": "tips"
+    },
+    {
+      "word": "Two,",
+      "start": 71.712,
+      "end": 72.092,
+      "scene_id": "tips"
+    },
+    {
+      "word": "pay",
+      "start": 72.092,
+      "end": 72.256,
+      "scene_id": "tips"
+    },
+    {
+      "word": "down",
+      "start": 72.256,
+      "end": 72.473,
+      "scene_id": "tips"
+    },
+    {
+      "word": "balances",
+      "start": 72.473,
+      "end": 72.908,
+      "scene_id": "tips"
+    },
+    {
+      "word": "to",
+      "start": 72.908,
+      "end": 73.017,
+      "scene_id": "tips"
+    },
+    {
+      "word": "under",
+      "start": 73.017,
+      "end": 73.289,
+      "scene_id": "tips"
+    },
+    {
+      "word": "thirty",
+      "start": 73.289,
+      "end": 73.616,
+      "scene_id": "tips"
+    },
+    {
+      "word": "percent,",
+      "start": 73.616,
+      "end": 74.214,
+      "scene_id": "tips"
+    },
+    {
+      "word": "then",
+      "start": 74.214,
+      "end": 74.432,
+      "scene_id": "tips"
+    },
+    {
+      "word": "under",
+      "start": 74.432,
+      "end": 74.704,
+      "scene_id": "tips"
+    },
+    {
+      "word": "ten",
+      "start": 74.704,
+      "end": 74.867,
+      "scene_id": "tips"
+    },
+    {
+      "word": "percent",
+      "start": 74.867,
+      "end": 75.248,
+      "scene_id": "tips"
+    },
+    {
+      "word": "for",
+      "start": 75.248,
+      "end": 75.411,
+      "scene_id": "tips"
+    },
+    {
+      "word": "maximum",
+      "start": 75.411,
+      "end": 75.792,
+      "scene_id": "tips"
+    },
+    {
+      "word": "impact.",
+      "start": 75.792,
+      "end": 76.553,
+      "scene_id": "tips"
+    },
+    {
+      "word": "Three,",
+      "start": 76.553,
+      "end": 77.043,
+      "scene_id": "tips"
+    },
+    {
+      "word": "don't",
+      "start": 77.043,
+      "end": 77.261,
+      "scene_id": "tips"
+    },
+    {
+      "word": "close",
+      "start": 77.261,
+      "end": 77.533,
+      "scene_id": "tips"
+    },
+    {
+      "word": "old",
+      "start": 77.533,
+      "end": 77.696,
+      "scene_id": "tips"
+    },
+    {
+      "word": "cards,",
+      "start": 77.696,
+      "end": 78.185,
+      "scene_id": "tips"
+    },
+    {
+      "word": "the",
+      "start": 78.185,
+      "end": 78.349,
+      "scene_id": "tips"
+    },
+    {
+      "word": "age",
+      "start": 78.349,
+      "end": 78.512,
+      "scene_id": "tips"
+    },
+    {
+      "word": "helps",
+      "start": 78.512,
+      "end": 78.784,
+      "scene_id": "tips"
+    },
+    {
+      "word": "your",
+      "start": 78.784,
+      "end": 79.001,
+      "scene_id": "tips"
+    },
+    {
+      "word": "length",
+      "start": 79.001,
+      "end": 79.328,
+      "scene_id": "tips"
+    },
+    {
+      "word": "of",
+      "start": 79.328,
+      "end": 79.437,
+      "scene_id": "tips"
+    },
+    {
+      "word": "history.",
+      "start": 79.437,
+      "end": 80.253,
+      "scene_id": "tips"
+    },
+    {
+      "word": "Four,",
+      "start": 80.253,
+      "end": 80.688,
+      "scene_id": "tips"
+    },
+    {
+      "word": "limit",
+      "start": 80.688,
+      "end": 80.96,
+      "scene_id": "tips"
+    },
+    {
+      "word": "hard",
+      "start": 80.96,
+      "end": 81.177,
+      "scene_id": "tips"
+    },
+    {
+      "word": "inquiries",
+      "start": 81.177,
+      "end": 81.667,
+      "scene_id": "tips"
+    },
+    {
+      "word": "to",
+      "start": 81.667,
+      "end": 81.776,
+      "scene_id": "tips"
+    },
+    {
+      "word": "one",
+      "start": 81.776,
+      "end": 81.939,
+      "scene_id": "tips"
+    },
+    {
+      "word": "or",
+      "start": 81.939,
+      "end": 82.048,
+      "scene_id": "tips"
+    },
+    {
+      "word": "two",
+      "start": 82.048,
+      "end": 82.211,
+      "scene_id": "tips"
+    },
+    {
+      "word": "per",
+      "start": 82.211,
+      "end": 82.374,
+      "scene_id": "tips"
+    },
+    {
+      "word": "year.",
+      "start": 82.374,
+      "end": 83.027,
+      "scene_id": "tips"
+    },
+    {
+      "word": "Five,",
+      "start": 83.027,
+      "end": 83.462,
+      "scene_id": "tips"
+    },
+    {
+      "word": "check",
+      "start": 83.462,
+      "end": 83.734,
+      "scene_id": "tips"
+    },
+    {
+      "word": "your",
+      "start": 83.734,
+      "end": 83.952,
+      "scene_id": "tips"
+    },
+    {
+      "word": "reports",
+      "start": 83.952,
+      "end": 84.333,
+      "scene_id": "tips"
+    },
+    {
+      "word": "free",
+      "start": 84.333,
+      "end": 84.55,
+      "scene_id": "tips"
+    },
+    {
+      "word": "at",
+      "start": 84.55,
+      "end": 84.659,
+      "scene_id": "tips"
+    },
+    {
+      "word": "Annual",
+      "start": 84.659,
+      "end": 84.985,
+      "scene_id": "tips"
+    },
+    {
+      "word": "Credit",
+      "start": 84.985,
+      "end": 85.312,
+      "scene_id": "tips"
+    },
+    {
+      "word": "Report",
+      "start": 85.312,
+      "end": 85.638,
+      "scene_id": "tips"
+    },
+    {
+      "word": "dot",
+      "start": 85.638,
+      "end": 85.802,
+      "scene_id": "tips"
+    },
+    {
+      "word": "com",
+      "start": 85.802,
+      "end": 85.965,
+      "scene_id": "tips"
+    },
+    {
+      "word": "and",
+      "start": 85.965,
+      "end": 86.128,
+      "scene_id": "tips"
+    },
+    {
+      "word": "dispute",
+      "start": 86.128,
+      "end": 86.509,
+      "scene_id": "tips"
+    },
+    {
+      "word": "any",
+      "start": 86.509,
+      "end": 86.672,
+      "scene_id": "tips"
+    },
+    {
+      "word": "errors,",
+      "start": 86.672,
+      "end": 87.216,
+      "scene_id": "tips"
+    },
+    {
+      "word": "one",
+      "start": 87.216,
+      "end": 87.379,
+      "scene_id": "tips"
+    },
+    {
+      "word": "in",
+      "start": 87.379,
+      "end": 87.488,
+      "scene_id": "tips"
+    },
+    {
+      "word": "five",
+      "start": 87.488,
+      "end": 87.706,
+      "scene_id": "tips"
+    },
+    {
+      "word": "reports",
+      "start": 87.706,
+      "end": 88.086,
+      "scene_id": "tips"
+    },
+    {
+      "word": "has",
+      "start": 88.086,
+      "end": 88.25,
+      "scene_id": "tips"
+    },
+    {
+      "word": "a",
+      "start": 88.25,
+      "end": 88.304,
+      "scene_id": "tips"
+    },
+    {
+      "word": "mistake.",
+      "start": 88.304,
+      "end": 89.12,
+      "scene_id": "tips"
+    },
+    {
+      "word": "Your",
+      "start": 90.203,
+      "end": 90.409,
+      "scene_id": "action"
+    },
+    {
+      "word": "action",
+      "start": 90.409,
+      "end": 90.718,
+      "scene_id": "action"
+    },
+    {
+      "word": "plan",
+      "start": 90.718,
+      "end": 90.924,
+      "scene_id": "action"
+    },
+    {
+      "word": "starts",
+      "start": 90.924,
+      "end": 91.233,
+      "scene_id": "action"
+    },
+    {
+      "word": "today.",
+      "start": 91.233,
+      "end": 91.902,
+      "scene_id": "action"
+    },
+    {
+      "word": "Step",
+      "start": 91.902,
+      "end": 92.108,
+      "scene_id": "action"
+    },
+    {
+      "word": "one,",
+      "start": 92.108,
+      "end": 92.469,
+      "scene_id": "action"
+    },
+    {
+      "word": "pull",
+      "start": 92.469,
+      "end": 92.675,
+      "scene_id": "action"
+    },
+    {
+      "word": "your",
+      "start": 92.675,
+      "end": 92.881,
+      "scene_id": "action"
+    },
+    {
+      "word": "free",
+      "start": 92.881,
+      "end": 93.087,
+      "scene_id": "action"
+    },
+    {
+      "word": "credit",
+      "start": 93.087,
+      "end": 93.396,
+      "scene_id": "action"
+    },
+    {
+      "word": "reports",
+      "start": 93.396,
+      "end": 93.756,
+      "scene_id": "action"
+    },
+    {
+      "word": "and",
+      "start": 93.756,
+      "end": 93.911,
+      "scene_id": "action"
+    },
+    {
+      "word": "check",
+      "start": 93.911,
+      "end": 94.168,
+      "scene_id": "action"
+    },
+    {
+      "word": "for",
+      "start": 94.168,
+      "end": 94.323,
+      "scene_id": "action"
+    },
+    {
+      "word": "errors.",
+      "start": 94.323,
+      "end": 95.043,
+      "scene_id": "action"
+    },
+    {
+      "word": "Step",
+      "start": 95.043,
+      "end": 95.249,
+      "scene_id": "action"
+    },
+    {
+      "word": "two,",
+      "start": 95.249,
+      "end": 95.61,
+      "scene_id": "action"
+    },
+    {
+      "word": "set",
+      "start": 95.61,
+      "end": 95.764,
+      "scene_id": "action"
+    },
+    {
+      "word": "up",
+      "start": 95.764,
+      "end": 95.867,
+      "scene_id": "action"
+    },
+    {
+      "word": "autopay",
+      "start": 95.867,
+      "end": 96.228,
+      "scene_id": "action"
+    },
+    {
+      "word": "on",
+      "start": 96.228,
+      "end": 96.331,
+      "scene_id": "action"
+    },
+    {
+      "word": "every",
+      "start": 96.331,
+      "end": 96.588,
+      "scene_id": "action"
+    },
+    {
+      "word": "account",
+      "start": 96.588,
+      "end": 96.949,
+      "scene_id": "action"
+    },
+    {
+      "word": "right",
+      "start": 96.949,
+      "end": 97.206,
+      "scene_id": "action"
+    },
+    {
+      "word": "now.",
+      "start": 97.206,
+      "end": 97.773,
+      "scene_id": "action"
+    },
+    {
+      "word": "Step",
+      "start": 97.773,
+      "end": 97.979,
+      "scene_id": "action"
+    },
+    {
+      "word": "three,",
+      "start": 97.979,
+      "end": 98.442,
+      "scene_id": "action"
+    },
+    {
+      "word": "pick",
+      "start": 98.442,
+      "end": 98.648,
+      "scene_id": "action"
+    },
+    {
+      "word": "your",
+      "start": 98.648,
+      "end": 98.854,
+      "scene_id": "action"
+    },
+    {
+      "word": "highest",
+      "start": 98.854,
+      "end": 99.214,
+      "scene_id": "action"
+    },
+    {
+      "word": "utilization",
+      "start": 99.214,
+      "end": 99.781,
+      "scene_id": "action"
+    },
+    {
+      "word": "card",
+      "start": 99.781,
+      "end": 99.987,
+      "scene_id": "action"
+    },
+    {
+      "word": "and",
+      "start": 99.987,
+      "end": 100.141,
+      "scene_id": "action"
+    },
+    {
+      "word": "make",
+      "start": 100.141,
+      "end": 100.347,
+      "scene_id": "action"
+    },
+    {
+      "word": "an",
+      "start": 100.347,
+      "end": 100.45,
+      "scene_id": "action"
+    },
+    {
+      "word": "extra",
+      "start": 100.45,
+      "end": 100.708,
+      "scene_id": "action"
+    },
+    {
+      "word": "payment",
+      "start": 100.708,
+      "end": 101.068,
+      "scene_id": "action"
+    },
+    {
+      "word": "this",
+      "start": 101.068,
+      "end": 101.274,
+      "scene_id": "action"
+    },
+    {
+      "word": "week.",
+      "start": 101.274,
+      "end": 101.892,
+      "scene_id": "action"
+    },
+    {
+      "word": "Remember,",
+      "start": 101.892,
+      "end": 102.51,
+      "scene_id": "action"
+    },
+    {
+      "word": "credit",
+      "start": 102.51,
+      "end": 102.819,
+      "scene_id": "action"
+    },
+    {
+      "word": "scores",
+      "start": 102.819,
+      "end": 103.128,
+      "scene_id": "action"
+    },
+    {
+      "word": "reward",
+      "start": 103.128,
+      "end": 103.437,
+      "scene_id": "action"
+    },
+    {
+      "word": "consistency",
+      "start": 103.437,
+      "end": 104.003,
+      "scene_id": "action"
+    },
+    {
+      "word": "over",
+      "start": 104.003,
+      "end": 104.209,
+      "scene_id": "action"
+    },
+    {
+      "word": "time.",
+      "start": 104.209,
+      "end": 104.827,
+      "scene_id": "action"
+    },
+    {
+      "word": "Small",
+      "start": 104.827,
+      "end": 105.085,
+      "scene_id": "action"
+    },
+    {
+      "word": "actions,",
+      "start": 105.085,
+      "end": 105.651,
+      "scene_id": "action"
+    },
+    {
+      "word": "repeated",
+      "start": 105.651,
+      "end": 106.063,
+      "scene_id": "action"
+    },
+    {
+      "word": "monthly,",
+      "start": 106.063,
+      "end": 106.63,
+      "scene_id": "action"
+    },
+    {
+      "word": "build",
+      "start": 106.63,
+      "end": 106.887,
+      "scene_id": "action"
+    },
+    {
+      "word": "an",
+      "start": 106.887,
+      "end": 106.99,
+      "scene_id": "action"
+    },
+    {
+      "word": "excellent",
+      "start": 106.99,
+      "end": 107.454,
+      "scene_id": "action"
+    },
+    {
+      "word": "score.",
+      "start": 107.454,
+      "end": 108.123,
+      "scene_id": "action"
+    },
+    {
+      "word": "Your",
+      "start": 108.123,
+      "end": 108.329,
+      "scene_id": "action"
+    },
+    {
+      "word": "future",
+      "start": 108.329,
+      "end": 108.638,
+      "scene_id": "action"
+    },
+    {
+      "word": "self,",
+      "start": 108.638,
+      "end": 109.05,
+      "scene_id": "action"
+    },
+    {
+      "word": "getting",
+      "start": 109.05,
+      "end": 109.41,
+      "scene_id": "action"
+    },
+    {
+      "word": "approved",
+      "start": 109.41,
+      "end": 109.822,
+      "scene_id": "action"
+    },
+    {
+      "word": "at",
+      "start": 109.822,
+      "end": 109.925,
+      "scene_id": "action"
+    },
+    {
+      "word": "the",
+      "start": 109.925,
+      "end": 110.08,
+      "scene_id": "action"
+    },
+    {
+      "word": "best",
+      "start": 110.08,
+      "end": 110.286,
+      "scene_id": "action"
+    },
+    {
+      "word": "rates,",
+      "start": 110.286,
+      "end": 110.749,
+      "scene_id": "action"
+    },
+    {
+      "word": "will",
+      "start": 110.749,
+      "end": 110.955,
+      "scene_id": "action"
+    },
+    {
+      "word": "thank",
+      "start": 110.955,
+      "end": 111.213,
+      "scene_id": "action"
+    },
+    {
+      "word": "you.",
+      "start": 111.213,
+      "end": 111.779,
+      "scene_id": "action"
+    }
+  ]
+}
