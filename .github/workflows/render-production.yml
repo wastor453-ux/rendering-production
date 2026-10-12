@@ -237,10 +237,11 @@ jobs:
               exit 1
             fi
             echo "Preparing manifest for video: $VIDEO_ID"
-            # Regenerate timeline from current VO (ensures freshness)
-            pip install faster-whisper huggingface-hub 2>&1 | tail -2
-            python3 tools/provision_whisper_model.py
-            python3 tools/run_pipeline.py --video "$VIDEO_ID"
+            # Use checked-in timeline/alignment/VO directly (CI-validated).
+            # Do NOT regenerate on the runner: the timeline is a build artifact,
+            # validated by validate_new_video.py and test_vo_visual_sync.py in CI.
+            # Regenerating here is slow (pip + model download + transcription),
+            # fragile (network/model failures), and non-deterministic.
             mkdir -p src/videos/_active
             cp "$TIMELINE_SRC" src/videos/_active/timeline.json
             cp "$AUDIO_SRC" src/videos/_active/vo.wav
