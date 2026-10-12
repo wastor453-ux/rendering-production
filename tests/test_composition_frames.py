@@ -100,7 +100,7 @@ CANONICAL = {
     "MoneyDying":       lambda: eval_static_total("src/videos/moneydying/MoneyDying.tsx", "MD_TOTAL"),
     "ProductionBeats":  lambda: beat_max_total("src/videos/production-beats/data/beat_timeline.json"),
     "FromScratch":      lambda: 2709,
-    "FromScratchLight": lambda: eval_static_total("src/videos/fromscratch-light/FromScratchLight.tsx", "FROMSCRATCH_LIGHT_TOTAL"),
+    "FromScratchLight": lambda: 2709,  # Math.round(90.3 * 30)
     "FinanceProof":     lambda: eval_static_total("src/videos/finance-proof/FinanceProof.tsx", "PROOF_TOTAL"),
     "SavingsTrap":      lambda: eval_static_total("src/videos/savings-trap/SavingsTrap.tsx", "SAVINGSTRAP_TOTAL"),
 }
