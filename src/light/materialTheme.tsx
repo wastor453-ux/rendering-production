@@ -1,15 +1,11 @@
-// materialTheme.tsx — MATERIAL A/B THEMING (test only)
+// materialTheme.tsx — Visual System v2.0 (from Hamza's A-to-Z Package)
+// Updated 2026-10-12: matches new tokens (Navy #102044, Blue #3478F6, Inter font)
 //
-// A = current Light Premium Fintech tokens (pixel-identical default).
-// B = refined material: deeper atmospheric background, more opaque glass,
-//     crisper thin border, stronger soft shadow. Still near-white/cool-gray,
-//     blue/lavender only. No dark, no neon, no glow, no heavy gradients.
-//
-// Components read tokens via useMaterial(). With no provider, A is used —
-// the production path is untouched.
+// MATERIAL A = Visual System v2.0 (production default)
+// MATERIAL B = Refined atmospheric (deeper blooms, more opaque glass)
 
 import React from "react";
-import { T as TOKENS_A } from "./tokens";
+import { T as TOKENS } from "./tokens";
 
 export type MaterialTokens = {
   canvas: string;
@@ -21,45 +17,40 @@ export type MaterialTokens = {
   glassBorder: string;
   glassBorderWidth: number;
   glassShadow: string;
-  /** Composition scale for the beat content (1.0 = current). Background stays full-bleed. */
   compositionScale: number;
 };
 
 export const MATERIAL_A: MaterialTokens = {
-  canvas: TOKENS_A.canvas,
-  blobOpacity: 0.55,
-  blobLavenderOpacity: 0.5,
-  blobBlueOpacity: 0.6,
-  blobPeachOpacity: 0.28,
-  glassFill: TOKENS_A.glassFill,
-  glassBorder: TOKENS_A.glassBorder,
-  glassBorderWidth: 2,
-  glassShadow: `${TOKENS_A.glassShadow}, inset 0 1px 0 rgba(255,255,255,0.9)`,
+  canvas: "linear-gradient(135deg, #F8FBFF 0%, #F1F6FF 48%, #EFEDFF 100%)",
+  blobOpacity: 1.0,
+  blobLavenderOpacity: TOKENS.bloomLavenderOpacity,
+  blobBlueOpacity: TOKENS.bloomBlueOpacity,
+  blobPeachOpacity: 0, // Removed: peach not in v2.0 palette
+  glassFill: TOKENS.glassFill,
+  glassBorder: TOKENS.glassBorder,
+  glassBorderWidth: 1,
+  glassShadow: TOKENS.glassShadow,
   compositionScale: 1.0,
 };
 
 export const MATERIAL_B: MaterialTokens = {
-  // near-white cool-gray, a touch deeper for atmospheric separation
-  canvas: "#F8FAFF",
-  blobOpacity: 0.62,
-  blobLavenderOpacity: 0.68,
-  blobBlueOpacity: 0.78,
-  blobPeachOpacity: 0.30,
-  // more opaque glass -> stronger card/background separation
-  glassFill: "rgba(255,255,255,0.86)",
-  // refined thin border: crisper edge, still 1px, still cool blue-gray
-  glassBorder: "rgba(128,146,192,0.62)",
-  glassBorderWidth: 2,
-  // softer, deeper lift
-  glassShadow: "0 26px 72px rgba(71,91,140,0.18), inset 0 1px 0 rgba(255,255,255,0.95)",
+  canvas: "linear-gradient(135deg, #F8FBFF 0%, #F1F6FF 48%, #EFEDFF 100%)",
+  blobOpacity: 1.0,
+  blobLavenderOpacity: 0.20,
+  blobBlueOpacity: 0.28,
+  blobPeachOpacity: 0,
+  glassFill: "rgba(255,255,255,0.92)",
+  glassBorder: "rgba(216,230,250,0.80)",
+  glassBorderWidth: 1,
+  glassShadow: "0 12px 36px rgba(40,85,170,0.10), inset 0 1px 0 rgba(255,255,255,0.95)",
   compositionScale: 1.0,
 };
 
-const Ctx = React.createContext<MaterialTokens>(MATERIAL_B);
+const Ctx = React.createContext<MaterialTokens>(MATERIAL_A);
 export const useMaterial = () => React.useContext(Ctx);
 export const MaterialProvider: React.FC<{ material: MaterialTokens; children?: React.ReactNode }> =
   ({ material, children }) => <Ctx.Provider value={material}>{children}</Ctx.Provider>;
 
-// Composition A/B (canonical Material B colors; scale is the ONLY variable).
-export const COMP_A: MaterialTokens = { ...MATERIAL_B, compositionScale: 1.0 };
-export const COMP_B: MaterialTokens = { ...MATERIAL_B, compositionScale: 1.28 };
+// Composition A/B (scale is the ONLY variable).
+export const COMP_A: MaterialTokens = { ...MATERIAL_A, compositionScale: 1.0 };
+export const COMP_B: MaterialTokens = { ...MATERIAL_A, compositionScale: 1.28 };
