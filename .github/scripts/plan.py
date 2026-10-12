@@ -196,19 +196,6 @@ def validate_repo_path(name: str, value: str, repo_root: str) -> str:
         fatal(f"{name}: {e}")
     full = os.path.join(repo_root, canonical)
     if not os.path.isfile(full):
-        # P4.4: vo_housingbroke.wav is built on-runner from hb_p1..hb_p7
-        # (70MB file can't be pushed via API). If the parts exist, allow it.
-        if canonical == "public/audio/vo_housingbroke.wav":
-            parts_ok = True
-            for i in range(1, 8):
-                part = os.path.join(repo_root, f"public/audio/hb_p{i}.wav")
-                if not os.path.isfile(part):
-                    parts_ok = False
-                    break
-            if parts_ok:
-                print(f"P4.4: {name} will be built on-runner from hb_p1..hb_p7",
-                      file=sys.stderr)
-                return canonical
         fatal(f"{name} file not found: {value!r}", code=2)
     return canonical
 
@@ -274,16 +261,7 @@ def main() -> int:
     if with_audio:
         vo = validate_repo_path("VO_FILE", get_env("VO_FILE"), repo_root)
         bed = validate_repo_path("BED_FILE", get_env("BED_FILE"), repo_root)
-        # P4.4: if VO will be built on-runner from parts, include the parts
-        # in the asset manifest instead of the (nonexistent) output file.
-        vo_full = os.path.join(repo_root, vo)
-        if not os.path.isfile(vo_full) and vo == "public/audio/vo_housingbroke.wav":
-            print("P4.4: VO will be built on-runner, including 7 parts in asset manifest",
-                  file=sys.stderr)
-            asset_paths = [f"public/audio/hb_p{i}.wav" for i in range(1, 8)]
-            asset_paths.append(bed)
-        else:
-            asset_paths = [vo, bed]
+        asset_paths = [vo, bed]
 
     # --- Required input files ---
     def require_file(rel: str) -> str:
