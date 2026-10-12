@@ -140,34 +140,18 @@ def main():
     )
     
     # Stage 4: Validate event timeline
-    print(f"\n{'='*60}", file=sys.stderr)
-    print(f"STAGE: Validate event timeline", file=sys.stderr)
-    print(f"{'='*60}", file=sys.stderr)
-    
-    with open(events_file) as f:
-        timeline = json.load(f)
-    
-    events = timeline.get("events", [])
-    if not events:
-        print(f"❌ Event timeline is empty", file=sys.stderr)
-        sys.exit(1)
-    
-    # Check each event has required fields
-    required = ["event_id", "start_frame", "end_frame", "word_anchor",
-                "visual_type", "entrance", "progression", "exit"]
-    for e in events:
-        for field in required:
-            if field not in e:
-                print(f"❌ Event {e.get('event_id', '?')} missing field: {field}", file=sys.stderr)
-                sys.exit(1)
-    
-    print(f"✅ Event timeline valid: {len(events)} events", file=sys.stderr)
+    run_stage(
+        "Validate event timeline (quality gates)",
+        ["python3", str(TOOLS_DIR / "validate_timeline.py"), str(events_file)]
+    )
     
     # Summary
+    with open(events_file) as f:
+        event_count = len(json.load(f).get("events", []))
     print(f"\n{'='*60}", file=sys.stderr)
     print(f"✅ PIPELINE COMPLETE for {video_id}", file=sys.stderr)
     print(f"{'='*60}", file=sys.stderr)
-    print(f"   Events: {len(events)}", file=sys.stderr)
+    print(f"   Events: {event_count}", file=sys.stderr)
     print(f"   Timeline: {events_file}", file=sys.stderr)
     print(f"   Ready for render.", file=sys.stderr)
 
