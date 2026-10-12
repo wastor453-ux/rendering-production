@@ -508,7 +508,7 @@ export const CreditScore: React.FC = () => {
   const local = frame - Math.round(beat.start_time * FPS);
   
   // Get words for current scene
-  const sceneId = beat.beat_id.split("-")[0]; // e.g., "hook-0" -> "hook"
+  const sceneId = beat.beat_id.split("_")[1] || beat.beat_id; // e.g., "credit-score_hook" -> "hook"
   const words = getSceneWords(sceneId);
   
   // Route to animated scene based on beat
