@@ -153,3 +153,15 @@ After removing overlaps:
 - Mortgage Payment Stack (#13)
 
 **Missing count: 21 components need to be built**
+
+---
+
+## RELATED FILES (v2.0 — all cross-linked)
+
+- **VISUAL_INDEX.md** — Master index of all rules files
+- **VISUAL_SYSTEM.md** — Production rules (colors, backgrounds, panels, motion)
+- **VISUAL_ESSENTIALS.md** — 46-item component catalog from 4 images
+- **TIMING_RULES.md** — Retention timing (max 4s static, 9 changes per beat)
+- **REPLACEMENT_RULES.md** — Step-by-step rebuild specifications
+
+*All files reference v2.0 only. No old visual styles.*
