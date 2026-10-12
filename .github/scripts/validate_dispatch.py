@@ -131,6 +131,7 @@ def check_composition(composition, expected_frames, repo_root):
 BEAT_FILES = {
     "ProductionBeats": "src/videos/production-beats/data/beat_timeline.json",
     "SavingsTrap": "src/videos/savings-trap/data/beat_timeline.json",
+    "CompoundInterest": "src/videos/compound-interest/data/beat_timeline.json",
 }
 
 

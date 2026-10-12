@@ -1,6 +1,7 @@
 import React from "react";
 import { Composition } from "remotion";
 import { SavingsTrap, SAVINGSTRAP_TOTAL } from "./videos/savings-trap/SavingsTrap";
+import { CompoundInterest } from "./videos/compound-interest/CompoundInterest";
 // DARK BRAIN REMOVED 2026-10-10: DemoVideo, StyleRefs, InflationRef retired (used src/theme.ts dark neon system)
 // See _retired/dark-brain/ for archived files.
 import { MoneyDyingVideo, MD_TOTAL, FPS as MD_FPS } from "./videos/moneydying/MoneyDying";
