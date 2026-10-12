@@ -75,6 +75,10 @@ COMPOSITIONS = {
     "BudgetRule": dict(role="production", brain="required", timeline="compiled_beats",
                           tokens="design_tokens", audio="embedded", qa="verify_render",
                           total_frames=5400,
+                          exemption=None),,
+    "EmergencyShield": dict(role="production", brain="required", timeline="compiled_beats",
+                          tokens="design_tokens", audio="embedded", qa="verify_render",
+                          total_frames=3088,
                           exemption=None),
     # --- test ---------------------------------------------------------------
 }
