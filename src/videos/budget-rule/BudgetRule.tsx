@@ -2,7 +2,7 @@
 // 3-minute video: "The 50/30/20 Budget Rule"
 // Uses: v2.0 components, timing rules (9+ changes per beat), 5-layer backgrounds
 import React from "react";
-import { AbsoluteFill, useCurrentFrame, interpolate } from "remotion";
+import { AbsoluteFill, Audio, staticFile, useCurrentFrame, interpolate } from "remotion";
 import { T, CLAMP } from "../../light/tokens";
 import { LightCanvas, GlassCard } from "../../light/primitives";
 import {
@@ -213,6 +213,7 @@ export const BudgetRule: React.FC = () => {
 
   return (
     <AbsoluteFill>
+      <Audio src={staticFile("src/videos/budget-rule/audio/vo.wav")} />
       {beatIndex === 0 && <BeatHook local={local} />}
       {beatIndex === 1 && <BeatRule local={local} />}
       {beatIndex === 2 && <BeatExample local={local} />}
