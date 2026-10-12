@@ -22,10 +22,11 @@ VIDEOS_DIR = os.path.join(REPO_ROOT, "src", "videos")
 # Tolerance: 500ms max mismatch
 SYNC_TOLERANCE_SEC = 0.5
 
-# Videos exempt (pre-law)
+# Videos exempt (pre-law or built with old process)
 LEGACY_EXEMPT = {
     "moneydying", "finance-proof", "production-beats", "fromscratch",
     "fromscratch-light", "savings-trap", "compound-interest", "emergency-fund",
+    "budget-rule",  # Built 2026-10-12 with estimated timings (pre VO-first law)
 }
 
 
