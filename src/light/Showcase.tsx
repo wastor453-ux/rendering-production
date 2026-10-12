@@ -54,7 +54,7 @@ export const SHOWCASE_MODES: { id: string; title: string; el: React.ReactNode }[
       <div style={{ marginTop: 28 }}><ComparisonBars left={{ label: "Median rent", value: 2150 }} right={{ label: "Median mortgage", value: 2980 }} /></div></GlassCard></Center> },
   { id: "donut_allocation", title: "Donut Allocation",
     el: <Center><DonutChart segments={[
-      { label: "Stocks", value: 55, color: "#5368F7" },
+      { label: "Stocks", value: 55, color: "#3478F6" },
       { label: "Bonds", value: 25, color: "#C9D0FF" },
       { label: "Cash", value: 20, color: "#51C59A" }]} /></Center> },
   { id: "metric_grid", title: "Metric Grid",
@@ -138,9 +138,9 @@ const combos: { id: string; title: string; el: React.ReactNode }[] = [
       cards={[{ name: "Stocks", value: "$58,200", delta: 12.4 }, { name: "Bonds", value: "$24,800", delta: 3.1 },
         { name: "Cash", value: "$18,400", delta: 1.2 }, { name: "Real Estate", value: "$42,000", delta: -2.4 }]}
       chartData={[
-        { label: "2024", segments: [{ label: "Stocks", value: 50, color: "#5368F7" }, { label: "Bonds", value: 30, color: "#C9D0FF" }, { label: "Cash", value: 20, color: "#51C59A" }] },
-        { label: "2025", segments: [{ label: "Stocks", value: 55, color: "#5368F7" }, { label: "Bonds", value: 25, color: "#C9D0FF" }, { label: "Cash", value: 20, color: "#51C59A" }] },
-        { label: "2026", segments: [{ label: "Stocks", value: 58, color: "#5368F7" }, { label: "Bonds", value: 24, color: "#C9D0FF" }, { label: "Cash", value: 18, color: "#51C59A" }] },
+        { label: "2024", segments: [{ label: "Stocks", value: 50, color: "#3478F6" }, { label: "Bonds", value: 30, color: "#C9D0FF" }, { label: "Cash", value: 20, color: "#51C59A" }] },
+        { label: "2025", segments: [{ label: "Stocks", value: 55, color: "#3478F6" }, { label: "Bonds", value: 25, color: "#C9D0FF" }, { label: "Cash", value: 20, color: "#51C59A" }] },
+        { label: "2026", segments: [{ label: "Stocks", value: 58, color: "#3478F6" }, { label: "Bonds", value: 24, color: "#C9D0FF" }, { label: "Cash", value: 18, color: "#51C59A" }] },
       ]}
       emphasis="Stocks drove 80% of this year's growth." /></Center> },
   { id: "combo_chart_thesis", title: "Combo · Chart → Thesis",
