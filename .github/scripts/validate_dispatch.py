@@ -58,8 +58,15 @@ def check_frame_math(start, end, chunk_size):
     return errors, total
 
 
-def check_composition(composition, expected_frames, repo_root):
-    """Verify composition exists and duration matches."""
+def check_composition(composition, expected_frames, repo_root, video_id=None):
+    """Verify composition exists and duration matches.
+
+    For dynamic-duration compositions (e.g. EventDriven) the declared
+    duration resolves from the video's timeline when video_id is given;
+    without it, resolution is impossible and a warning (not an error)
+    is printed — the hard gate is validate_for_dispatch, which fails
+    closed on missing video_id.
+    """
     errors = []
     # Find composition definition
     comp_file = None
@@ -113,6 +120,25 @@ def check_composition(composition, expected_frames, repo_root):
             )
         else:
             print(f"  Frame count matches: {declared}")
+    elif video_id:
+        # Dynamic duration: resolve from the video's timeline.
+        try:
+            from composition_contract import get_total_frames
+            total = get_total_frames(composition, video_id=video_id)
+        except Exception:
+            total = None
+        if total is None:
+            print(f"  WARNING: Could not resolve frame count for "
+                  f"{composition} (video_id={video_id!r})")
+            print(f"  (Manual verification required)")
+        elif total != expected_frames:
+            errors.append(
+                f"Composition {composition!r} resolves to {total} frames "
+                f"for video_id={video_id!r}, but dispatch requests "
+                f"{expected_frames} frames (frames 0-{expected_frames - 1})."
+            )
+        else:
+            print(f"  Frame count matches (dynamic, video_id={video_id!r}): {total}")
     else:
         print(f"  WARNING: Could not determine frame count from {comp_file}")
         print(f"  (Manual verification required)")
@@ -381,37 +407,47 @@ def check_workflow_yaml(repo_root):
 
 
 def check_push_coverage(repo_root):
-    """Verify all workflows are in the push script (regression test).
+    """Verify every pipeline file is tracked by git.
 
-    Workflows listed in NOT_DEPLOYED are deliberately excluded: they exist
-    in the tree as inactive proposals and must NOT be pushed to any branch.
+    The real invariant (regression: P4.3 file-dropping, and the
+    untracked EventDriven/Typography incidents): a pipeline file that
+    is not committed never reaches the runner, no matter how correct
+    it is locally. Publication ships the committed tree, so
+    tracked-ness is the gate — not membership in any external,
+    unversioned push-script file list (that coupling let the check
+    pass locally while the runner used stale code, and failed
+    locally whenever the external script drifted).
+
+    Covers: .github/scripts/*.py, .github/workflows/*.yml,
+    tools/*.py, tests/*.py. Fails closed if git cannot verify.
     """
-    # P4.4: cleanup-artifacts.yml is an inactive proposal (header-marked
-    # "not active"). It must never be deployed, so the coverage gate
-    # explicitly exempts it instead of demanding it in the push script.
-    NOT_DEPLOYED = {"cleanup-artifacts.yml"}
+    import subprocess
     errors = []
-    wf_dir = os.path.join(repo_root, ".github", "workflows")
-    push_script = os.path.expanduser("~/workspace/skills/github/bin/push_p40_branch.py")
-    
-    if not os.path.exists(push_script):
-        print("  WARNING: Push script not found, skipping coverage check")
-        return errors
-    
-    with open(push_script) as f:
-        script_content = f.read()
-    
-    workflows = [f for f in os.listdir(wf_dir) if f.endswith(".yml")]
-    for wf in workflows:
-        if wf in NOT_DEPLOYED:
-            print(f"  Push coverage SKIP (deliberately not deployed): {wf}")
+    try:
+        result = subprocess.run(
+            ["git", "-C", repo_root, "ls-files"],
+            capture_output=True, text=True, check=True)
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        return [f"Cannot verify pipeline files are tracked (git ls-files "
+                f"failed: {e}). Refusing to dispatch unverified."]
+    tracked = set(result.stdout.splitlines())
+    for rel_dir, suffix in ((os.path.join(".github", "scripts"), ".py"),
+                            (os.path.join(".github", "workflows"), ".yml"),
+                            ("tools", ".py"),
+                            ("tests", ".py")):
+        abs_dir = os.path.join(repo_root, rel_dir)
+        if not os.path.isdir(abs_dir):
             continue
-        path = f".github/workflows/{wf}"
-        if path not in script_content:
-            errors.append(f"Push script missing workflow: {path} (will not be deployed!)")
-        else:
-            print(f"  Push coverage OK: {wf}")
-    
+        for fname in sorted(os.listdir(abs_dir)):
+            if not fname.endswith(suffix) or fname.startswith("__"):
+                continue
+            path = os.path.join(rel_dir, fname)
+            if path not in tracked:
+                errors.append(
+                    f"Pipeline file not tracked by git: {path} "
+                    f"(will not be published — `git add` it first)")
+            else:
+                print(f"  Tracked OK: {path}")
     return errors
 
 
@@ -425,6 +461,10 @@ def main():
     parser.add_argument("--bed-file", default="public/audio/bed.mp3")
     parser.add_argument("--with-audio", default="true")
     parser.add_argument("--vo-offset-seconds", default="0")
+    parser.add_argument("--video-id", default="",
+                        help="Video id for dynamic-duration compositions "
+                             "(e.g. EventDriven). Required to resolve "
+                             "total_frames for such compositions.")
     parser.add_argument("--with-sfx-mix", default="false")
     parser.add_argument("--sfx-chain-test", default="false")
     parser.add_argument("--install-verify", default="false")
@@ -446,7 +486,8 @@ def main():
     all_errors.extend(errs)
     
     print("\n[2] Composition...")
-    errs = check_composition(args.composition, total_frames, repo_root)
+    errs = check_composition(args.composition, total_frames, repo_root,
+                             video_id=args.video_id or None)
     all_errors.extend(errs)
     
     print("\n[3] Audio files...")
@@ -458,7 +499,7 @@ def main():
     errs = check_workflow_yaml(repo_root)
     all_errors.extend(errs)
     
-    print("\n[5] Push script coverage...")
+    print("\n[5] Pipeline files tracked (no external push-script coupling)...")
     errs = check_push_coverage(repo_root)
     all_errors.extend(errs)
 
@@ -467,7 +508,8 @@ def main():
     all_errors.extend(errs)
     errs = check_no_duplicate_ids()
     all_errors.extend(errs)
-    errs = validate_for_dispatch(args.composition, with_audio)
+    errs = validate_for_dispatch(args.composition, with_audio,
+                                 video_id=args.video_id or None)
     all_errors.extend(errs)
     if not errs:
         from composition_contract import get_contract
@@ -484,7 +526,8 @@ def main():
     print("\n[8] Workflow flag combinations (Q2)...")
     from composition_contract import get_total_frames
     # Q1: upper-bound check pre-dispatch
-    total = get_total_frames(args.composition)
+    total = get_total_frames(args.composition,
+                             video_id=args.video_id or None)
     if total is None:
         all_errors.append(
             f"composition {args.composition!r} has no valid total_frames; "

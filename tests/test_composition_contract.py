@@ -399,7 +399,39 @@ class TestDispatchGates(unittest.TestCase):
             else:
                 self.assertTrue(errs, f"{cid} (role={contract.get('role')}) should be rejected")
 
-    def test_exempt_test_compositions_pass(self):
+    def test_dynamic_duration_passes_with_video_id(self):
+        # EventDriven resolves its duration from a checked-in timeline
+        # when video_id is supplied (generic discovery, no hardcoded
+        # video names). Without video_id it fails closed (see
+        # test_all_registered_pass_with_audio_true).
+        import glob
+        import json
+        import os
+        repo_root = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 "..")
+        video_id = None
+        for path in sorted(glob.glob(os.path.join(
+                repo_root, "src", "videos", "*", "data",
+                "event_timeline.json"))):
+            with open(path) as f:
+                tl = json.load(f)
+            events = tl.get("events", [])
+            if events and max(e.get("end_frame", 0) for e in events) > 0:
+                video_id = os.path.basename(os.path.dirname(
+                    os.path.dirname(path)))
+                break
+        self.assertIsNotNone(
+            video_id, "no checked-in event timeline to resolve EventDriven")
+        self.assertEqual(validate_for_dispatch("EventDriven", True,
+                                               video_id=video_id), [])
+
+    def test_dynamic_duration_fails_with_unknown_video_id(self):
+        # A video_id with no timeline fails closed — never a static guess.
+        errs = validate_for_dispatch("EventDriven", True,
+                                     video_id="NoSuchVideo")
+        self.assertTrue(errs)
+        self.assertTrue(any("total_frames" in e or "resolve" in e
+                            for e in errs), f"{errs}")
         for cid in ("SavingsTrap",):
             self.assertEqual(validate_for_dispatch(cid, True), [])
 

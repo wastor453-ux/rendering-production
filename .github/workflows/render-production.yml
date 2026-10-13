@@ -289,10 +289,11 @@ jobs:
         #    - event_timeline: validate_timeline.py (timing, coverage, lifecycle)
         #    - compiled_beats: existing S7 beat validation (already run above)
         #    - fixed: no timeline file to validate (static composition)
-        # NOTE (2026-10-13): Non-blocking during pipeline hardening.
-        # Validation output is captured for review; failures don't block render.
-        # CI (test.yml) enforces these gates strictly.
-        continue-on-error: true
+        # BLOCKING (2026-10-13): the temporary continue-on-error bypass
+        # from pipeline hardening is removed. The underlying gates
+        # (contract self-test, _active stub contract, timeline validation)
+        # now pass, so validation failures block the render again.
+        # A bypass is never a fix; this step must fail the workflow.
         env:
           COMPOSITION: ${{ inputs.composition }}
         run: |
@@ -588,6 +589,26 @@ jobs:
             cp /tmp/validated-inputs/timeline.json src/videos/_active/timeline.json
             cp /tmp/validated-inputs/vo.wav src/videos/_active/vo.wav
             VIDEO_ID="$VIDEO_ID" python3 -c "import json, os; json.dump({'videoId': os.environ['VIDEO_ID']}, open('src/videos/_active/manifest.json', 'w'))"
+            # Fail closed on stubs: a worker must never bundle the checked-in
+            # placeholders. The manifest must name this video and the
+            # timeline must carry real events (the plan job already
+            # validated this timeline; this is defense in depth per worker).
+            VIDEO_ID="$VIDEO_ID" python3 - <<'PY'
+            import json, os, sys
+            m = json.load(open('src/videos/_active/manifest.json'))
+            t = json.load(open('src/videos/_active/timeline.json'))
+            vid = os.environ['VIDEO_ID']
+            if m.get('videoId') != vid:
+                print(f"FATAL: _active manifest videoId {m.get('videoId')!r} "
+                      f"!= {vid!r} (stub?)", file=sys.stderr)
+                sys.exit(1)
+            if not t.get('events'):
+                print('FATAL: _active timeline has zero events (stub?)',
+                      file=sys.stderr)
+                sys.exit(1)
+            print(f"_active verified: videoId={vid}, "
+                  f"events={len(t['events'])}")
+            PY
             echo "✅ Worker prepared _active/ from validated artifact for $VIDEO_ID"
           fi
 

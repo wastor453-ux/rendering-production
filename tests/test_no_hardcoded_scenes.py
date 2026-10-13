@@ -21,7 +21,7 @@ from composition_contract import COMPOSITIONS
 # Legacy dark compositions exempt from light-system check.
 # These predate the LIGHT PREMIUM FINTECH mandate and are not
 # part of the current production visual system.
-LEGACY_DARK_EXEMPT = {"FromScratch", "MoneyDying"}
+LEGACY_DARK_EXEMPT = set()  # Test videos removed 2026-10-13
 
 
 def _production_tsx_files():
@@ -66,8 +66,11 @@ def test_no_hardcoded_scenes():
         if '/light/' not in content:
             violations.append(f"{comp}: does not import from light/ components")
 
-        # Check 2: Must reference visual_mode
-        if "visual_mode" not in content:
+        # Check 2: Must reference visual_mode (or delegate to generic renderer)
+        # Wrappers that bind data to EventDrivenVideo are exempt — the generic
+        # renderer handles visual_mode routing internally.
+        is_generic_wrapper = "EventDrivenVideo" in content and "timeline" in content
+        if "visual_mode" not in content and not is_generic_wrapper:
             violations.append(f"{comp}: does not route by visual_mode")
 
         # Check 3: Must not hardcode dark backgrounds
@@ -76,8 +79,8 @@ def test_no_hardcoded_scenes():
             if re.search(pattern, content, re.IGNORECASE):
                 violations.append(f"{comp}: contains hardcoded dark color ({pattern})")
 
-        # Check 4: Must use LightCanvas (not custom dark container)
-        if "LightCanvas" not in content:
+        # Check 4: Must use LightCanvas (or delegate to generic renderer)
+        if "LightCanvas" not in content and not is_generic_wrapper:
             violations.append(f"{comp}: does not use LightCanvas")
 
     if violations:

@@ -18,11 +18,8 @@ VIDEOS_DIR = os.path.join(REPO_ROOT, "src", "videos")
 
 # Videos created before the voiceover rule (2026-10-12)
 LEGACY_NO_VO_EXEMPT = {
-    "moneydying",
     "finance-proof",
     "production-beats",
-    "fromscratch",
-    "fromscratch-light",
     "savings-trap",
     "compound-interest",  # Pipeline testing - VO to be added
     "emergency-fund",  # Pipeline testing - VO to be added

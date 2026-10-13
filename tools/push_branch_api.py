@@ -4,7 +4,7 @@
 Used because this environment has no git HTTPS credential; the
 established pattern (push_p40_branch.py) uses the skill credential.
 Pushes ONLY the files changed in local commits ahead of the remote
-branch, onto p4-4-complete-preproduction-closure (never main).
+branch, onto p4-4-ccdecbc-readiness (never main).
 """
 import sys, os, json, base64, urllib.request, urllib.error
 
@@ -14,8 +14,8 @@ from dynamic_credentials import add_surrogate_to_request, read_json_response
 REPO = "wastor453-ux/rendering-production"
 BASE = "https://api.github.com"
 ALLOWED = ["api.github.com"]
-BRANCH = "p4-4-complete-preproduction-closure"
-WORKDIR = os.path.expanduser("~/workspace/crackit/demo-video")
+BRANCH = "p4-4-ccdecbc-readiness"
+WORKDIR = os.path.expanduser("~/workspace/crackit/production")
 
 
 def api(method, path, payload=None, timeout=60, retries=4):

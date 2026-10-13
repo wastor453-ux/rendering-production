@@ -83,7 +83,11 @@ COMPOSITIONS = {
                           # get_total_frames() computes it from the video's
                           # timeline (see below). NO FALLBACK — fails closed
                           # if timeline is unavailable.
+                          # dynamic_duration=True is the explicit marker:
+                          # this composition has NO static total_frames, and
+                          # every caller must supply video_id to resolve one.
                           total_frames=None,
+                          dynamic_duration=True,
                           exemption=None),
     # --- test ---------------------------------------------------------------
 }
@@ -167,8 +171,13 @@ def remotion_root_ids(repo_root):
     return set(re.findall(r'<Composition\s[^>]*id="([A-Za-z0-9_]+)"', content))
 
 
-def validate_for_dispatch(composition, with_audio):
-    """Enforce the contract for a dispatch. Returns a list of error strings."""
+def validate_for_dispatch(composition, with_audio, video_id=None):
+    """Enforce the contract for a dispatch. Returns a list of error strings.
+
+    video_id is required for dynamic-duration compositions (total_frames
+    is None + dynamic_duration=True, e.g. EventDriven): without it the
+    duration cannot be resolved and dispatch fails closed.
+    """
     errors = []
     contract = get_contract(composition)
     if contract is None:
@@ -240,7 +249,23 @@ def validate_for_dispatch(composition, with_audio):
     # Q1 (2026-10-11): total_frames must be a positive integer. plan.py
     # rejects frame ranges outside [0, total_frames); a missing or invalid
     # total fails closed here so the bound is never silently skipped.
-    if get_total_frames(composition) is None:
+    # Dynamic-duration compositions resolve their total from the video's
+    # timeline — video_id is mandatory for them, and an unresolvable
+    # timeline fails closed (never falls back to a static guess).
+    if contract.get("dynamic_duration"):
+        if not video_id:
+            errors.append(
+                f"Composition '{composition}' has dynamic duration: "
+                f"video_id is required to resolve total_frames. "
+                f"Dispatch without video_id cannot validate frame ranges."
+            )
+        elif get_total_frames(composition, video_id=video_id) is None:
+            errors.append(
+                f"Composition '{composition}' has dynamic duration but "
+                f"total_frames could not be resolved from video_id "
+                f"{video_id!r}. Frame-range validation cannot run."
+            )
+    elif get_total_frames(composition) is None:
         errors.append(
             f"Composition '{composition}' has missing or invalid total_frames "
             f"in the contract registry. Frame-range validation cannot run."
@@ -292,6 +317,33 @@ def check_registry_consistency(repo_root):
     return errors
 
 
+def discover_video_id_with_timeline(repo_root):
+    """Find a checked-in video id with a readable event timeline.
+
+    Generic discovery (glob, no hardcoded video names): used by the
+    self-test and tests to resolve dynamic-duration compositions through
+    the real production path (checked-in timeline -> total_frames).
+    Returns the video id, or None if no such timeline exists.
+    """
+    import glob as _glob
+    import json as _json
+    pattern = os.path.join(repo_root, "src", "videos", "*", "data",
+                           "event_timeline.json")
+    for path in sorted(_glob.glob(pattern)):
+        try:
+            with open(path) as f:
+                tl = _json.load(f)
+        except (OSError, ValueError):
+            continue
+        events = tl.get("events", []) if isinstance(tl, dict) else []
+        if events and max((e.get("end_frame", 0) for e in events),
+                          default=0) > 0:
+            # src/videos/<video_id>/data/event_timeline.json
+            return os.path.basename(os.path.dirname(
+                os.path.dirname(path)))
+    return None
+
+
 def self_test():
     """Smoke assertions runnable via `python3 .github/scripts/composition_contract.py`."""
     # Registry must match RemotionRoot.tsx registrations (no hardcoded count).
@@ -301,11 +353,33 @@ def self_test():
     root_ids = remotion_root_ids(_repo)
     assert set(COMPOSITIONS) == set(root_ids), \
         f"registry/RemotionRoot mismatch: registry-only={set(COMPOSITIONS)-set(root_ids)}, root-only={set(root_ids)-set(COMPOSITIONS)}"
+    # A checked-in timeline to resolve dynamic compositions (generic).
+    _dynamic_video = None
     for cid, c in COMPOSITIONS.items():
         assert REQUIRED_FIELDS <= set(c.keys()), f"{cid} missing fields"
         assert c["role"] in VALID_ROLES, f"{cid} bad role"
-        # Q1: every composition must carry a valid total_frames.
-        assert get_total_frames(cid) is not None, f"{cid} missing/invalid total_frames"
+        if c.get("dynamic_duration"):
+            # Dynamic: NO static total (fail closed without video_id),
+            # and resolvable through the real timeline path with one.
+            assert get_total_frames(cid) is None, \
+                f"{cid}: dynamic composition must not resolve without video_id"
+            assert c.get("total_frames") is None, \
+                f"{cid}: dynamic composition must not carry a static total_frames"
+            if _dynamic_video is None:
+                _dynamic_video = discover_video_id_with_timeline(_repo)
+            assert _dynamic_video is not None, \
+                f"{cid}: no checked-in event timeline to resolve dynamic duration"
+            total = get_total_frames(cid, video_id=_dynamic_video)
+            assert isinstance(total, int) and total > 0, \
+                f"{cid}: could not resolve total_frames from {_dynamic_video!r}"
+            errs = validate_for_dispatch(cid, True)
+            assert errs and "video_id" in errs[0], \
+                f"{cid}: must fail closed without video_id, got {errs}"
+            errs = validate_for_dispatch(cid, True, video_id=_dynamic_video)
+            assert not errs, f"{cid} with video_id={_dynamic_video!r}: {errs}"
+        else:
+            # Q1: static compositions must carry a valid total_frames.
+            assert get_total_frames(cid) is not None, f"{cid} missing/invalid total_frames"
     # Unknown id is rejected.
     errs = validate_for_dispatch("NoSuchVideo", True)
     assert errs and "not registered" in errs[0]
@@ -338,10 +412,19 @@ def self_test():
     finally:
         COMPOSITIONS[pcid]["exemption"] = saved
     # All registered ids pass with_audio=true.
+    # Dynamic compositions need a video_id (resolved above via a
+    # checked-in timeline); non-production roles are still rejected.
     for cid in COMPOSITIONS:
-        errs = validate_for_dispatch(cid, True)
-        assert not errs, f"{cid}: {errs}"
-    print("composition_contract self-test: OK (24 registered, gates behave)")
+        if COMPOSITIONS[cid].get("dynamic_duration"):
+            errs = validate_for_dispatch(cid, True, video_id=_dynamic_video)
+            assert not errs, f"{cid}: {errs}"
+        elif COMPOSITIONS[cid].get("role") == "production":
+            errs = validate_for_dispatch(cid, True)
+            assert not errs, f"{cid}: {errs}"
+        else:
+            errs = validate_for_dispatch(cid, True)
+            assert errs, f"{cid} (non-production) should be rejected"
+    print(f"composition_contract self-test: OK ({len(COMPOSITIONS)} registered, gates behave)")
 
 
 if __name__ == "__main__":

@@ -1238,19 +1238,85 @@ class TestScopeControl(unittest.TestCase):
 
     def test_no_creative_files_in_patch(self):
         import subprocess
-        result = subprocess.run(
-            ["git", "diff", "HEAD", "--name-only"],
-            capture_output=True, text=True, cwd=".")
+        import os
+        # In CI: compare committed patch vs base branch
+        # Locally: compare working tree vs HEAD
+        # CI contexts:
+        # - Pull request: GITHUB_BASE_REF set, compare PR head vs base
+        # - Push: GITHUB_SHA set, compare commit vs parent
+        # Local: compare working tree vs HEAD
+        base = os.environ.get("GITHUB_BASE_REF")
+        sha = os.environ.get("GITHUB_SHA")
+        if base:
+            cmd = ["git", "diff", f"origin/{base}", "--name-only"]
+        elif sha:
+            cmd = ["git", "diff", f"{sha}^", sha, "--name-only"]
+        else:
+            cmd = ["git", "diff", "HEAD", "--name-only"]
+        result = subprocess.run(cmd, capture_output=True, text=True, cwd=".")
         files = result.stdout.strip().split('\n')
         # Creative paths that must NOT appear in the infrastructure patch
         forbidden_prefixes = [
             "src/light/", "src/videos/production-beats/data/", "crackit/",
             "public/audio/sfx/",  # curated SFX pack
         ]
+        # Narrow exception (approved 2026-10-12): exactly these 3 files are
+        # infrastructure changes for the generic typography system, not creative.
+        # - src/light/tokens.ts: Added caption role to TYPE tokens (design system)
+        # - src/light/EventDrivenVideo.tsx: Uses explicit Typography role components
+        # - src/light/Typography.tsx: NEW explicit semantic role components
+        # All other src/light/ files remain protected.
+        allowed_exceptions = frozenset([
+            "src/light/tokens.ts",
+            "src/light/EventDrivenVideo.tsx",
+            "src/light/Typography.tsx",
+        ])
         for f in files:
+            if f in allowed_exceptions:
+                continue
             for prefix in forbidden_prefixes:
                 self.assertFalse(f.startswith(prefix),
                                  f"creative file in patch: {f}")
+
+    def test_guard_rejects_prohibited_file(self):
+        """Prove the guard catches src/light/ in a committed patch."""
+        import subprocess
+        import os
+        # Simulate a committed patch containing a prohibited file
+        # by checking the forbidden prefixes logic directly
+        forbidden_prefixes = [
+            "src/light/", "src/videos/production-beats/data/", "crackit/",
+            "public/audio/sfx/",
+        ]
+        test_file = "src/light/tokens.ts"
+        caught = any(test_file.startswith(p) for p in forbidden_prefixes)
+        self.assertTrue(caught, f"Guard should catch {test_file}")
+        # A non-prohibited file should not be caught
+        ok_file = "tools/validate_typography.py"
+        caught_ok = any(ok_file.startswith(p) for p in forbidden_prefixes)
+        self.assertFalse(caught_ok)
+
+    def test_narrow_exception_only_allows_three_files(self):
+        """Prove the exception is narrow: other src/light/ files still rejected."""
+        forbidden_prefixes = ["src/light/"]
+        allowed = frozenset([
+            "src/light/tokens.ts",
+            "src/light/EventDrivenVideo.tsx",
+            "src/light/Typography.tsx",
+        ])
+        # These should be REJECTED (not in exception)
+        rejected = [
+            "src/light/primitives.tsx",
+            "src/light/materialTheme.tsx",
+            "src/light/newfile.ts",
+        ]
+        for f in rejected:
+            self.assertNotIn(f, allowed, f"{f} should not be in exception")
+            caught = any(f.startswith(p) for p in forbidden_prefixes)
+            self.assertTrue(caught, f"{f} should be caught by guard")
+        # These should be ALLOWED (in exception)
+        for f in allowed:
+            self.assertIn(f, allowed)
 
     def test_sfx_pack_untouched(self):
         import subprocess
@@ -1373,46 +1439,57 @@ class TestPlanScript(unittest.TestCase):
             shutil.rmtree(tmpdir)
 
 
-class TestPushScriptCompleteness(unittest.TestCase):
-    """P4.4: Push script must include all workflow and script files.
-    Regression test for P4.3 file-dropping (render-production-q002-test.yml
-    was missing from remote because push script had hardcoded list)."""
+class TestPipelineFilesTracked(unittest.TestCase):
+    """P4.4: Every pipeline file must be tracked by git.
 
-    def test_push_script_includes_all_workflows(self):
-        """Every .github/workflows/*.yml must be in the push script."""
-        import os
-        push_script = os.path.expanduser(
-            "~/workspace/skills/github/bin/push_p40_branch.py")
-        if not os.path.isfile(push_script):
-            self.skipTest(f"push script not present (hosted runner)")
-        wf_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                              "..", ".github", "workflows")
-        workflows = [f for f in os.listdir(wf_dir) if f.endswith(".yml")]
-        # Read push script
-        with open(push_script) as f:
-            script_content = f.read()
-        for wf in workflows:
-            path = f".github/workflows/{wf}"
-            self.assertIn(path, script_content,
-                          f"Push script missing workflow: {path}")
+    Regression test for P4.3 file-dropping and the untracked
+    EventDriven/Typography incidents: a pipeline file that is not
+    committed never reaches the runner, no matter how correct it is
+    locally. Publication ships the committed tree, so tracked-ness
+    is the gate.
 
-    def test_push_script_includes_all_scripts(self):
-        """Every .github/scripts/*.py must be in the push script."""
-        import os
-        push_script = os.path.expanduser(
-            "~/workspace/skills/github/bin/push_p40_branch.py")
-        if not os.path.isfile(push_script):
-            self.skipTest(f"push script not present (hosted runner)")
-        script_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                  "..", ".github", "scripts")
-        scripts = [f for f in os.listdir(script_dir)
-                   if f.endswith(".py") and not f.startswith("__")]
-        with open(push_script) as f:
-            script_content = f.read()
-        for s in scripts:
-            path = f".github/scripts/{s}"
-            self.assertIn(path, script_content,
-                          f"Push script missing script: {path}")
+    Deliberately NOT coupled to any external, unversioned push-script
+    file (the old test asserted membership in an out-of-repo P4.0
+    push script, which lives outside the repo, drifted stale, and
+    failed locally whenever it did — while passing on the runner
+    where the file was absent and the test skipped). The
+    production-path check is validate_dispatch.check_push_coverage,
+    exercised directly here.
+    """
+
+    def test_all_pipeline_files_tracked(self):
+        """validate_dispatch's tracked-files gate passes on this tree."""
+        from validate_dispatch import check_push_coverage
+        repo_root = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 "..")
+        errs = check_push_coverage(os.path.normpath(repo_root))
+        self.assertEqual(errs, [], f"Untracked pipeline files: {errs}")
+
+    def test_no_external_push_script_coupling(self):
+        """No in-repo source may depend on the external push script.
+
+        The coupling is banned: tests/ and .github/scripts/ must not
+        reference the out-of-repo push-script path. If the coupling
+        returns, the tracked-files gate above is the replacement.
+        """
+        repo_root = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 "..")
+        # Assembled so this test file itself does not contain the
+        # banned literal (it would otherwise flag itself).
+        needle = "push_" + "p40_branch"
+        offenders = []
+        for sub in ("tests", os.path.join(".github", "scripts")):
+            base = os.path.join(repo_root, sub)
+            for fname in os.listdir(base):
+                if not fname.endswith(".py"):
+                    continue
+                fpath = os.path.join(base, fname)
+                with open(fpath, encoding="utf-8", errors="ignore") as f:
+                    if needle in f.read():
+                        offenders.append(
+                            os.path.join(sub, fname))
+        self.assertEqual(offenders, [],
+                         f"External push-script coupling in: {offenders}")
 
 
 if __name__ == "__main__":

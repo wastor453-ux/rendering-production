@@ -81,7 +81,7 @@ def main():
         from faster_whisper import WhisperModel
     except ImportError:
         print(f"FATAL: faster-whisper not available.", file=sys.stderr)
-        print(f"  Use the locked pipeline venv: ~/workspace/crackit/demo-video/.venv", file=sys.stderr)
+        print(f"  Use the locked pipeline venv: ~/workspace/crackit/production/.venv", file=sys.stderr)
         sys.exit(1)
 
     # Use local pinned model (no download)

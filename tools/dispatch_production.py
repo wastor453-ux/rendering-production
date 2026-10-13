@@ -69,6 +69,11 @@ def run_validator(args):
            "--vo-file", args.vo_file,
            "--bed-file", args.bed_file,
            "--with-audio", "true" if args.with_audio else "false"]
+    # EventDriven (dynamic duration) cannot validate without video_id —
+    # pass it through so the gate resolves total_frames from the timeline
+    # instead of failing closed on every generic dispatch.
+    if getattr(args, "video_id", ""):
+        cmd += ["--video-id", args.video_id]
     print("Running pre-dispatch validation...")
     r = subprocess.run(cmd, cwd=REPO_ROOT)
     return r.returncode == 0
