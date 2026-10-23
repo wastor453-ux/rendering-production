@@ -7,8 +7,8 @@ const root = path.resolve(__dirname, "..");
 const workflow = fs.readFileSync(path.join(root, ".github/workflows/render-production.yml"), "utf8");
 
 test("production workflow has bounded defaults consistent with validation", () => {
-  assert.match(workflow, /max_parallel:[\s\S]{0,120}default: '10'/);
-  assert.match(workflow, /bounded\("MAX_PARALLEL", 1, 10\)/);
+  assert.match(workflow, /max-parallel: 10/);
+  assert.doesNotMatch(workflow, /inputs\.max_parallel/);
   assert.match(workflow, /bounded\("CRF", 0, 51\)/);
   assert.match(workflow, /at most 100000 frames/);
 });
