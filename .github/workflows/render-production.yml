@@ -210,8 +210,9 @@ jobs:
               a, b = int(values.get("start", "-1")), int(values.get("end", "-1"))
               if cid != expected_id:
                   raise SystemExit(f"chunk IDs not contiguous: expected {expected_id}, got {cid}")
-              if a != expected_start or b < a or b > end or b - a + 1 > size:
-                  raise SystemExit(f"frame coverage gap/overlap/invalid range at chunk {cid}: {a}-{b}, expected start {expected_start}")
+              expected_end = min(expected_start + size - 1, end)
+              if a != expected_start or b != expected_end:
+                  raise SystemExit(f"frame coverage gap/overlap/invalid range at chunk {cid}: got {a}-{b}, expected {expected_start}-{expected_end}")
               mp4, sha = f"chunk_{cid}.mp4", f"chunk_{cid}.sha256"
               if not os.path.isfile(mp4) or not os.path.isfile(sha):
                   raise SystemExit(f"missing artifact for chunk {cid}")
@@ -263,35 +264,39 @@ jobs:
           echo "audio muxed: /tmp/master.mp4"
 
       - name: Verify master (video + audio + pipeline)
+        env:
+          WITH_AUDIO: ${{ inputs.with_audio }}
+          START_FRAME: ${{ inputs.start_frame }}
+          END_FRAME: ${{ inputs.end_frame }}
         run: |
           set -euo pipefail
           MASTER=/tmp/master.mp4
-          if [ "${{ inputs.with_audio }}" != "true" ]; then
+          if [ "$WITH_AUDIO" != "true" ]; then
             MASTER=/tmp/master_video.mp4
-            cp $MASTER /tmp/master.mp4
+            cp "$MASTER" /tmp/master.mp4
           fi
 
           echo "=== VIDEO ==="
-          W=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1 $MASTER)
-          H=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 $MASTER)
-          FPS_R=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 $MASTER)
-          FRAMES=$(ffprobe -v error -select_streams v:0 -show_entries stream=nb_frames -of default=noprint_wrappers=1:nokey=1 $MASTER)
-          V_DUR=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $MASTER)
+          W=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1 "$MASTER")
+          H=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 "$MASTER")
+          FPS_R=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 "$MASTER")
+          FRAMES=$(ffprobe -v error -select_streams v:0 -show_entries stream=nb_frames -of default=noprint_wrappers=1:nokey=1 "$MASTER")
+          V_DUR=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$MASTER")
           echo "video: ${W}x${H} @ ${FPS_R}fps, ${FRAMES} frames, ${V_DUR}s"
 
           [ "$W" = "1920" ] && [ "$H" = "1080" ] || { echo "resolution FAIL: ${W}x${H}"; exit 1; }
           [ "$FPS_R" = "30/1" ] || { echo "fps FAIL: $FPS_R"; exit 1; }
-          EXPECTED_FRAMES=$(( ${{ inputs.end_frame }} - ${{ inputs.start_frame }} + 1 ))
+          EXPECTED_FRAMES=$(( END_FRAME - START_FRAME + 1 ))
           [ "$FRAMES" = "$EXPECTED_FRAMES" ] || { echo "frame count FAIL: expected $EXPECTED_FRAMES got $FRAMES"; exit 1; }
 
           ffmpeg -v error -i $MASTER -f null - || { echo "decode FAIL"; exit 1; }
           echo "video OK"
 
           echo "=== AUDIO ==="
-          if [ "${{ inputs.with_audio }}" = "true" ]; then
+          if [ "$WITH_AUDIO" = "true" ]; then
             A_STREAMS=$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 $MASTER | wc -l)
             [ "$A_STREAMS" -ge 1 ] || { echo "audio stream MISSING"; exit 1; }
-            A_DUR=$(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 $MASTER)
+            A_DUR=$(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 "$MASTER")
             echo "audio: ${A_STREAMS} stream(s), ${A_DUR}s (video ${V_DUR}s)"
             # audio duration must match video within 0.5s
             DIFF=$(echo "$V_DUR - $A_DUR" | bc | tr -d -)
@@ -308,7 +313,7 @@ jobs:
           [ -f "src/compiled_p3/events.json" ] || { echo "events missing"; exit 1; }
           echo "pipeline inputs OK"
 
-          echo "MASTER VERIFIED: ${W}x${H}, ${FRAMES}f, audio=${{ inputs.with_audio }}"
+          echo "MASTER VERIFIED: ${W}x${H}, ${FRAMES}f, audio=$WITH_AUDIO"
 
       - name: Upload master
         uses: actions/upload-artifact@v4
