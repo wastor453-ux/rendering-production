@@ -66,6 +66,11 @@ jobs:
           SIZE: ${{ inputs.chunk_size }}
           MAX_PARALLEL: ${{ inputs.max_parallel }}
           CRF: ${{ inputs.crf }}
+          COMPOSITION: ${{ inputs.composition }}
+          JOB_ID: ${{ inputs.job_id }}
+          WITH_AUDIO: ${{ inputs.with_audio }}
+          VO_FILE: ${{ inputs.vo_file }}
+          BED_FILE: ${{ inputs.bed_file }}
         run: |
           python3 - <<'PY'
           import os, re
@@ -79,6 +84,19 @@ jobs:
           bounded("SIZE", 1, 1800)
           bounded("MAX_PARALLEL", 1, 10)
           bounded("CRF", 0, 51)
+          if not re.fullmatch(r"[A-Za-z0-9_-]{1,100}", os.environ["COMPOSITION"]):
+              raise SystemExit("COMPOSITION must use only letters, digits, underscore, and hyphen (max 100 chars)")
+          if not re.fullmatch(r"[A-Za-z0-9._-]{1,80}", os.environ["JOB_ID"]):
+              raise SystemExit("JOB_ID must use only letters, digits, dot, underscore, and hyphen (max 80 chars)")
+          if os.environ["WITH_AUDIO"] not in ("true", "false"):
+              raise SystemExit("WITH_AUDIO must be exactly true or false")
+          for name in ("VO_FILE", "BED_FILE"):
+              value = os.environ[name]
+              parts = value.split("/")
+              if (not value.startswith("public/audio/") or value.startswith("/") or
+                  any(part in ("", ".", "..") for part in parts) or
+                  not re.fullmatch(r"[A-Za-z0-9._/-]+", value)):
+                  raise SystemExit(f"{name} must be a safe path beneath public/audio/")
           if end < start or end - start + 1 > 100_000:
               raise SystemExit("frame range must be ordered and at most 100000 frames")
           PY
@@ -289,14 +307,18 @@ jobs:
           EXPECTED_FRAMES=$(( END_FRAME - START_FRAME + 1 ))
           [ "$FRAMES" = "$EXPECTED_FRAMES" ] || { echo "frame count FAIL: expected $EXPECTED_FRAMES got $FRAMES"; exit 1; }
 
-          ffmpeg -v error -i $MASTER -f null - || { echo "decode FAIL"; exit 1; }
+          ffmpeg -v error -i "$MASTER" -f null - || { echo "decode FAIL"; exit 1; }
           echo "video OK"
 
           echo "=== AUDIO ==="
           if [ "$WITH_AUDIO" = "true" ]; then
-            A_STREAMS=$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 $MASTER | wc -l)
+            A_STREAMS=$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 "$MASTER" | wc -l)
             [ "$A_STREAMS" -ge 1 ] || { echo "audio stream MISSING"; exit 1; }
             A_DUR=$(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 "$MASTER")
+            if ! [[ "$A_DUR" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+              echo "audio duration unavailable or invalid: $A_DUR"
+              exit 1
+            fi
             echo "audio: ${A_STREAMS} stream(s), ${A_DUR}s (video ${V_DUR}s)"
             # audio duration must match video within 0.5s
             DIFF=$(echo "$V_DUR - $A_DUR" | bc | tr -d -)
