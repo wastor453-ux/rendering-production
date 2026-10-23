@@ -55,6 +55,33 @@ jobs:
       matrix: ${{ steps.set.outputs.matrix }}
       job_id: ${{ inputs.job_id }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Validate required production inputs
+        env:
+          WITH_AUDIO: ${{ inputs.with_audio }}
+          VO_FILE: ${{ inputs.vo_file }}
+          BED_FILE: ${{ inputs.bed_file }}
+          COMPOSITION_ID: ${{ inputs.composition }}
+        run: |
+          set -euo pipefail
+          # Fail before allocating the render matrix if source assets or pipeline manifests are missing.
+          python3 - <<'PY'
+          import json, os, re
+          composition = os.environ["COMPOSITION_ID"]
+          if not re.fullmatch(r"[A-Za-z0-9_-]{1,100}", composition):
+              raise SystemExit("invalid composition ID")
+          for name in ("src/compiled_p3/beat_timeline.json", "src/compiled_p3/events.json"):
+              with open(name, encoding="utf8") as f:
+                  json.load(f)
+          if os.environ["WITH_AUDIO"] == "true":
+              for key in ("VO_FILE", "BED_FILE"):
+                  path = os.environ[key]
+                  if not os.path.isfile(path) or os.path.getsize(path) == 0:
+                      raise SystemExit(f"{key} is missing or empty: {path}")
+          print("required manifests and selected audio inputs verified")
+          PY
       - name: Validate numeric bounds
         env:
           START: ${{ inputs.start_frame }}
