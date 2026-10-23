@@ -32,5 +32,9 @@ const results = cases.map((c) => {
   const got = selectVisualMode(c.ev);
   return { case: c.name, selected: got, expected: c.expect, pass: c.expect.includes(got) };
 });
-const npass = results.filter((r: any) => r.pass !== false && r.legacy_map_ok !== false).length;
-console.log(JSON.stringify({ total: results.length, passed: npass, results }, null, 1));
+const failures = results.filter((r: any) => r.pass === false || r.legacy_map_ok === false);
+console.log(JSON.stringify({ total: results.length, passed: results.length - failures.length, results }, null, 1));
+if (failures.length > 0) {
+  console.error(`Selector contract failures: ${failures.map((r: any) => r.case).join(", ")}`);
+  process.exitCode = 1;
+}
