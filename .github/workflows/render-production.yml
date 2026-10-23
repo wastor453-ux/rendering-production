@@ -59,6 +59,29 @@ jobs:
       matrix: ${{ steps.set.outputs.matrix }}
       job_id: ${{ inputs.job_id }}
     steps:
+      - name: Validate numeric bounds
+        env:
+          START: ${{ inputs.start_frame }}
+          END: ${{ inputs.end_frame }}
+          SIZE: ${{ inputs.chunk_size }}
+          MAX_PARALLEL: ${{ inputs.max_parallel }}
+          CRF: ${{ inputs.crf }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          def bounded(name, low, high):
+              raw = os.environ[name]
+              if not re.fullmatch(r"[0-9]+", raw) or not low <= int(raw) <= high:
+                  raise SystemExit(f"{name} must be an integer from {low} to {high}")
+              return int(raw)
+          start = bounded("START", 0, 1_000_000)
+          end = bounded("END", 0, 1_000_000)
+          bounded("SIZE", 1, 1800)
+          bounded("MAX_PARALLEL", 1, 10)
+          bounded("CRF", 0, 51)
+          if end < start or end - start + 1 > 100_000:
+              raise SystemExit("frame range must be ordered and at most 100000 frames")
+          PY
       - id: set
         run: |
           python3 - <<'PY'
