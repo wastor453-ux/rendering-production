@@ -24,7 +24,7 @@ on:
       max_parallel:
         description: 'Max parallel chunk jobs'
         required: false
-        default: '20'
+        default: '10'
       crf:
         description: 'H.264 CRF (quality)'
         required: false
