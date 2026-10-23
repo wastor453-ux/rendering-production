@@ -21,10 +21,6 @@ on:
         description: 'Frames per chunk'
         required: false
         default: '600'
-      max_parallel:
-        description: 'Max parallel chunk jobs'
-        required: false
-        default: '10'
       crf:
         description: 'H.264 CRF (quality)'
         required: false
@@ -64,7 +60,6 @@ jobs:
           START: ${{ inputs.start_frame }}
           END: ${{ inputs.end_frame }}
           SIZE: ${{ inputs.chunk_size }}
-          MAX_PARALLEL: ${{ inputs.max_parallel }}
           CRF: ${{ inputs.crf }}
           COMPOSITION: ${{ inputs.composition }}
           JOB_ID: ${{ inputs.job_id }}
@@ -82,7 +77,6 @@ jobs:
           start = bounded("START", 0, 1_000_000)
           end = bounded("END", 0, 1_000_000)
           bounded("SIZE", 1, 1800)
-          bounded("MAX_PARALLEL", 1, 10)
           bounded("CRF", 0, 51)
           if not re.fullmatch(r"[A-Za-z0-9_-]{1,100}", os.environ["COMPOSITION"]):
               raise SystemExit("COMPOSITION must use only letters, digits, underscore, and hyphen (max 100 chars)")
@@ -127,7 +121,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      max-parallel: ${{ fromJSON(inputs.max_parallel) }}
+      # Fixed cap prevents unvalidated dispatch input from affecting strategy evaluation.
+      max-parallel: 10
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
