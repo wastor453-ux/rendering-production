@@ -257,7 +257,13 @@ jobs:
               if not os.path.isfile(mp4) or not os.path.isfile(sha):
                   raise SystemExit(f"missing artifact for chunk {cid}")
               expected = open(sha, encoding="utf8").read().strip()
-              actual = hashlib.sha256(open(mp4, "rb").read()).hexdigest()
+              digest = hashlib.sha256()
+              with open(mp4, "rb") as media:
+                  for block in iter(lambda: media.read(1024 * 1024), b""):
+                      digest.update(block)
+              actual = digest.hexdigest()
+              if os.path.getsize(mp4) == 0:
+                  raise SystemExit(f"empty video artifact for chunk {cid}")
               if not re.fullmatch(r"[0-9a-f]{64}", expected) or expected != actual:
                   raise SystemExit(f"checksum FAIL chunk {cid}")
               concat.append(mp4)
@@ -320,9 +326,14 @@ jobs:
           W=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1 "$MASTER")
           H=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 "$MASTER")
           FPS_R=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 "$MASTER")
-          FRAMES=$(ffprobe -v error -select_streams v:0 -show_entries stream=nb_frames -of default=noprint_wrappers=1:nokey=1 "$MASTER")
+          # Count decoded frames because MP4 nb_frames may be unavailable.
+          FRAMES=$(ffprobe -v error -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of default=noprint_wrappers=1:nokey=1 "$MASTER")
           V_DUR=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$MASTER")
-          echo "video: ${W}x${H} @ ${FPS_R}fps, ${FRAMES} frames, ${V_DUR}s"
+          if ! [[ "$FRAMES" =~ ^[0-9]+$ ]] || ! [[ "$V_DUR" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+            echo "invalid or unavailable video frame count/duration: frames=$FRAMES duration=$V_DUR"
+            exit 1
+          fi
+          echo "video: ${W}x${H} @ ${FPS_R}fps, ${FRAMES} decoded frames, ${V_DUR}s"
 
           [ "$W" = "1920" ] && [ "$H" = "1080" ] || { echo "resolution FAIL: ${W}x${H}"; exit 1; }
           [ "$FPS_R" = "30/1" ] || { echo "fps FAIL: $FPS_R"; exit 1; }
