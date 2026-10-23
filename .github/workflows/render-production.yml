@@ -182,13 +182,13 @@ jobs:
           merge-multiple: true
 
       - name: Verify chunk checksums + assemble video
-        run: |
-          set -euo pipefail
-          cd /tmp/chunks
         env:
           START_FRAME: ${{ inputs.start_frame }}
           END_FRAME: ${{ inputs.end_frame }}
           CHUNK_SIZE: ${{ inputs.chunk_size }}
+        run: |
+          set -euo pipefail
+          cd /tmp/chunks
           python3 - <<'PY'
           import hashlib, json, os, re
           start, end, size = (int(os.environ[k]) for k in ("START_FRAME", "END_FRAME", "CHUNK_SIZE"))
