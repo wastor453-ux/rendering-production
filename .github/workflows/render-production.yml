@@ -21,10 +21,6 @@ on:
         description: 'Frames per chunk'
         required: false
         default: '600'
-      max_parallel:
-        description: 'Max parallel chunk jobs'
-        required: false
-        default: '20'
       crf:
         description: 'H.264 CRF (quality)'
         required: false
@@ -59,6 +55,72 @@ jobs:
       matrix: ${{ steps.set.outputs.matrix }}
       job_id: ${{ inputs.job_id }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Validate required production inputs
+        env:
+          WITH_AUDIO: ${{ inputs.with_audio }}
+          VO_FILE: ${{ inputs.vo_file }}
+          BED_FILE: ${{ inputs.bed_file }}
+          COMPOSITION_ID: ${{ inputs.composition }}
+        run: |
+          set -euo pipefail
+          # Fail before allocating the render matrix if source assets or pipeline manifests are missing.
+          python3 - <<'PY'
+          import json, os, re
+          composition = os.environ["COMPOSITION_ID"]
+          if not re.fullmatch(r"[A-Za-z0-9_-]{1,100}", composition):
+              raise SystemExit("invalid composition ID")
+          for name in ("src/compiled_p3/beat_timeline.json", "src/compiled_p3/events.json"):
+              with open(name, encoding="utf8") as f:
+                  json.load(f)
+          if os.environ["WITH_AUDIO"] == "true":
+              for key in ("VO_FILE", "BED_FILE"):
+                  path = os.environ[key]
+                  if not os.path.isfile(path) or os.path.getsize(path) == 0:
+                      raise SystemExit(f"{key} is missing or empty: {path}")
+          print("required manifests and selected audio inputs verified")
+          PY
+      - name: Validate numeric bounds
+        env:
+          START: ${{ inputs.start_frame }}
+          END: ${{ inputs.end_frame }}
+          SIZE: ${{ inputs.chunk_size }}
+          CRF: ${{ inputs.crf }}
+          COMPOSITION: ${{ inputs.composition }}
+          JOB_ID: ${{ inputs.job_id }}
+          WITH_AUDIO: ${{ inputs.with_audio }}
+          VO_FILE: ${{ inputs.vo_file }}
+          BED_FILE: ${{ inputs.bed_file }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          def bounded(name, low, high):
+              raw = os.environ[name]
+              if not re.fullmatch(r"[0-9]+", raw) or not low <= int(raw) <= high:
+                  raise SystemExit(f"{name} must be an integer from {low} to {high}")
+              return int(raw)
+          start = bounded("START", 0, 1_000_000)
+          end = bounded("END", 0, 1_000_000)
+          bounded("SIZE", 1, 1800)
+          bounded("CRF", 0, 51)
+          if not re.fullmatch(r"[A-Za-z0-9_-]{1,100}", os.environ["COMPOSITION"]):
+              raise SystemExit("COMPOSITION must use only letters, digits, underscore, and hyphen (max 100 chars)")
+          if not re.fullmatch(r"[A-Za-z0-9._-]{1,80}", os.environ["JOB_ID"]):
+              raise SystemExit("JOB_ID must use only letters, digits, dot, underscore, and hyphen (max 80 chars)")
+          if os.environ["WITH_AUDIO"] not in ("true", "false"):
+              raise SystemExit("WITH_AUDIO must be exactly true or false")
+          for name in ("VO_FILE", "BED_FILE"):
+              value = os.environ[name]
+              parts = value.split("/")
+              if (not value.startswith("public/audio/") or value.startswith("/") or
+                  any(part in ("", ".", "..") for part in parts) or
+                  not re.fullmatch(r"[A-Za-z0-9._/-]+", value)):
+                  raise SystemExit(f"{name} must be a safe path beneath public/audio/")
+          if end < start or end - start + 1 > 100_000:
+              raise SystemExit("frame range must be ordered and at most 100000 frames")
+          PY
       - id: set
         run: |
           python3 - <<'PY'
@@ -86,7 +148,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      max-parallel: ${{ fromJSON(inputs.max_parallel) }}
+      # Fixed cap prevents unvalidated dispatch input from affecting strategy evaluation.
+      max-parallel: 10
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
@@ -116,13 +179,16 @@ jobs:
 
       - name: Render chunk ${{ matrix.chunk.chunk_id }}
         working-directory: .
+        env:
+          COMPOSITION_ID: ${{ inputs.composition }}
+          RENDER_CRF: ${{ inputs.crf }}
         run: |
           set -euo pipefail
-          # (fail_chunk test hook removed after RETRY-001 validation)
-          npx remotion render ${{ inputs.composition }} \
+          # Keep dispatch inputs in environment variables; never interpolate user text into shell code.
+          npx remotion render "$COMPOSITION_ID" \
             /tmp/chunk_${{ matrix.chunk.chunk_id }}.mp4 \
             --frames=${{ matrix.chunk.start }}-${{ matrix.chunk.end }} \
-            --concurrency=2 --codec=h264 --crf=${{ inputs.crf }} --overwrite
+            --concurrency=2 --codec=h264 --crf="$RENDER_CRF" --overwrite
           [ -f /tmp/chunk_${{ matrix.chunk.chunk_id }}.mp4 ] || { echo "chunk output missing"; exit 1; }
           sha256sum /tmp/chunk_${{ matrix.chunk.chunk_id }}.mp4 | cut -d' ' -f1 > /tmp/chunk_${{ matrix.chunk.chunk_id }}.sha256
           echo "chunk_id=${{ matrix.chunk.chunk_id }}" > /tmp/chunk_${{ matrix.chunk.chunk_id }}.meta
@@ -159,40 +225,83 @@ jobs:
           merge-multiple: true
 
       - name: Verify chunk checksums + assemble video
+        env:
+          START_FRAME: ${{ inputs.start_frame }}
+          END_FRAME: ${{ inputs.end_frame }}
+          CHUNK_SIZE: ${{ inputs.chunk_size }}
         run: |
           set -euo pipefail
           cd /tmp/chunks
-          # verify each chunk
-          for meta in *.meta; do
-            id=$(grep chunk_id "$meta" | cut -d= -f2)
-            expected=$(cat "chunk_${id}.sha256")
-            actual=$(sha256sum "chunk_${id}.mp4" | cut -d' ' -f1)
-            [ "$expected" = "$actual" ] || { echo "checksum FAIL chunk $id"; exit 1; }
-          done
-          echo "all chunk checksums OK"
-          # assemble in order (no re-encode)
-          ls chunk_*.mp4 | sort -V | sed "s/^/file '/;s/$/'/" > concat.txt
+          python3 - <<'PY'
+          import hashlib, json, os, re
+          start, end, size = (int(os.environ[k]) for k in ("START_FRAME", "END_FRAME", "CHUNK_SIZE"))
+          metas = sorted((p for p in os.listdir(".") if re.fullmatch(r"chunk_\d+\.meta", p)), key=lambda p: int(p.split("_")[1].split(".")[0]))
+          if not metas:
+              raise SystemExit("no chunk metadata found")
+          expected_start = start
+          concat = []
+          expected_id = 0
+          for meta in metas:
+              values = {}
+              for line in open(meta, encoding="utf8"):
+                  k, sep, v = line.strip().partition("=")
+                  if sep: values[k] = v
+              cid = int(values.get("chunk_id", "-1"))
+              a, b = int(values.get("start", "-1")), int(values.get("end", "-1"))
+              if cid != expected_id:
+                  raise SystemExit(f"chunk IDs not contiguous: expected {expected_id}, got {cid}")
+              expected_end = min(expected_start + size - 1, end)
+              if a != expected_start or b != expected_end:
+                  raise SystemExit(f"frame coverage gap/overlap/invalid range at chunk {cid}: got {a}-{b}, expected {expected_start}-{expected_end}")
+              mp4, sha = f"chunk_{cid}.mp4", f"chunk_{cid}.sha256"
+              if not os.path.isfile(mp4) or not os.path.isfile(sha):
+                  raise SystemExit(f"missing artifact for chunk {cid}")
+              expected = open(sha, encoding="utf8").read().strip()
+              digest = hashlib.sha256()
+              with open(mp4, "rb") as media:
+                  for block in iter(lambda: media.read(1024 * 1024), b""):
+                      digest.update(block)
+              actual = digest.hexdigest()
+              if os.path.getsize(mp4) == 0:
+                  raise SystemExit(f"empty video artifact for chunk {cid}")
+              if not re.fullmatch(r"[0-9a-f]{64}", expected) or expected != actual:
+                  raise SystemExit(f"checksum FAIL chunk {cid}")
+              concat.append(mp4)
+              expected_start = b + 1
+              expected_id += 1
+          if expected_start != end + 1:
+              raise SystemExit(f"chunk coverage ends at {expected_start - 1}; expected {end}")
+          with open("concat.txt", "w", encoding="utf8") as out:
+              for p in concat:
+                  out.write("file '" + os.path.abspath(p).replace("'", "'\\''") + "'\n")
+          print(f"validated {len(concat)} contiguous chunks covering frames {start}-{end}")
+          PY
           ffmpeg -y -f concat -safe 0 -i concat.txt -c copy /tmp/master_video.mp4
           echo "video assembled: /tmp/master_video.mp4"
 
       - name: Mux canonical audio (VO + music bed)
         if: inputs.with_audio == 'true'
+        env:
+          AUDIO_START_FRAME: ${{ inputs.start_frame }}
+          AUDIO_END_FRAME: ${{ inputs.end_frame }}
+          VO_FILE: ${{ inputs.vo_file }}
+          BED_FILE: ${{ inputs.bed_file }}
         run: |
           set -euo pipefail
           # Canonical P3 mix: VO dominant + bed at -18dB (from mix_audio.sh)
           # Audio segment matches the rendered frame range
           FPS=30
-          START_S=$(echo "scale=3; ${{ inputs.start_frame }} / $FPS" | bc)
-          DUR_S=$(echo "scale=3; (${{ inputs.end_frame }} - ${{ inputs.start_frame }} + 1) / $FPS" | bc)
+          START_S=$(echo "scale=3; $AUDIO_START_FRAME / $FPS" | bc)
+          DUR_S=$(echo "scale=3; ($AUDIO_END_FRAME - $AUDIO_START_FRAME + 1) / $FPS" | bc)
           echo "audio segment: start=${START_S}s duration=${DUR_S}s"
 
-          [ -f "${{ inputs.vo_file }}" ] || { echo "VO missing: ${{ inputs.vo_file }}"; exit 1; }
-          [ -f "${{ inputs.bed_file }}" ] || { echo "bed missing: ${{ inputs.bed_file }}"; exit 1; }
+          [ -f "$VO_FILE" ] || { echo "VO missing"; exit 1; }
+          [ -f "$BED_FILE" ] || { echo "bed missing"; exit 1; }
 
           ffmpeg -y \
             -i /tmp/master_video.mp4 \
-            -ss $START_S -t $DUR_S -i "${{ inputs.vo_file }}" \
-            -ss $START_S -t $DUR_S -i "${{ inputs.bed_file }}" \
+            -ss "$START_S" -t "$DUR_S" -i "$VO_FILE" \
+            -ss "$START_S" -t "$DUR_S" -i "$BED_FILE" \
             -filter_complex "[1:a]volume=1.0[vo];[2:a]atrim=0:${DUR_S},volume=-18dB[bed];[vo][bed]amix=inputs=2:duration=shortest[aout]" \
             -map 0:v -map "[aout]" \
             -c:v copy -c:a aac -b:a 192k \
@@ -201,35 +310,48 @@ jobs:
           echo "audio muxed: /tmp/master.mp4"
 
       - name: Verify master (video + audio + pipeline)
+        env:
+          WITH_AUDIO: ${{ inputs.with_audio }}
+          START_FRAME: ${{ inputs.start_frame }}
+          END_FRAME: ${{ inputs.end_frame }}
         run: |
           set -euo pipefail
           MASTER=/tmp/master.mp4
-          if [ "${{ inputs.with_audio }}" != "true" ]; then
+          if [ "$WITH_AUDIO" != "true" ]; then
             MASTER=/tmp/master_video.mp4
-            cp $MASTER /tmp/master.mp4
+            cp "$MASTER" /tmp/master.mp4
           fi
 
           echo "=== VIDEO ==="
-          W=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1 $MASTER)
-          H=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 $MASTER)
-          FPS_R=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 $MASTER)
-          FRAMES=$(ffprobe -v error -select_streams v:0 -show_entries stream=nb_frames -of default=noprint_wrappers=1:nokey=1 $MASTER)
-          V_DUR=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $MASTER)
-          echo "video: ${W}x${H} @ ${FPS_R}fps, ${FRAMES} frames, ${V_DUR}s"
+          W=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=noprint_wrappers=1:nokey=1 "$MASTER")
+          H=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=noprint_wrappers=1:nokey=1 "$MASTER")
+          FPS_R=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 "$MASTER")
+          # Count decoded frames because MP4 nb_frames may be unavailable.
+          FRAMES=$(ffprobe -v error -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of default=noprint_wrappers=1:nokey=1 "$MASTER")
+          V_DUR=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$MASTER")
+          if ! [[ "$FRAMES" =~ ^[0-9]+$ ]] || ! [[ "$V_DUR" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+            echo "invalid or unavailable video frame count/duration: frames=$FRAMES duration=$V_DUR"
+            exit 1
+          fi
+          echo "video: ${W}x${H} @ ${FPS_R}fps, ${FRAMES} decoded frames, ${V_DUR}s"
 
           [ "$W" = "1920" ] && [ "$H" = "1080" ] || { echo "resolution FAIL: ${W}x${H}"; exit 1; }
           [ "$FPS_R" = "30/1" ] || { echo "fps FAIL: $FPS_R"; exit 1; }
-          EXPECTED_FRAMES=$(( ${{ inputs.end_frame }} - ${{ inputs.start_frame }} + 1 ))
+          EXPECTED_FRAMES=$(( END_FRAME - START_FRAME + 1 ))
           [ "$FRAMES" = "$EXPECTED_FRAMES" ] || { echo "frame count FAIL: expected $EXPECTED_FRAMES got $FRAMES"; exit 1; }
 
-          ffmpeg -v error -i $MASTER -f null - || { echo "decode FAIL"; exit 1; }
+          ffmpeg -v error -i "$MASTER" -f null - || { echo "decode FAIL"; exit 1; }
           echo "video OK"
 
           echo "=== AUDIO ==="
-          if [ "${{ inputs.with_audio }}" = "true" ]; then
-            A_STREAMS=$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 $MASTER | wc -l)
+          if [ "$WITH_AUDIO" = "true" ]; then
+            A_STREAMS=$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 "$MASTER" | wc -l)
             [ "$A_STREAMS" -ge 1 ] || { echo "audio stream MISSING"; exit 1; }
-            A_DUR=$(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 $MASTER)
+            A_DUR=$(ffprobe -v error -select_streams a:0 -show_entries stream=duration -of default=noprint_wrappers=1:nokey=1 "$MASTER")
+            if ! [[ "$A_DUR" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+              echo "audio duration unavailable or invalid: $A_DUR"
+              exit 1
+            fi
             echo "audio: ${A_STREAMS} stream(s), ${A_DUR}s (video ${V_DUR}s)"
             # audio duration must match video within 0.5s
             DIFF=$(echo "$V_DUR - $A_DUR" | bc | tr -d -)
@@ -246,7 +368,7 @@ jobs:
           [ -f "src/compiled_p3/events.json" ] || { echo "events missing"; exit 1; }
           echo "pipeline inputs OK"
 
-          echo "MASTER VERIFIED: ${W}x${H}, ${FRAMES}f, audio=${{ inputs.with_audio }}"
+          echo "MASTER VERIFIED: ${W}x${H}, ${FRAMES}f, audio=$WITH_AUDIO"
 
       - name: Upload master
         uses: actions/upload-artifact@v4
