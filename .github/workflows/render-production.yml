@@ -185,16 +185,47 @@ jobs:
         run: |
           set -euo pipefail
           cd /tmp/chunks
-          # verify each chunk
-          for meta in *.meta; do
-            id=$(grep chunk_id "$meta" | cut -d= -f2)
-            expected=$(cat "chunk_${id}.sha256")
-            actual=$(sha256sum "chunk_${id}.mp4" | cut -d' ' -f1)
-            [ "$expected" = "$actual" ] || { echo "checksum FAIL chunk $id"; exit 1; }
-          done
-          echo "all chunk checksums OK"
-          # assemble in order (no re-encode)
-          ls chunk_*.mp4 | sort -V | sed "s/^/file '/;s/$/'/" > concat.txt
+        env:
+          START_FRAME: ${{ inputs.start_frame }}
+          END_FRAME: ${{ inputs.end_frame }}
+          CHUNK_SIZE: ${{ inputs.chunk_size }}
+          python3 - <<'PY'
+          import hashlib, json, os, re
+          start, end, size = (int(os.environ[k]) for k in ("START_FRAME", "END_FRAME", "CHUNK_SIZE"))
+          metas = sorted((p for p in os.listdir(".") if re.fullmatch(r"chunk_\\d+\\.meta", p)), key=lambda p: int(p.split("_")[1].split(".")[0]))
+          if not metas:
+              raise SystemExit("no chunk metadata found")
+          expected_start = start
+          concat = []
+          expected_id = 0
+          for meta in metas:
+              values = {}
+              for line in open(meta, encoding="utf8"):
+                  k, sep, v = line.strip().partition("=")
+                  if sep: values[k] = v
+              cid = int(values.get("chunk_id", "-1"))
+              a, b = int(values.get("start", "-1")), int(values.get("end", "-1"))
+              if cid != expected_id:
+                  raise SystemExit(f"chunk IDs not contiguous: expected {expected_id}, got {cid}")
+              if a != expected_start or b < a or b > end or b - a + 1 > size:
+                  raise SystemExit(f"frame coverage gap/overlap/invalid range at chunk {cid}: {a}-{b}, expected start {expected_start}")
+              mp4, sha = f"chunk_{cid}.mp4", f"chunk_{cid}.sha256"
+              if not os.path.isfile(mp4) or not os.path.isfile(sha):
+                  raise SystemExit(f"missing artifact for chunk {cid}")
+              expected = open(sha, encoding="utf8").read().strip()
+              actual = hashlib.sha256(open(mp4, "rb").read()).hexdigest()
+              if not re.fullmatch(r"[0-9a-f]{64}", expected) or expected != actual:
+                  raise SystemExit(f"checksum FAIL chunk {cid}")
+              concat.append(mp4)
+              expected_start = b + 1
+              expected_id += 1
+          if expected_start != end + 1:
+              raise SystemExit(f"chunk coverage ends at {expected_start - 1}; expected {end}")
+          with open("concat.txt", "w", encoding="utf8") as out:
+              for p in concat:
+                  out.write("file '" + os.path.abspath(p).replace("'", "'\\''") + "'\\n")
+          print(f"validated {len(concat)} contiguous chunks covering frames {start}-{end}")
+          PY
           ffmpeg -y -f concat -safe 0 -i concat.txt -c copy /tmp/master_video.mp4
           echo "video assembled: /tmp/master_video.mp4"
 
